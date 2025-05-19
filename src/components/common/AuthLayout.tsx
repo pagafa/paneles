@@ -11,7 +11,7 @@ import {
   UserCheck,
   ShieldCheck,
   BookOpenCheck,
-  Settings,
+  // Settings, // Removed Settings icon
 } from "lucide-react";
 import { AppLogo } from "@/components/common/AppLogo";
 import { UserNav } from "@/components/common/UserNav";
@@ -96,13 +96,16 @@ function SiteSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      {/* Removed SidebarFooter containing Settings link */}
+      {/* 
       <SidebarFooter className="p-2">
         <Link href="/settings" legacyBehavior passHref>
           <SidebarMenuButton asChild tooltip={{children: "Settings", className:"text-xs"}}>
             <a><Settings /><span>Settings</span></a>
           </SidebarMenuButton>
         </Link>
-      </SidebarFooter>
+      </SidebarFooter> 
+      */}
     </Sidebar>
   );
 }
