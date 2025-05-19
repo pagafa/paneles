@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut } from "lucide-react"; // Removed UserIcon as it's no longer used for Profile
 import { useRouter } from "next/navigation"; 
 import { useEffect, useState } from "react";
 import type { User, UserRole } from "@/types";
@@ -82,13 +83,16 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {/* Removed Profile DropdownMenuItem */}
+        {/* 
         <DropdownMenuGroup>
           <DropdownMenuItem disabled>
             <UserIcon className="mr-2 h-4 w-4" />
             <span>Profile</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator /> 
+        */}
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
