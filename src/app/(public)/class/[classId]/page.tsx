@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react'; // Import 'use'
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -38,8 +38,10 @@ async function getEventsForClass(className: string): Promise<SchoolEvent[]> {
 }
 
 
-export default function PublicClassPage({ params }: { params: { classId: string } }) {
-  const { classId } = params;
+export default function PublicClassPage({ params: paramsPromise }: { params: Promise<{ classId: string }> }) {
+  const actualParams = use(paramsPromise); // Resolve the params promise
+  const { classId } = actualParams;         // Destructure classId from the resolved params
+
   const { t } = useLanguage();
   
   const [classDetails, setClassDetails] = useState<SchoolClass | null | undefined>(undefined); // undefined for loading, null for not found
@@ -58,7 +60,9 @@ export default function PublicClassPage({ params }: { params: { classId: string 
       }
       setLoading(false);
     }
-    fetchData();
+    if (classId) { // Ensure classId is resolved before fetching
+        fetchData();
+    }
   }, [classId]);
 
   if (loading) {
