@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +20,7 @@ import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
+import { mockUsers } from "@/lib/placeholder-data"; // Import mockUsers
 
 const loginFormSchema = z.object({
   username: z.string().min(3, { message: "Username must be at least 3 characters." }),
@@ -110,7 +112,7 @@ export function LoginForm() {
               )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : <> <LogIn className="mr-2 h-4 w-4" /> Log In </>}
+              {isLoading ? "Logging in..." : <> <LogIn className="mr-2 h-4 w-4" /> {t('loginButtonLabel')} </>}
             </Button>
           </form>
         </Form>
