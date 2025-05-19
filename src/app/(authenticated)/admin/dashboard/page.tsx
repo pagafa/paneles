@@ -50,7 +50,14 @@ export default function AdminDashboardPage() {
     try {
       const response = await fetch('/api/announcements');
       if (!response.ok) {
-        throw new Error(`Failed to fetch announcements: ${response.statusText}`);
+        let errorMessage = `Failed to fetch announcements. Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          // Ignore if response is not JSON
+        }
+        throw new Error(errorMessage);
       }
       const data: Announcement[] = await response.json();
       setAnnouncements(sortAnnouncements(data));
@@ -84,8 +91,14 @@ export default function AdminDashboardPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'post'} announcement`);
+        let errorMessage = `Failed to ${isEditing ? 'update' : 'post'} announcement. Status: ${response.status}`;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+            // Ignore if response is not JSON
+        }
+        throw new Error(errorMessage);
       }
       
       toast({
@@ -95,13 +108,6 @@ export default function AdminDashboardPage() {
 
       setEditingAnnouncement(null);
       await fetchAnnouncements(); // Refresh list
-       // Reset form if it was a new submission
-      if (!isEditing && typeof window !== 'undefined') {
-        // This is a bit of a hack; ideally the form itself handles its reset after a successful submit action
-        // For now, we rely on key change for AdminAnnouncementForm or explicit reset inside it.
-        // The form component already resets itself if initialData.id is not present.
-      }
-
     } catch (err) {
       console.error(err);
       toast({
@@ -123,8 +129,14 @@ export default function AdminDashboardPage() {
         method: 'DELETE',
       });
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete announcement');
+        let errorMessage = `Failed to delete announcement. Status: ${response.status}`;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+             // Ignore if response is not JSON
+        }
+        throw new Error(errorMessage);
       }
       toast({
         title: t('announcementDeletedToastTitle'),
