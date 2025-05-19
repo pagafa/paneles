@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,9 +19,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import type { Announcement } from "@/types";
+import React, { useEffect, useState } from "react";
 
 const announcementFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
@@ -100,40 +102,81 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
         <FormField
           control={form.control}
           name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Announcement Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
+          render={({ field }) => {
+            const [timeInput, setTimeInput] = useState(() =>
+              field.value ? format(field.value, "HH:mm") : "00:00"
+            );
+
+            useEffect(() => {
+              if (field.value) {
+                setTimeInput(format(field.value, "HH:mm"));
+              }
+            }, [field.value]);
+
+            const handleDateSelect = (selectedDate?: Date) => {
+              if (!selectedDate) return;
+              const [hours, minutes] = timeInput.split(":").map(Number);
+              const newDate = new Date(selectedDate);
+              newDate.setHours(hours);
+              newDate.setMinutes(minutes);
+              field.onChange(newDate);
+            };
+
+            const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+              const newTime = e.target.value;
+              setTimeInput(newTime);
+              const [hours, minutes] = newTime.split(":").map(Number);
+              const currentDate = field.value ? new Date(field.value) : new Date();
+              currentDate.setHours(hours);
+              currentDate.setMinutes(minutes);
+              field.onChange(currentDate);
+            };
+
+            return (
+              <FormItem className="flex flex-col">
+                <FormLabel>Announcement Date and Time</FormLabel>
+                <div className="flex items-center gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "flex-grow pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP p")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={handleDateSelect}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
+                    <Input
+                      type="time"
+                      value={timeInput}
+                      onChange={handleTimeChange}
+                      className="w-[120px]"
+                    />
                   </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
+                </div>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
         <Button type="submit" className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />

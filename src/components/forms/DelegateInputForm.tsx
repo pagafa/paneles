@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/types";
 import { mockClasses } from "@/lib/placeholder-data"; 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
 
@@ -38,24 +38,24 @@ const announcementSchema = z.object({
   ...commonSchema,
   type: z.literal("announcement"),
   content: z.string().min(10, "Content is too short.").optional().default(""),
-  subject: z.string().optional(), // Optional here
-  assignmentName: z.string().optional(), // Optional here
+  subject: z.string().optional(), 
+  assignmentName: z.string().optional(), 
 });
 
 const examSchema = z.object({
   ...commonSchema,
   type: z.literal("exam"),
   subject: z.string().min(2, "Subject is too short.").optional().default(""),
-  content: z.string().optional(), // Optional here
-  assignmentName: z.string().optional(), // Optional here
+  content: z.string().optional(), 
+  assignmentName: z.string().optional(), 
 });
 
 const deadlineSchema = z.object({
   ...commonSchema,
   type: z.literal("deadline"),
   assignmentName: z.string().min(3, "Assignment name is too short.").optional().default(""),
-  content: z.string().optional(), // Optional here
-  subject: z.string().optional(), // Optional here
+  content: z.string().optional(), 
+  subject: z.string().optional(), 
 });
 
 const delegateInputFormSchema = z.discriminatedUnion("type", [
@@ -77,7 +77,7 @@ export function DelegateInputForm({
   availableClasses = mockClasses,
   initialData 
 }: DelegateInputFormProps) {
-  const { t } = useLanguage(); // Get t function
+  const { t } = useLanguage(); 
   const [activeTab, setActiveTab] = useState<"announcement" | "exam" | "deadline">(initialData?.type || "announcement");
 
   const form = useForm<DelegateInputFormValues>({
@@ -110,12 +110,11 @@ export function DelegateInputForm({
         assignmentName: initialData.type === 'deadline' ? (initialData as Deadline).assignmentName || "" : "",
       });
     } else {
-      // Reset for new entry or when activeTab changes for a new entry
       form.reset({
         type: activeTab,
         title: "",
         date: new Date(),
-        classId: classIdForForm, // Preserve selected class if any, or default
+        classId: classIdForForm, 
         description: "",
         content: "", 
         subject: "",
@@ -128,11 +127,16 @@ export function DelegateInputForm({
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
     setActiveTab(newType); 
-    // useEffect will handle resetting fields based on activeTab for new entries
-    // For existing entries, type is already part of initialData and form.reset
-    // If switching tab for a new entry, ensure the type is set for validation
     if (!initialData) {
         form.setValue("type", newType, { shouldValidate: true });
+         // Reset fields specifically when tab changes for a NEW entry
+        form.reset({
+            ...form.getValues(), // keep common fields like title, date, classId if already entered
+            type: newType,
+            content: "", 
+            subject: "",
+            assignmentName: "",
+        });
     }
   };
 
@@ -179,7 +183,8 @@ export function DelegateInputForm({
         } as Deadline;
         break;
       default:
-        const _exhaustiveCheck: never = values;
+        // This should not happen with Zod discriminated union
+        const _exhaustiveCheck: never = values; 
         console.error("Invalid form type submitted", _exhaustiveCheck);
         return;
     }
@@ -188,7 +193,7 @@ export function DelegateInputForm({
       onSubmitSuccess(submissionData);
     }
 
-    if (!initialData) { // If it was a new submission
+    if (!initialData) { 
       const preservedClassId = form.getValues('classId');
       form.reset({
         type: activeTab, 
@@ -237,25 +242,66 @@ export function DelegateInputForm({
             <FormField
               control={form.control}
               name="date"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <FormLabel>{t('formDateTimeLabel')}</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
+              render={({ field }) => {
+                const [timeInput, setTimeInput] = useState(() =>
+                  field.value ? format(field.value, "HH:mm") : "00:00"
+                );
+
+                useEffect(() => {
+                  if (field.value) {
+                    setTimeInput(format(field.value, "HH:mm"));
+                  }
+                }, [field.value]);
+
+                const handleDateSelect = (selectedDate?: Date) => {
+                  if (!selectedDate) return;
+                  const [hours, minutes] = timeInput.split(":").map(Number);
+                  const newDate = new Date(selectedDate);
+                  newDate.setHours(hours);
+                  newDate.setMinutes(minutes);
+                  field.onChange(newDate);
+                };
+
+                const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const newTime = e.target.value;
+                  setTimeInput(newTime);
+                  const [hours, minutes] = newTime.split(":").map(Number);
+                  const currentDate = field.value ? new Date(field.value) : new Date();
+                  currentDate.setHours(hours);
+                  currentDate.setMinutes(minutes);
+                  field.onChange(currentDate);
+                };
+                
+                return (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>{t('formDateTimeLabel')}</FormLabel>
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button variant={"outline"} className={cn("flex-grow pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                              {field.value ? format(field.value, "PPP p") : <span>{t('formPickDateTimeButton')}</span>}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar mode="single" selected={field.value} onSelect={handleDateSelect} initialFocus />
+                        </PopoverContent>
+                      </Popover>
                       <FormControl>
-                        <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                          {field.value ? format(field.value, "PPP p") : <span>{t('formPickDateTimeButton')}</span>}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
+                        <Input
+                          type="time"
+                          value={timeInput}
+                          onChange={handleTimeChange}
+                          className="w-[120px]"
+                        />
                       </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             <FormField
               control={form.control}
