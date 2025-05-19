@@ -29,9 +29,6 @@ interface Translations {
 
   // For PublicClassPage
   classPageTitle: string;
-  // announcementsForClassSectionTitle: string; // No longer needed, using generic
-  // examsForClassSectionTitle: string; // No longer needed, using generic
-  // deadlinesForClassSectionTitle: string; // No longer needed, using generic
   noClassAnnouncementsHint: string;
   noClassExamsHint: string;
   noClassDeadlinesHint: string;
@@ -40,7 +37,7 @@ interface Translations {
   backToHomeButton: string;
   backToAllAnnouncementsButton: string;
   delegateIdLabel: string; 
-  noEventsForClassHint: string;
+  noEventsForClassHint: string; // This will be the fun message
   loadingLabel: string;
 
   // For DelegateDashboardPage
@@ -102,7 +99,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainSubtitle: "Latest school updates at your fingertips.",
     announcementsSectionTitle: "Announcements",
     examsSectionTitle: "Exams",
-    deadlinesSectionTitle: "Assignments",
+    deadlinesSectionTitle: "Assignments", // Changed from "Deadlines"
     noAnnouncementsHint: "No current announcements.",
     noExamsHint: "No upcoming exams scheduled.",
     noDeadlinesHint: "No assignment deadlines approaching.",
@@ -122,7 +119,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToHomeButton: "Back to Home",
     backToAllAnnouncementsButton: "Back to All Announcements",
     delegateIdLabel: "Delegate", 
-    noEventsForClassHint: "No events posted for this class yet.",
+    noEventsForClassHint: "Looks like this class is on a secret mission! Nothing to show right now.", // Fun message
     loadingLabel: "Loading...",
 
     assignedClassesLabel: "Assigned classes",
@@ -177,7 +174,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainSubtitle: "Últimas actualizaciones de la escuela al alcance de tu mano.",
     announcementsSectionTitle: "Anuncios",
     examsSectionTitle: "Exámenes",
-    deadlinesSectionTitle: "Tareas",
+    deadlinesSectionTitle: "Tareas", // Changed
     noAnnouncementsHint: "No hay anuncios actualmente.",
     noExamsHint: "No hay exámenes programados.",
     noDeadlinesHint: "No hay fechas de entrega próximas.",
@@ -197,7 +194,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToHomeButton: "Volver al Inicio",
     backToAllAnnouncementsButton: "Volver a Todos los Anuncios",
     delegateIdLabel: "Delegado/a", 
-    noEventsForClassHint: "No hay eventos publicados para esta clase todavía.",
+    noEventsForClassHint: "¡Parece que esta clase está en una misión secreta! No hay nada que mostrar por ahora.", // Fun message
     loadingLabel: "Cargando...",
 
     assignedClassesLabel: "Clases asignadas",
@@ -252,7 +249,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.",
     announcementsSectionTitle: "Annonces",
     examsSectionTitle: "Examens",
-    deadlinesSectionTitle: "Devoirs",
+    deadlinesSectionTitle: "Devoirs", // Changed
     noAnnouncementsHint: "Aucune annonce pour le moment.",
     noExamsHint: "Aucun examen prévu.",
     noDeadlinesHint: "Aucune date limite d'affectation approchant.",
@@ -272,7 +269,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToHomeButton: "Retour à l'accueil",
     backToAllAnnouncementsButton: "Retour à Toutes les Annonces",
     delegateIdLabel: "Délégué(e)", 
-    noEventsForClassHint: "Aucun événement publié pour cette classe pour le moment.",
+    noEventsForClassHint: "On dirait que cette classe est en mission secrète ! Rien à afficher pour le moment.", // Fun message
     loadingLabel: "Chargement...",
 
     assignedClassesLabel: "Classes assignées",
@@ -326,8 +323,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Mantente Informado",
     kioskMainSubtitle: "Últimas actualizacións da escola ao teu alcance.",
     announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Exames",
-    deadlinesSectionTitle: "Tarefas",
+    examsSectionTitle: "Exames", // Changed
+    deadlinesSectionTitle: "Tarefas", // Changed
     noAnnouncementsHint: "Non hai anuncios actualmente.",
     noExamsHint: "Non hai exames programados.",
     noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
@@ -347,7 +344,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToHomeButton: "Volver ao Inicio",
     backToAllAnnouncementsButton: "Volver a Todos os Anuncios",
     delegateIdLabel: "Delegado/a", 
-    noEventsForClassHint: "Aínda non hai eventos publicados para esta clase.",
+    noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.", // Fun message
     loadingLabel: "Cargando...",
 
     assignedClassesLabel: "Clases asignadas",
@@ -397,4 +394,5 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
+
 

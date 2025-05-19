@@ -122,8 +122,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     if (delegateUser) {
       delegateNameDisplay = delegateUser.name;
     }
-    // If delegateUser is not found, delegateNameDisplay remains "N/A" or could show ID as fallback
-    // else { delegateNameDisplay = classDetails.delegateId; }
   }
 
   return (
@@ -168,18 +166,14 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             width={200}
             height={133}
             className="mx-auto mb-4 rounded-lg shadow-sm"
-            data-ai-hint="empty classroom"
+            data-ai-hint="empty classroom secret mission"
           />
           <p className="text-xl font-medium text-muted-foreground">{t('noEventsForClassHint')}</p>
           <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
         </div>
       )}
 
-      <div className="mt-12 text-center">
-        <Button asChild variant="outline">
-          <Link href="/">{t('backToAllAnnouncementsButton')}</Link>
-        </Button>
-      </div>
+      {/* The "Back to All Announcements" button has been removed from here */}
     </div>
   );
 }
