@@ -67,7 +67,8 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   if (loading) {
     return (
       <div className="w-full max-w-lg text-center py-10">
-        <p>{t('kioskMainTitle', {className: 'Loading...'})}</p> 
+        {/* Usamos a chave de tradución xenérica para o título do quiosco, pero con "className" para o estado de carga */}
+        <p>{t('kioskMainTitle', {className: t('loadingLabel')})}</p> 
       </div>
     );
   }
@@ -96,10 +97,11 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   const exams = classEvents.filter(event => event.type === 'exam') as Exam[];
   const deadlines = classEvents.filter(event => event.type === 'deadline') as Deadline[];
 
-  const sectionsConfig: { titleKey: TranslationKey; translationPayload?: object; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
-    { titleKey: 'announcementsForClassSectionTitle', translationPayload: { className: classDetails.name }, events: announcements, icon: Megaphone, emptyImageHint: 'megaphone class empty' },
-    { titleKey: 'examsForClassSectionTitle', translationPayload: { className: classDetails.name }, events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar class empty' },
-    { titleKey: 'deadlinesForClassSectionTitle', translationPayload: { className: classDetails.name }, events: deadlines, icon: FileText, emptyImageHint: 'deadline list class empty' },
+  // Modificado: Usar chaves de tradución xenéricas para os títulos das seccións e eliminar translationPayload.
+  const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
+    { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone class empty' },
+    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar class empty' },
+    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list class empty' },
   ];
   
   const visibleClassSections = sectionsConfig.filter(section => section.events.length > 0);
@@ -112,6 +114,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             <School className="h-10 w-10 text-primary" />
             <div>
               <CardTitle className="text-3xl font-bold text-primary">{classDetails.name}</CardTitle>
+              {/* O título principal da páxina da clase aínda usa o nome da clase */}
               <CardDescription className="text-primary/80">{t('classPageTitle', { className: classDetails.name })}</CardDescription>
             </div>
           </div>
@@ -131,7 +134,8 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             <div className="flex items-center mb-6">
               <section.icon className="h-8 w-8 text-primary mr-3" />
               <h2 className="text-3xl font-semibold text-primary/90">
-                {t(section.titleKey, section.translationPayload as any)}
+                {/* Modificado: Chamar a t() só coa chave para os títulos das seccións */}
+                {t(section.titleKey)}
               </h2>
             </div>
             <KioskCarousel items={section.events} />
@@ -161,3 +165,5 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     </div>
   );
 }
+
+    

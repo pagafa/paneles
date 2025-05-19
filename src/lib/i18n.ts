@@ -17,10 +17,10 @@ interface Translations {
   announcementsSectionTitle: string;
   examsSectionTitle: string;
   deadlinesSectionTitle: string;
-  noAnnouncementsHint: string; // Used if a specific section is empty, but others might have content
-  noExamsHint: string; // Used if a specific section is empty
-  noDeadlinesHint: string; // Used if a specific section is empty
-  noEventsGeneralHint: string; // New: Used on KioskPage if ALL sections are empty
+  noAnnouncementsHint: string; 
+  noExamsHint: string; 
+  noDeadlinesHint: string; 
+  noEventsGeneralHint: string; 
   checkBackLaterHint: string;
   viewClassesButtonLabel: string;
   noClassesHint: string; 
@@ -29,18 +29,22 @@ interface Translations {
 
   // For PublicClassPage
   classPageTitle: string; 
+  // As chaves 'announcementsForClassSectionTitle', 'examsForClassSectionTitle', 'deadlinesForClassSectionTitle' xa non se usan para os títulos de sección na páxina da clase,
+  // no seu lugar úsanse as xenéricas de arriba ('announcementsSectionTitle', etc.)
+  // Mantemos as chaves que inclúen {className} no caso de que se necesiten noutro contexto, pero non para os títulos das seccións internas.
   announcementsForClassSectionTitle: string; 
   examsForClassSectionTitle: string; 
   deadlinesForClassSectionTitle: string; 
-  noClassAnnouncementsHint: string; // Used if class announcements section is empty
-  noClassExamsHint: string; // Used if class exams section is empty
-  noClassDeadlinesHint: string; // Used if class deadlines section is empty
+  noClassAnnouncementsHint: string; 
+  noClassExamsHint: string; 
+  noClassDeadlinesHint: string; 
   classNotFoundTitle: string; 
   classNotFoundMessage: string; 
   backToHomeButton: string; 
   backToAllAnnouncementsButton: string;
   delegateIdLabel: string;
-  noEventsForClassHint: string; // Used on ClassPage if ALL sections for that class are empty
+  noEventsForClassHint: string; 
+  loadingLabel: string; // Nova chave para o texto de "Cargando..."
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -68,9 +72,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "All rights reserved.",
 
     classPageTitle: "Events for {className}",
-    announcementsForClassSectionTitle: "Announcements for {className}",
-    examsForClassSectionTitle: "Exams for {className}",
-    deadlinesForClassSectionTitle: "Deadlines for {className}",
+    announcementsForClassSectionTitle: "Announcements for {className}", // Mantida por se se usa noutro sitio
+    examsForClassSectionTitle: "Exams for {className}", // Mantida
+    deadlinesForClassSectionTitle: "Deadlines for {className}", // Mantida
     noClassAnnouncementsHint: "No current announcements for this class.",
     noClassExamsHint: "No upcoming exams scheduled for this class.",
     noClassDeadlinesHint: "No assignment deadlines approaching for this class.",
@@ -80,6 +84,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToAllAnnouncementsButton: "Back to All Announcements",
     delegateIdLabel: "Delegate ID",
     noEventsForClassHint: "No events posted for this class yet.",
+    loadingLabel: "Loading...",
   },
   es: {
     appTitle: "Avisos Escolares",
@@ -117,6 +122,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToAllAnnouncementsButton: "Volver a Todos los Anuncios",
     delegateIdLabel: "ID del Delegado",
     noEventsForClassHint: "No hay eventos publicados para esta clase todavía.",
+    loadingLabel: "Cargando...",
   },
   fr: { 
     appTitle: "Annonces Scolaires",
@@ -154,6 +160,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToAllAnnouncementsButton: "Retour à Toutes les Annonces",
     delegateIdLabel: "ID du Délégué",
     noEventsForClassHint: "Aucun événement publié pour cette classe pour le moment.",
+    loadingLabel: "Chargement...",
   },
   gl: { 
     appTitle: "Avisos Escolares",
@@ -179,9 +186,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "Todos os dereitos reservados.",
 
     classPageTitle: "Eventos para {className}",
-    announcementsForClassSectionTitle: "Anuncios para {className}",
-    examsForClassSectionTitle: "Exames para {className}",
-    deadlinesForClassSectionTitle: "Prazos para {className}",
+    announcementsForClassSectionTitle: "Anuncios para {className}", // Mantida por se se usa noutro sitio
+    examsForClassSectionTitle: "Exames para {className}", // Mantida
+    deadlinesForClassSectionTitle: "Prazos para {className}", // Mantida
     noClassAnnouncementsHint: "Non hai anuncios actuais para esta clase.",
     noClassExamsHint: "Non hai exames programados para esta clase.",
     noClassDeadlinesHint: "Non hai prazos de entrega de tarefas próximos para esta clase.",
@@ -191,6 +198,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     backToAllAnnouncementsButton: "Volver a Todos os Anuncios",
     delegateIdLabel: "ID do Delegado",
     noEventsForClassHint: "Aínda non hai eventos publicados para esta clase.",
+    loadingLabel: "Cargando...",
   },
 };
 
@@ -199,3 +207,6 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
+
+
+    
