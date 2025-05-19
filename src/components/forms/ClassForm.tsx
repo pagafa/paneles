@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,6 +34,8 @@ interface ClassFormProps {
   availableDelegates?: User[]; // Pass available delegates
 }
 
+const UNASSIGNED_DELEGATE_SELECT_VALUE = "__NONE_OPTION__";
+
 export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = mockUsers.filter(u => u.role === 'delegate') }: ClassFormProps) {
   const { toast } = useToast();
   const form = useForm<ClassFormValues>({
@@ -40,7 +43,7 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
     defaultValues: {
       name: initialData?.name || "",
       teacher: initialData?.teacher || "",
-      delegateId: initialData?.delegateId || "",
+      delegateId: initialData?.delegateId || "", // "" represents no delegate in form state
     },
   });
 
@@ -95,17 +98,28 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
         <FormField
           control={form.control}
           name="delegateId"
-          render={({ field }) => (
+          render={({ field }) => ( // field.value is either "" or a delegate_id string
             <FormItem>
               <FormLabel>Delegate (Optional)</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={(valueFromSelect) => {
+                  if (valueFromSelect === UNASSIGNED_DELEGATE_SELECT_VALUE) {
+                    field.onChange(""); // Update form state to "" for "None"
+                  } else {
+                    field.onChange(valueFromSelect); // Update form state to actual delegate_id
+                  }
+                }}
+                value={field.value === "" ? UNASSIGNED_DELEGATE_SELECT_VALUE : field.value}
+                // If form state is "", the Select component's current value is our special "None" value.
+                // Otherwise, it's the delegate_id.
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a delegate" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">None</SelectItem>
+                  <SelectItem value={UNASSIGNED_DELEGATE_SELECT_VALUE}>None</SelectItem>
                   {availableDelegates.map(delegate => (
                     <SelectItem key={delegate.id} value={delegate.id}>
                       {delegate.name} ({delegate.email})
@@ -125,3 +139,4 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
     </Form>
   );
 }
+
