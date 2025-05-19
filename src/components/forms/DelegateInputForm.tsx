@@ -22,10 +22,10 @@ import { CalendarIcon, PlusCircle, Megaphone, BookOpenCheck, FileText } from "lu
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/types";
-import { mockClasses } from "@/lib/placeholder-data"; 
+import { mockClasses } from "@/lib/placeholder-data";
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLanguage } from "@/context/LanguageContext"; 
+import { useLanguage } from "@/context/LanguageContext";
 
 const commonSchema = {
   title: z.string().min(3, "Title is too short."),
@@ -38,24 +38,24 @@ const announcementSchema = z.object({
   ...commonSchema,
   type: z.literal("announcement"),
   content: z.string().min(10, "Content is too short.").optional().default(""),
-  subject: z.string().optional(), 
-  assignmentName: z.string().optional(), 
+  subject: z.string().optional(),
+  assignmentName: z.string().optional(),
 });
 
 const examSchema = z.object({
   ...commonSchema,
   type: z.literal("exam"),
   subject: z.string().min(2, "Subject is too short.").optional().default(""),
-  content: z.string().optional(), 
-  assignmentName: z.string().optional(), 
+  content: z.string().optional(),
+  assignmentName: z.string().optional(),
 });
 
 const deadlineSchema = z.object({
   ...commonSchema,
   type: z.literal("deadline"),
   assignmentName: z.string().min(3, "Assignment name is too short.").optional().default(""),
-  content: z.string().optional(), 
-  subject: z.string().optional(), 
+  content: z.string().optional(),
+  subject: z.string().optional(),
 });
 
 const delegateInputFormSchema = z.discriminatedUnion("type", [
@@ -72,77 +72,70 @@ interface DelegateInputFormProps {
   initialData?: SchoolEvent | null;
 }
 
-export function DelegateInputForm({ 
-  onSubmitSuccess, 
+export function DelegateInputForm({
+  onSubmitSuccess,
   availableClasses = mockClasses,
-  initialData 
+  initialData
 }: DelegateInputFormProps) {
-  const { t } = useLanguage(); 
-  const [activeTab, setActiveTab] = useState<"announcement" | "exam" | "deadline">(initialData?.type || "announcement");
+  const { t } = useLanguage();
+  const [activeTab, setActiveTab] = useState<"announcement" | "exam" | "deadline">(
+    initialData?.type || "announcement"
+  );
 
   const form = useForm<DelegateInputFormValues>({
     resolver: zodResolver(delegateInputFormSchema),
-    defaultValues: {
-      type: initialData?.type || "announcement",
-      title: initialData?.title || "",
-      date: initialData?.date ? new Date(initialData.date) : new Date(),
-      classId: initialData?.class ? availableClasses.find(c => c.name === initialData.class)?.id || "" : "",
-      description: initialData?.description || "",
-      content: (initialData?.type === 'announcement' ? (initialData as Announcement).content : "") || "",
-      subject: (initialData?.type === 'exam' ? (initialData as Exam).subject : "") || "",
-      assignmentName: (initialData?.type === 'deadline' ? (initialData as Deadline).assignmentName : "") || "",
-    },
-  }); 
-  
+    // Default values are now primarily managed by the useEffect below
+  });
+
   useEffect(() => {
-    const classIdForForm = initialData?.class ? availableClasses.find(c => c.name === initialData.class)?.id || "" : form.getValues('classId') || "";
-    
     if (initialData) {
-      setActiveTab(initialData.type);
+      // If editing, and initialData.type is different from current activeTab, update activeTab.
+      if (initialData.type !== activeTab) {
+        setActiveTab(initialData.type);
+      }
+      const classIdForEditing = availableClasses.find(c => c.name === initialData.class)?.id || "";
       form.reset({
         type: initialData.type,
         title: initialData.title || "",
         date: initialData.date ? new Date(initialData.date) : new Date(),
-        classId: classIdForForm,
+        classId: classIdForEditing,
         description: initialData.description || "",
         content: initialData.type === 'announcement' ? (initialData as Announcement).content || "" : "",
         subject: initialData.type === 'exam' ? (initialData as Exam).subject || "" : "",
         assignmentName: initialData.type === 'deadline' ? (initialData as Deadline).assignmentName || "" : "",
       });
     } else {
+      // New submission: form state should reflect the activeTab and pre-select class if only one.
+      let classIdToSet = "";
+      if (availableClasses && availableClasses.length === 1) {
+        classIdToSet = availableClasses[0].id;
+      }
+
       form.reset({
-        type: activeTab,
-        title: "",
+        type: activeTab, // Current active tab determines the type
+        title: "",       // Clear common fields for a new entry on this tab
         date: new Date(),
-        classId: classIdForForm, 
+        classId: classIdToSet,
         description: "",
-        content: "", 
+        // Clear all type-specific fields, the visible one will be empty and ready for input
+        content: "",
         subject: "",
         assignmentName: "",
       });
     }
-  }, [initialData, form, activeTab, availableClasses]);
+  }, [initialData, activeTab, availableClasses, form, setActiveTab]);
 
 
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
-    setActiveTab(newType); 
-    if (!initialData) {
-        form.setValue("type", newType, { shouldValidate: true });
-        form.reset({
-            ...form.getValues(), 
-            type: newType,
-            content: "", 
-            subject: "",
-            assignmentName: "",
-        });
-    }
+    setActiveTab(newType);
+    // The useEffect above will handle form reset based on activeTab change if !initialData
   };
 
 
   async function onSubmit(values: DelegateInputFormValues) {
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     const selectedClass = availableClasses.find(c => c.id === values.classId);
     let submissionData: SchoolEvent;
     const id = initialData?.id || `del-${values.type}-${Date.now()}`;
@@ -154,7 +147,7 @@ export function DelegateInputForm({
           title: values.title,
           date: values.date.toISOString(),
           type: 'announcement',
-          content: values.content || "", 
+          content: values.content || "",
           class: selectedClass?.name,
           description: values.description,
         } as Announcement;
@@ -165,7 +158,7 @@ export function DelegateInputForm({
           title: values.title,
           date: values.date.toISOString(),
           type: 'exam',
-          subject: values.subject || "", 
+          subject: values.subject || "",
           class: selectedClass?.name,
           description: values.description,
         } as Exam;
@@ -176,28 +169,28 @@ export function DelegateInputForm({
           title: values.title,
           date: values.date.toISOString(),
           type: 'deadline',
-          assignmentName: values.assignmentName || "", 
+          assignmentName: values.assignmentName || "",
           class: selectedClass?.name,
           description: values.description,
         } as Deadline;
         break;
       default:
-        const _exhaustiveCheck: never = values; 
+        const _exhaustiveCheck: never = values;
         console.error("Invalid form type submitted", _exhaustiveCheck);
         return;
     }
-    
+
     if (onSubmitSuccess) {
       onSubmitSuccess(submissionData);
     }
 
-    if (!initialData) { 
+    if (!initialData) {
       const preservedClassId = form.getValues('classId');
       form.reset({
-        type: activeTab, 
+        type: activeTab,
         title: "",
-        date: new Date(), 
-        classId: preservedClassId, 
+        date: new Date(),
+        classId: preservedClassId,
         description: "",
         content: "",
         subject: "",
@@ -205,7 +198,7 @@ export function DelegateInputForm({
       });
     }
   }
-  
+
   const getTabName = (tabValue: "announcement" | "exam" | "deadline"): string => {
     if (tabValue === "announcement") return t("announcementTabLabel");
     if (tabValue === "exam") return t("examTabLabel");
@@ -224,7 +217,7 @@ export function DelegateInputForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField control={form.control} name="type" render={({ field }) => <Input type="hidden" {...field} />} />
-          
+
           <FormField
             control={form.control}
             name="title"
@@ -253,14 +246,14 @@ export function DelegateInputForm({
                   newDate.setMilliseconds(0);
                   field.onChange(newDate);
                 };
-    
+
                 const handleHourChange = (hourString: string) => {
                   const hour = parseInt(hourString, 10);
                   const newDate = new Date(field.value || new Date());
                   newDate.setHours(hour);
                   field.onChange(newDate);
                 };
-    
+
                 const handleMinuteChange = (minuteString: string) => {
                   const minute = parseInt(minuteString, 10);
                   const newDate = new Date(field.value || new Date());
@@ -274,8 +267,8 @@ export function DelegateInputForm({
                      <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
-                            <Button 
-                                variant={"outline"} 
+                            <Button
+                                variant={"outline"}
                                 className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {field.value ? format(field.value, "PPP HH:mm") : <span>{t('formPickDateTimeButton')}</span>}
@@ -341,11 +334,11 @@ export function DelegateInputForm({
               )}
             />
           </div>
-          
+
           <TabsContent value="announcement" className="space-y-6 mt-0 border-none p-0">
              <FormField
               control={form.control}
-              name="content" 
+              name="content"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formAnnouncementContentLabel')}</FormLabel>
@@ -381,7 +374,7 @@ export function DelegateInputForm({
               )}
             />
           </TabsContent>
-          
+
           <FormField
             control={form.control}
             name="description"
@@ -402,3 +395,4 @@ export function DelegateInputForm({
     </Tabs>
   );
 }
+
