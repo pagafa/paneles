@@ -5,6 +5,9 @@ import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { translations, defaultLanguage, supportedLanguages, type SupportedLanguage, type TranslationKey, type TranslationVariables } from '@/lib/i18n';
 
+const USER_LANGUAGE_KEY = 'appLanguage';
+const ADMIN_GLOBAL_LANGUAGE_KEY = 'adminGlobalAppLanguage';
+
 interface LanguageContextType {
   language: SupportedLanguage;
   setLanguage: (lang: SupportedLanguage) => void;
@@ -18,13 +21,21 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedLang = localStorage.getItem('appLanguage') as SupportedLanguage;
-      if (storedLang && supportedLanguages.includes(storedLang)) {
-        setLanguageState(storedLang);
+      const userStoredLang = localStorage.getItem(USER_LANGUAGE_KEY) as SupportedLanguage;
+      const adminStoredGlobalLang = localStorage.getItem(ADMIN_GLOBAL_LANGUAGE_KEY) as SupportedLanguage;
+
+      let effectiveLang = defaultLanguage; // Fallback to hardcoded default
+
+      if (userStoredLang && supportedLanguages.includes(userStoredLang)) {
+        effectiveLang = userStoredLang; // User's preference takes highest priority
+      } else if (adminStoredGlobalLang && supportedLanguages.includes(adminStoredGlobalLang)) {
+        effectiveLang = adminStoredGlobalLang; // Admin's global setting is next
+        localStorage.setItem(USER_LANGUAGE_KEY, effectiveLang); // Set this as the user's preference if they had none
       } else {
-        // If no language is stored, set the default one in localStorage
-        localStorage.setItem('appLanguage', defaultLanguage);
+        // No user preference, no admin global preference, use hardcoded default
+        localStorage.setItem(USER_LANGUAGE_KEY, defaultLanguage); // And store it as user's preference
       }
+      setLanguageState(effectiveLang);
     }
   }, []);
 
@@ -32,7 +43,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     if (supportedLanguages.includes(lang)) {
       setLanguageState(lang);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('appLanguage', lang);
+        localStorage.setItem(USER_LANGUAGE_KEY, lang); // Always update the user's specific preference
       }
     }
   }, []);
@@ -40,11 +51,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const t = useCallback((key: TranslationKey, variables?: TranslationVariables): string => {
     const langTranslations = translations[language] || translations[defaultLanguage];
     const defaultLangTranslations = translations[defaultLanguage];
-    let translatedString = langTranslations[key] || defaultLangTranslations[key] || String(key); // Fallback to the key itself
+    let translatedString = langTranslations[key] || defaultLangTranslations[key] || String(key); 
 
     if (variables && typeof variables === 'object' && Object.keys(variables).length > 0) {
       Object.keys(variables).forEach((variableKey) => {
-        // Escape curly braces for literal matching and ensure variableKey is a simple string
         const escapedVariableKey = variableKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`\\{${escapedVariableKey}\\}`, 'g');
         translatedString = translatedString.replace(regex, String(variables[variableKey]));

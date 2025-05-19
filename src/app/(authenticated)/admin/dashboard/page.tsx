@@ -5,10 +5,9 @@ import { AdminAnnouncementForm } from "@/components/forms/AdminAnnouncementForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-// mockClasses no longer used directly for allClasses state
-import type { Announcement, SchoolClass } from "@/types";
+import type { Announcement, SchoolClass, SupportedLanguage } from "@/types";
 import { format } from "date-fns";
-import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle } from "lucide-react";
+import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,28 +23,45 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolName } from "@/context/SchoolNameContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supportedLanguages, defaultLanguage } from "@/lib/i18n";
 
 const sortAnnouncements = (announcements: Announcement[]) => {
   return [...announcements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
+const ADMIN_GLOBAL_LANGUAGE_KEY = 'adminGlobalAppLanguage';
+
 export default function AdminDashboardPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
-  const [allClasses, setAllClasses] = useState<SchoolClass[]>([]); // Fetched from API
+  const [allClasses, setAllClasses] = useState<SchoolClass[]>([]); 
   const [isLoadingAnnouncements, setIsLoadingAnnouncements] = useState(true);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const [errorAnnouncements, setErrorAnnouncements] = useState<string | null>(null);
   const [errorClasses, setErrorClasses] = useState<string | null>(null);
   
   const { toast } = useToast();
-  const { t } = useLanguage();
-  const { schoolName, setSchoolName } = useSchoolName();
+  const { language: currentSessionLanguage, setLanguage: setSessionLanguage, t } = useLanguage();
+  const { schoolName, setSchoolName: setGlobalSchoolName } = useSchoolName(); // Renamed to avoid conflict
   const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
+  const [selectedGlobalLanguage, setSelectedGlobalLanguage] = useState<SupportedLanguage>(defaultLanguage);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedAdminLang = localStorage.getItem(ADMIN_GLOBAL_LANGUAGE_KEY) as SupportedLanguage;
+      if (storedAdminLang && supportedLanguages.includes(storedAdminLang)) {
+        setSelectedGlobalLanguage(storedAdminLang);
+      } else {
+        setSelectedGlobalLanguage(currentSessionLanguage); // Default to current session if no admin global is set
+      }
+    }
+  }, [currentSessionLanguage]);
+
 
   const fetchAnnouncements = useCallback(async () => {
     setIsLoadingAnnouncements(true);
@@ -122,12 +138,6 @@ export default function AdminDashboardPage() {
         throw new Error(errorMessage);
       }
       
-      // No need to call toast here if AdminAnnouncementForm handles its own success toast
-      // toast({
-      //   title: isEditing ? t('announcementUpdatedToastTitle') : t('announcementPostedToastTitle'),
-      //   description: t('announcementActionSuccessToastDescription', { title: data.title, action: isEditing ? t('updated') : t('posted')})
-      // });
-
       setEditingAnnouncement(null);
       await fetchAnnouncements(); 
     } catch (err) {
@@ -175,19 +185,32 @@ export default function AdminDashboardPage() {
   };
 
   const handleSchoolNameSave = () => {
-    setSchoolName(editableSchoolName.trim());
+    setGlobalSchoolName(editableSchoolName.trim()); // Use the renamed context function
     toast({
       title: t('schoolNameUpdatedToastTitle'),
       description: t('schoolNameUpdatedToastDescription', { schoolName: editableSchoolName.trim() || "My School" }),
     });
   };
+  
+  const handleGlobalLanguageSave = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(ADMIN_GLOBAL_LANGUAGE_KEY, selectedGlobalLanguage);
+    }
+    // Also update the current admin's session language for immediate feedback
+    setSessionLanguage(selectedGlobalLanguage); 
+    toast({
+      title: t('globalLanguageUpdatedToastTitle'),
+      description: t('globalLanguageUpdatedToastDescription', { languageName: selectedGlobalLanguage.toUpperCase() }),
+    });
+  };
+
 
   const getTargetDisplay = (targetClassIds?: string[]): string => {
     if (!targetClassIds || targetClassIds.length === 0) {
       return t('schoolWideTarget');
     }
     const targetedClassNames = targetClassIds.map(id => {
-      const cls = allClasses.find(c => c.id === id); // Use fetched allClasses
+      const cls = allClasses.find(c => c.id === id); 
       return cls ? cls.name : id;
     }).join(', ');
     return `${t('classesTargetLabel')}: ${targetedClassNames}`;
@@ -227,6 +250,42 @@ export default function AdminDashboardPage() {
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
+            <Globe className="h-6 w-6 text-accent" />
+            {t('globalLanguageSettingsCardTitle')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="globalLanguageSelect">{t('globalLanguageSelectLabel')}</Label>
+              <Select 
+                value={selectedGlobalLanguage} 
+                onValueChange={(value) => setSelectedGlobalLanguage(value as SupportedLanguage)}
+              >
+                <SelectTrigger id="globalLanguageSelect" className="mt-1">
+                  <SelectValue placeholder={t('selectLanguagePlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {supportedLanguages.map(lang => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang.toUpperCase()} {/* Consider adding full language names in i18n later */}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleGlobalLanguageSave}>
+              <Save className="mr-2 h-4 w-4" />
+              {t('saveGlobalLanguageButton')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+
+      <Card className="mb-8 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
             <Megaphone className="h-6 w-6 text-accent" />
             {editingAnnouncement ? t('editAnnouncementTitle') : t('postNewAnnouncementTitle')}
           </CardTitle>
@@ -245,7 +304,7 @@ export default function AdminDashboardPage() {
             <AdminAnnouncementForm 
               onSubmitSuccess={handleFormSubmit} 
               initialData={editingAnnouncement || undefined}
-              availableClasses={allClasses} // Pass fetched classes
+              availableClasses={allClasses} 
               key={editingAnnouncement ? editingAnnouncement.id : 'new'}
             />
           )}

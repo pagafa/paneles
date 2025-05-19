@@ -116,52 +116,60 @@ interface Translations {
   retryButtonLabel: string;
 
   // Manage Users Page
-  userUpdatedToastTitle: string; // e.g. User "{name}" Updated!
-  userCreatedToastTitle: string; // e.g. User "{name}" Created!
-  userActionSuccessToastDescription: string; // e.g. Account for "{name}" has been successfully {action}.
-  actionProhibitedToastTitle: string; // e.g. Action Prohibited
-  cannotDeleteDefaultAdminToastDescription: string; // e.g. This demo admin user cannot be deleted.
-  userDeletedToastTitle: string; // e.g. User "{name}" Deleted
-  userDeletedToastDescription: string; // e.g. The user account has been successfully deleted.
-  editUserAccountTitle: string; // e.g. Edit User Account
-  createNewUserAccountTitle: string; // e.g. Create New User Account
-  editingUserAccountDescription: string; // e.g. You are editing account for: "{name}".
-  existingUsersTitle: string; // e.g. Existing Users
-  errorLoadingUsersTitle: string; // e.g. Error Loading Users
-  noUsersCreatedHint: string; // e.g. No users created yet.
-  userNameTableHeader: string; // e.g. Name (for table header)
-  usernameTableHeader: string; // e.g. Username (for table header)
-  userRoleTableHeader: string; // e.g. Role (for table header)
-  actionsTableHeader: string; // e.g. Actions (for table header)
-  adminRoleLabel: string; // e.g. Admin
-  delegateRoleLabel: string; // e.g. Delegate
-  editUserButtonLabel: string; // e.g. Edit User
-  deleteUserButtonLabel: string; // e.g. Delete User
-  deleteUserConfirmation: string; // e.g. This action cannot be undone. This will permanently delete the user account for "{name}".
-  userNamePlaceholder: string; // e.g. John Doe
-  usernamePlaceholder: string; // e.g. johndoe
-  usernameEditWarning: string; // e.g. Username can be changed, but ensure it remains unique.
-  selectRolePlaceholder: string; // e.g. Select a role
-  newPasswordOptionalLabel: string; // e.g. New Password (Optional)
-  passwordLabel: string; // e.g. Password
-  passwordEditHint: string; // e.g. Leave blank to keep current password.
-  updateUserButton: string; // e.g. Update User
-  createUserButton: string; // e.g. Create User
-  passwordRequiredForNewUser: string; // e.g. Password is required for new users.
+  userUpdatedToastTitle: string; 
+  userCreatedToastTitle: string; 
+  userActionSuccessToastDescription: string; 
+  actionProhibitedToastTitle: string; 
+  cannotDeleteDefaultAdminToastDescription: string; 
+  userDeletedToastTitle: string; 
+  userDeletedToastDescription: string; 
+  editUserAccountTitle: string; 
+  createNewUserAccountTitle: string; 
+  editingUserAccountDescription: string; 
+  existingUsersTitle: string; 
+  errorLoadingUsersTitle: string; 
+  noUsersCreatedHint: string; 
+  userNameTableHeader: string; 
+  usernameTableHeader: string; 
+  userRoleTableHeader: string; 
+  actionsTableHeader: string; 
+  adminRoleLabel: string; 
+  delegateRoleLabel: string; 
+  editUserButtonLabel: string; 
+  deleteUserButtonLabel: string; 
+  deleteUserConfirmation: string; 
+  userNamePlaceholder: string; 
+  usernamePlaceholder: string; 
+  usernameEditWarning: string; 
+  selectRolePlaceholder: string; 
+  newPasswordOptionalLabel: string; 
+  passwordLabel: string; 
+  passwordEditHint: string; 
+  updateUserButton: string; 
+  createUserButton: string; 
+  passwordRequiredForNewUser: string; 
 
 
   // ClassForm
-  classNameLabel: string; // e.g. Class Name
-  classNamePlaceholder: string; // e.g. Grade 10A, Computer Science Club
-  classDelegateLabel: string; // e.g. Delegate
-  optionalLabel: string; // e.g. Optional
-  loadingDelegatesPlaceholder: string; // e.g. Loading delegates...
-  selectDelegatePlaceholder: string; // e.g. Select a delegate
-  noDelegateOption: string; // e.g. None
-  noDelegatesAvailableHint: string; // e.g. No delegates available to assign. Create delegate users first.
-  updateClassButton: string; // e.g. Update Class
-  createClassButton: string; // e.g. Create Class
-  errorFetchingDelegates: string; // e.g. Error fetching delegates: {message}
+  classNameLabel: string; 
+  classNamePlaceholder: string; 
+  classDelegateLabel: string; 
+  optionalLabel: string; 
+  loadingDelegatesPlaceholder: string; 
+  selectDelegatePlaceholder: string; 
+  noDelegateOption: string; 
+  noDelegatesAvailableHint: string; 
+  updateClassButton: string; 
+  createClassButton: string; 
+  errorFetchingDelegates: string; 
+
+  // Admin Dashboard Global Language Settings
+  globalLanguageSettingsCardTitle: string;
+  globalLanguageSelectLabel: string;
+  selectLanguagePlaceholder: string;
+  saveGlobalLanguageButton: string;
+  globalLanguageUpdatedToastTitle: string;
+  globalLanguageUpdatedToastDescription: string; // e.g. Global application language updated to {languageName}
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -307,6 +315,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateClassButton: "Update Class",
     createClassButton: "Create Class",
     errorFetchingDelegates: "Error fetching delegates: {message}",
+    globalLanguageSettingsCardTitle: "Global Language Settings",
+    globalLanguageSelectLabel: "Set Global Application Language",
+    selectLanguagePlaceholder: "Select a language",
+    saveGlobalLanguageButton: "Save Global Language",
+    globalLanguageUpdatedToastTitle: "Global Language Updated",
+    globalLanguageUpdatedToastDescription: "The global application language has been set to {languageName}.",
   },
   es: {
     appTitle: "Portal Escolar",
@@ -450,6 +464,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateClassButton: "Actualizar Clase",
     createClassButton: "Crear Clase",
     errorFetchingDelegates: "Error al obtener delegados: {message}",
+    globalLanguageSettingsCardTitle: "Configuración Global de Idioma",
+    globalLanguageSelectLabel: "Establecer Idioma Global de la Aplicación",
+    selectLanguagePlaceholder: "Seleccionar un idioma",
+    saveGlobalLanguageButton: "Guardar Idioma Global",
+    globalLanguageUpdatedToastTitle: "Idioma Global Actualizado",
+    globalLanguageUpdatedToastDescription: "El idioma global de la aplicación se ha establecido a {languageName}.",
   },
   fr: {
     appTitle: "Portail Scolaire",
@@ -571,7 +591,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateRoleLabel: "Délégué",
     editUserButtonLabel: "Modifier Utilisateur",
     deleteUserButtonLabel: "Supprimer Utilisateur",
-    deleteUserConfirmation: "Cette action est irréversible. Cela supprimera définitivement le compte utilisateur de \"{name}\".",
+    deleteUserConfirmation: "Cette action est irréversible. Cela supprimera définitiveiment le compte utilisateur de \"{name}\".",
     userNamePlaceholder: "ex: Jean Dupont",
     usernamePlaceholder: "ex: jeandupont",
     usernameEditWarning: "Le nom d'utilisateur peut être modifié, mais assurez-vous qu'il reste unique.",
@@ -593,6 +613,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateClassButton: "Mettre à Jour Classe",
     createClassButton: "Créer Classe",
     errorFetchingDelegates: "Erreur lors de la récupération des délégués: {message}",
+    globalLanguageSettingsCardTitle: "Paramètres Globaux de Langue",
+    globalLanguageSelectLabel: "Définir la Langue Globale de l'Application",
+    selectLanguagePlaceholder: "Sélectionner une langue",
+    saveGlobalLanguageButton: "Enregistrer la Langue Globale",
+    globalLanguageUpdatedToastTitle: "Langue Globale Mise à Jour",
+    globalLanguageUpdatedToastDescription: "La langue globale de l'application a été définie sur {languageName}.",
   },
   gl: {
     appTitle: "Portal Escolar",
@@ -736,6 +762,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateClassButton: "Actualizar Clase",
     createClassButton: "Crear Clase",
     errorFetchingDelegates: "Erro ao obter delegados: {message}",
+    globalLanguageSettingsCardTitle: "Configuración Global de Idioma",
+    globalLanguageSelectLabel: "Establecer Idioma Global da Aplicación",
+    selectLanguagePlaceholder: "Seleccionar un idioma",
+    saveGlobalLanguageButton: "Gardar Idioma Global",
+    globalLanguageUpdatedToastTitle: "Idioma Global Actualizado",
+    globalLanguageUpdatedToastDescription: "O idioma global da aplicación estableceuse a {languageName}.",
   },
 };
 
