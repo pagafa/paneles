@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -7,7 +8,7 @@ import {
   // Megaphone, // Not used directly
   // ClipboardList, // Not used directly
   Users,
-  School as SchoolIcon,
+  Library, // Changed from SchoolIcon
   UserCheck,
   ShieldCheck,
   // BookOpenCheck, // Not used directly
@@ -43,7 +44,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/admin/dashboard", labelKey: "adminDashboardTitle", icon: ShieldCheck, roles: ["admin"] },
-  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: SchoolIcon, roles: ["admin"] },
+  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Library, roles: ["admin"] }, // Changed icon here
   { href: "/admin/manage-users", labelKey: "manageUsersTitle", icon: Users, roles: ["admin"] },
   { href: "/delegate/dashboard", labelKey: "delegateDashboardTitle", icon: UserCheck, roles: ["delegate"] },
 ];

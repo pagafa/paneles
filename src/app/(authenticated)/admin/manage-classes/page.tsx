@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ClassForm } from "@/components/forms/ClassForm";
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { mockClasses as initialClasses, mockUsers } from "@/lib/placeholder-data";
 import type { SchoolClass, User } from "@/types";
-import { Edit3, School, Trash2 } from "lucide-react";
+import { Edit3, Library, Trash2 } from "lucide-react"; // Changed School to Library
 import { useState, useMemo } from "react";
 import {
   AlertDialog,
@@ -73,7 +74,7 @@ export default function ManageClassesPage() {
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <School className="h-6 w-6 text-accent" />
+            <Library className="h-6 w-6 text-accent" /> {/* Changed School to Library */}
             {editingClass ? "Edit Class" : "Add New Class"}
           </CardTitle>
            {editingClass && (
