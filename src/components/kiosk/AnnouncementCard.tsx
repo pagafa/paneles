@@ -1,7 +1,11 @@
+
+"use client";
+
 import type { SchoolEvent, Announcement, Exam, Deadline } from '@/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Megaphone, CalendarCheck, ClipboardList, BookOpenCheck, FileText, CalendarDays } from 'lucide-react';
+import { Megaphone, BookOpenCheck, FileText, CalendarDays } from 'lucide-react';
 import { format } from 'date-fns';
+import { useState, useEffect } from 'react';
 
 interface AnnouncementCardProps {
   item: SchoolEvent;
@@ -15,14 +19,15 @@ const IconMap: Record<SchoolEvent['type'], React.ElementType> = {
 
 export function AnnouncementCard({ item }: AnnouncementCardProps) {
   const Icon = IconMap[item.type] || CalendarDays;
+  const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
 
-  const formatDate = (dateString: string) => {
+  useEffect(() => {
     try {
-      return format(new Date(dateString), 'PPP p'); // "Jun 12, 2023 4:00 PM"
+      setFormattedDate(format(new Date(item.date), 'PPP p'));
     } catch (error) {
-      return "Invalid Date";
+      setFormattedDate("Invalid Date");
     }
-  };
+  }, [item.date]);
 
   return (
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
@@ -31,7 +36,7 @@ export function AnnouncementCard({ item }: AnnouncementCardProps) {
         <div>
           <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
-            {formatDate(item.date)}
+            {formattedDate}
             {item.type === 'exam' && (item as Exam).class && ` - Class: ${(item as Exam).class}`}
             {item.type === 'deadline' && (item as Deadline).class && ` - Class: ${(item as Deadline).class}`}
           </CardDescription>
