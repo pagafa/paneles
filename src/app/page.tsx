@@ -2,11 +2,10 @@
 "use client"; 
 
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
-// mockSchoolEvents and mockClasses are no longer the primary source for fetched data here
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from '@/types';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
-import { Megaphone, BookOpenCheck, FileText, LogIn, ChevronDown, Info } from 'lucide-react';
+import { Megaphone, BookOpenCheck, FileText, LogIn, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,47 +23,72 @@ const sortEvents = (events: SchoolEvent[]) => {
   return [...events].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
-// Updated to fetch from API
+// Fetch school-wide announcements from API
 async function getSchoolWideAnnouncements(): Promise<Announcement[]> {
-  const response = await fetch('/api/announcements');
-  if (!response.ok) {
-    console.error("Failed to fetch announcements for kiosk", response.status, await response.text());
+  try {
+    const response = await fetch('/api/announcements');
+    if (!response.ok) {
+      console.error("Failed to fetch announcements for kiosk", response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    const allAnnouncements: Announcement[] = await response.json();
+    return allAnnouncements.filter(event => 
+      event.type === 'announcement' && 
+      (!event.targetClassIds || event.targetClassIds.length === 0)
+    );
+  } catch (error) {
+    console.error('Error fetching school-wide announcements for Kiosk:', error);
     return [];
   }
-  const allAnnouncements: Announcement[] = await response.json();
-  // Filter for school-wide announcements
-  return allAnnouncements.filter(event => 
-    event.type === 'announcement' && 
-    (!event.targetClassIds || event.targetClassIds.length === 0)
-  );
 }
 
-// TODO: Implement API for exams and deadlines for kiosk if needed
-// For now, these might be empty or use limited mock data if specific API endpoints are not ready
+// Fetch kiosk-wide exams from API
 async function getKioskExams(): Promise<Exam[]> {
-  // Placeholder: In a real app, fetch from '/api/exams' or similar
-  // const response = await fetch('/api/schoolevents?type=exam&scope=all');
-  // if(!response.ok) return [];
-  // return await response.json();
-  return []; // Return empty for now until API is ready for general exams
+  try {
+    const response = await fetch('/api/schoolevents?type=exam');
+    if (!response.ok) {
+      console.error("Failed to fetch exams for kiosk", response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    const allExams: Exam[] = await response.json();
+    // Further filter if kiosk exams should only be those not tied to a specific class
+    return allExams.filter(exam => !exam.classId); 
+  } catch (error) {
+    console.error('Error fetching kiosk exams:', error);
+    return [];
+  }
 }
 
+// Fetch kiosk-wide deadlines from API
 async function getKioskDeadlines(): Promise<Deadline[]> {
-  // Placeholder: In a real app, fetch from '/api/deadlines' or similar
-  // const response = await fetch('/api/schoolevents?type=deadline&scope=all');
-  // if(!response.ok) return [];
-  // return await response.json();
-  return []; // Return empty for now until API is ready for general deadlines
+  try {
+    const response = await fetch('/api/schoolevents?type=deadline');
+    if (!response.ok) {
+      console.error("Failed to fetch deadlines for kiosk", response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    const allDeadlines: Deadline[] = await response.json();
+    // Further filter if kiosk deadlines should only be those not tied to a specific class
+    return allDeadlines.filter(deadline => !deadline.classId);
+  } catch (error) {
+    console.error('Error fetching kiosk deadlines:', error);
+    return [];
+  }
 }
 
 
 async function getClassesData(): Promise<SchoolClass[]> {
-  const response = await fetch('/api/classes');
-   if (!response.ok) {
-    console.error("Failed to fetch classes for kiosk dropdown", response.status, await response.text());
+  try {
+    const response = await fetch('/api/classes');
+    if (!response.ok) {
+      console.error("Failed to fetch classes for kiosk dropdown", response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching classes for Kiosk dropdown:', error);
     return [];
   }
-  return await response.json();
 }
 
 
@@ -77,42 +101,40 @@ export default function KioskPage() {
   
   const [isLoadingAnnouncements, setIsLoadingAnnouncements] = useState(true);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
-  // Add loading states for exams and deadlines if they become API-driven
-  // const [isLoadingExams, setIsLoadingExams] = useState(true);
-  // const [isLoadingDeadlines, setIsLoadingDeadlines] = useState(true);
+  const [isLoadingExams, setIsLoadingExams] = useState(true);
+  const [isLoadingDeadlines, setIsLoadingDeadlines] = useState(true);
 
-  const loading = isLoadingAnnouncements || isLoadingClasses; // Combine loading states
+  const loading = isLoadingAnnouncements || isLoadingClasses || isLoadingExams || isLoadingDeadlines; 
 
   const fetchData = useCallback(async () => {
     setIsLoadingAnnouncements(true);
     setIsLoadingClasses(true);
+    setIsLoadingExams(true);
+    setIsLoadingDeadlines(true);
 
     try {
       const announcementsData = await getSchoolWideAnnouncements();
       setAnnouncements(sortEvents(announcementsData));
-    } catch (e) { console.error("Error fetching announcements data", e); setAnnouncements([]);} 
+    } catch (e) { console.error("Error fetching announcements data for Kiosk", e); setAnnouncements([]);} 
     finally { setIsLoadingAnnouncements(false); }
 
     try {
       const classesData = await getClassesData();
-      setClasses(classesData); // Assuming API sorts them or sort here if needed
-    } catch (e) { console.error("Error fetching classes data", e); setClasses([]);}
+      setClasses(classesData);
+    } catch (e) { console.error("Error fetching classes data for Kiosk", e); setClasses([]);}
     finally { setIsLoadingClasses(false); }
     
-    // Fetch exams and deadlines (currently placeholders)
-    // setIsLoadingExams(true);
-    // try {
-    //   const examsData = await getKioskExams();
-    //   setExams(sortEvents(examsData));
-    // } catch (e) { console.error("Error fetching exams data", e); setExams([]);}
-    // finally { setIsLoadingExams(false); }
+    try {
+      const examsData = await getKioskExams();
+      setExams(sortEvents(examsData));
+    } catch (e) { console.error("Error fetching exams data for Kiosk", e); setExams([]);}
+    finally { setIsLoadingExams(false); }
     
-    // setIsLoadingDeadlines(true);
-    // try {
-    //   const deadlinesData = await getKioskDeadlines();
-    //   setDeadlines(sortEvents(deadlinesData));
-    // } catch (e) { console.error("Error fetching deadlines data", e); setDeadlines([]);}
-    // finally { setIsLoadingDeadlines(false); }
+    try {
+      const deadlinesData = await getKioskDeadlines();
+      setDeadlines(sortEvents(deadlinesData));
+    } catch (e) { console.error("Error fetching deadlines data for Kiosk", e); setDeadlines([]);}
+    finally { setIsLoadingDeadlines(false); }
 
   }, []);
 
@@ -123,13 +145,15 @@ export default function KioskPage() {
 
   const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string, isLoading: boolean }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone empty', isLoading: isLoadingAnnouncements },
-    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar', isLoading: false /*isLoadingExams*/ },
-    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list', isLoading: false /*isLoadingDeadlines*/ },
+    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar', isLoading: isLoadingExams },
+    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list', isLoading: isLoadingDeadlines },
   ];
 
   const visibleSections = sectionsConfig.filter(section => section.events.length > 0 || section.isLoading);
+  const noEventsForAllSections = !loading && announcements.length === 0 && exams.length === 0 && deadlines.length === 0;
 
-  if (loading && visibleSections.length === 0) { // Show global loading only if all sections would be empty otherwise
+
+  if (loading && visibleSections.length === 0) { 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
         <p>{t('loadingLabel')}</p> 
@@ -186,25 +210,27 @@ export default function KioskPage() {
         <main className="w-full flex-grow flex flex-col items-center space-y-12">
           {visibleSections.length > 0 ? (
             visibleSections.map((section, index) => (
-              <section key={section.titleKey} className="w-full max-w-4xl">
-                <div className="flex items-center mb-6">
-                  <section.icon className="h-8 w-8 text-primary mr-3" />
-                  <h2 className="text-3xl font-semibold text-primary/90">{t(section.titleKey)}</h2>
-                </div>
-                {section.isLoading ? (
-                  <div className="w-full max-w-3xl mx-auto" style={{ minHeight: '300px' }}>
-                     <Skeleton className="h-full w-full rounded-lg" />
+              section.isLoading || section.events.length > 0 ? (
+                <section key={section.titleKey} className="w-full max-w-4xl">
+                  <div className="flex items-center mb-6">
+                    <section.icon className="h-8 w-8 text-primary mr-3" />
+                    <h2 className="text-3xl font-semibold text-primary/90">{t(section.titleKey)}</h2>
                   </div>
-                ) : section.events.length > 0 ? (
-                  <KioskCarousel items={section.events} />
-                ) : (
-                   <p className="text-center text-muted-foreground text-lg">{t('noEventsGeneralHint')}</p> // Or specific per section like t('noAnnouncementsHint')
-                )}
-                {index < visibleSections.length - 1 && visibleSections[index+1].events.length > 0 && <Separator className="my-12" />}
-              </section>
+                  {section.isLoading ? (
+                    <div className="w-full max-w-3xl mx-auto" style={{ minHeight: '300px' }}>
+                       <Skeleton className="h-64 w-full rounded-lg" />
+                    </div>
+                  ) : section.events.length > 0 ? (
+                    <KioskCarousel items={section.events} />
+                  ) : (
+                     <p className="text-center text-muted-foreground text-lg">{t('noEventsGeneralHint')}</p>
+                  )}
+                  {index < visibleSections.filter(s => s.isLoading || s.events.length > 0).length - 1 && <Separator className="my-12" />}
+                </section>
+              ) : null
             ))
           ) : (
-            !loading && // Ensure not to show this if parent 'loading' is true
+            !loading && noEventsForAllSections &&
             <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
               <Image 
                 src="https://placehold.co/300x200.png"

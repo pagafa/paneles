@@ -18,7 +18,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PlusCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { SchoolClass, User } from "@/types";
-import { mockUsers } from "@/lib/placeholder-data"; // For delegate selection
+// mockUsers no longer used directly for availableDelegates
+import { useState, useEffect, useCallback } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+
 
 const classFormSchema = z.object({
   name: z.string().min(2, { message: "Class name must be at least 2 characters." }),
@@ -30,36 +33,80 @@ type ClassFormValues = z.infer<typeof classFormSchema>;
 interface ClassFormProps {
   onSubmitSuccess?: (data: SchoolClass) => void;
   initialData?: Partial<ClassFormValues & { id?: string }>;
-  availableDelegates?: User[]; // Pass available delegates
+  // availableDelegates prop is removed, fetched internally now
 }
 
 const UNASSIGNED_DELEGATE_SELECT_VALUE = "__NONE_OPTION__";
 
-export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = mockUsers.filter(u => u.role === 'delegate') }: ClassFormProps) {
+export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const [availableDelegates, setAvailableDelegates] = useState<User[]>([]);
+  const [isLoadingDelegates, setIsLoadingDelegates] = useState(true);
+
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       name: initialData?.name || "",
-      delegateId: initialData?.delegateId || "", // "" represents no delegate in form state
+      delegateId: initialData?.delegateId || "", 
     },
   });
 
+  const fetchDelegates = useCallback(async () => {
+    setIsLoadingDelegates(true);
+    try {
+      const response = await fetch('/api/users?role=delegate'); // Assuming API can filter by role
+      if (!response.ok) {
+        // Try without role filter if the above fails, then filter client-side
+        const fallbackResponse = await fetch('/api/users');
+        if (!fallbackResponse.ok) {
+          const errorData = await fallbackResponse.json().catch(() => ({ message: `Failed to fetch delegates. Status: ${fallbackResponse.status}` }));
+          throw new Error(errorData.message || `Failed to fetch delegates. Status: ${fallbackResponse.status}`);
+        }
+        const allUsers: User[] = await fallbackResponse.json();
+        setAvailableDelegates(allUsers.filter(u => u.role === 'delegate'));
+      } else {
+        const delegates: User[] = await response.json();
+        setAvailableDelegates(delegates.filter(u => u.role === 'delegate')); // Ensure role is correct
+      }
+    } catch (error) {
+      console.error("Error fetching delegates for ClassForm:", error);
+      setAvailableDelegates([]); 
+      toast({ title: t('errorDialogTitle'), description: t('errorFetchingDelegates', { message: (error as Error).message }), variant: 'destructive' });
+    } finally {
+      setIsLoadingDelegates(false);
+    }
+  }, [t, toast]);
+
+  useEffect(() => {
+    fetchDelegates();
+  }, [fetchDelegates]);
+
+  useEffect(() => { // Reset form if initialData changes
+    if (initialData) {
+      form.reset({
+        name: initialData.name || "",
+        delegateId: initialData.delegateId || "",
+      });
+    } else {
+        form.reset({ name: "", delegateId: "" });
+    }
+  }, [initialData, form]);
+
+
   async function onSubmit(values: ClassFormValues) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // await new Promise(resolve => setTimeout(resolve, 500)); // Removed artificial delay
     const newClass: SchoolClass = {
-      id: initialData?.id || `class-${Date.now()}`,
-      ...values,
+      id: initialData?.id || `class-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
+      name: values.name,
+      delegateId: values.delegateId === UNASSIGNED_DELEGATE_SELECT_VALUE ? undefined : values.delegateId,
     };
     
-    toast({
-      title: initialData?.id ? "Class Updated!" : "Class Created!",
-      description: `Class "${newClass.name}" has been successfully ${initialData?.id ? 'updated' : 'created'}.`,
-    });
+    // Toast is now handled by the parent page (ManageClassesPage)
     if (onSubmitSuccess) {
       onSubmitSuccess(newClass);
     }
-     if (!initialData?.id) {
+     if (!initialData?.id) { // Only reset for new creations within the form
       form.reset({ name: "", delegateId: "" });
     }
   }
@@ -72,9 +119,9 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Class Name</FormLabel>
+              <FormLabel>{t('classNameLabel')}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Grade 10A, Computer Science Club" {...field} />
+                <Input placeholder={t('classNamePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -85,24 +132,21 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
           name="delegateId"
           render={({ field }) => ( 
             <FormItem>
-              <FormLabel>Delegate (Optional)</FormLabel>
+              <FormLabel>{t('classDelegateLabel')} ({t('optionalLabel')})</FormLabel>
               <Select
                 onValueChange={(valueFromSelect) => {
-                  if (valueFromSelect === UNASSIGNED_DELEGATE_SELECT_VALUE) {
-                    field.onChange(""); 
-                  } else {
                     field.onChange(valueFromSelect); 
-                  }
                 }}
-                value={field.value === "" ? UNASSIGNED_DELEGATE_SELECT_VALUE : field.value}
+                value={field.value || UNASSIGNED_DELEGATE_SELECT_VALUE} // Ensure UNASSIGNED is default if field.value is empty
+                disabled={isLoadingDelegates}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a delegate" />
+                    <SelectValue placeholder={isLoadingDelegates ? t('loadingDelegatesPlaceholder') : t('selectDelegatePlaceholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={UNASSIGNED_DELEGATE_SELECT_VALUE}>None</SelectItem>
+                  <SelectItem value={UNASSIGNED_DELEGATE_SELECT_VALUE}>{t('noDelegateOption')}</SelectItem>
                   {availableDelegates.map(delegate => (
                     <SelectItem key={delegate.id} value={delegate.id}>
                       {delegate.name} ({delegate.username})
@@ -110,13 +154,14 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
                   ))}
                 </SelectContent>
               </Select>
+              { !isLoadingDelegates && availableDelegates.length === 0 && <p className="text-xs text-muted-foreground">{t('noDelegatesAvailableHint')}</p>}
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
-          {initialData?.id ? "Update Class" : "Create Class"}
+          {initialData?.id ? t('updateClassButton') : t('createClassButton')}
         </Button>
       </form>
     </Form>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { UserForm } from "@/components/forms/UserForm";
@@ -13,10 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockUsers as initialUsers } from "@/lib/placeholder-data";
+// initialUsers no longer used directly for users state
 import type { User } from "@/types";
-import { Edit3, Trash2, Users } from "lucide-react"; // Removed Badge icon as it's not used for a direct title icon
-import { useState } from "react";
+import { Edit3, Trash2, Users, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,19 +31,85 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge as ShadBadge } from "@/components/ui/badge"; 
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/context/LanguageContext";
 
+const sortUsers = (users: User[]) => {
+  return [...users].sort((a, b) => a.name.localeCompare(b.name));
+};
 
 export default function ManageUsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
-  const handleFormSubmit = (data: User) => {
-    if (editingUser) {
-      setUsers(users.map(usr => usr.id === data.id ? data : usr));
+
+  const fetchUsers = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/users');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to fetch users. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to fetch users. Status: ${response.status}`);
+      }
+      const data: User[] = await response.json();
+      setUsers(sortUsers(data));
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message);
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  const handleFormSubmit = async (data: User) => {
+    const isEditing = !!editingUser;
+    const url = isEditing ? `/api/users/${data.id}` : '/api/users';
+    const method = isEditing ? 'PUT' : 'POST';
+    
+    // Password handling - for demo, not sending password if not changed.
+    // In a real app, this is more complex with hashing.
+    const payload = { ...data };
+    if (isEditing && ! (data as any).password) { // Assuming password might be in form data but empty
+      delete (payload as any).password;
+    }
+
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to ${isEditing ? 'update' : 'create'} user. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} user. Status: ${response.status}`);
+      }
+      
+      toast({
+        title: isEditing ? t('userUpdatedToastTitle', { name: data.name }) : t('userCreatedToastTitle', { name: data.name }),
+        description: t('userActionSuccessToastDescription', { name: data.name, action: isEditing ? t('updated') : t('created') }),
+      });
+
       setEditingUser(null);
-    } else {
-      setUsers([data, ...users]);
+      await fetchUsers(); // Refresh list
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: t('errorDialogTitle'),
+        description: (err as Error).message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -51,37 +118,51 @@ export default function ManageUsersPage() {
      window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (userId: string) => {
+  const handleDelete = async (userId: string) => {
     const userToDelete = users.find(u => u.id === userId);
-    if (userToDelete?.username === 'admin_user') { // Check against username
+    if (userToDelete?.username === 'admin_user') { 
       toast({
-        title: "Action Prohibited",
-        description: "This demo admin user cannot be deleted.",
-        variant: "destructive",
+        title: t('actionProhibitedToastTitle'),
+        description: t('cannotDeleteDefaultAdminToastDescription'),
+        variant: "warning",
       });
       return;
     }
-    setUsers(users.filter(usr => usr.id !== userId));
-    toast({
-      title: "User Deleted",
-      description: "The user account has been successfully deleted.",
-      variant: "destructive"
-    });
+    try {
+      const response = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to delete user. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to delete user. Status: ${response.status}`);
+      }
+      toast({
+        title: t('userDeletedToastTitle', { name: userToDelete?.name || 'User' }),
+        description: t('userDeletedToastDescription'),
+        variant: "destructive"
+      });
+      await fetchUsers(); // Refresh list
+    } catch (err) {
+       console.error(err);
+       toast({
+        title: t('errorDialogTitle'),
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8 text-primary">Manage Users</h1>
+      <h1 className="text-3xl font-bold mb-8 text-primary">{t('manageUsersTitle')}</h1>
 
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Users className="h-6 w-6 text-accent" />
-            {editingUser ? "Edit User Account" : "Create New User Account"}
+            {editingUser ? t('editUserAccountTitle') : t('createNewUserAccountTitle')}
           </CardTitle>
           {editingUser && (
             <CardDescription>
-              You are editing account for: "{editingUser.name}". <Button variant="link" size="sm" onClick={() => setEditingUser(null)}>Cancel Edit</Button>
+              {t('editingUserAccountDescription', {name: editingUser.name})} <Button variant="link" size="sm" onClick={() => setEditingUser(null)}>{t('cancelEditButton')}</Button>
             </CardDescription>
           )}
         </CardHeader>
@@ -97,19 +178,40 @@ export default function ManageUsersPage() {
 
       <Separator className="my-8" />
 
-      <h2 className="text-2xl font-semibold mb-6">Existing Users</h2>
-      {users.length === 0 ? (
-        <p className="text-muted-foreground">No users created yet.</p>
-      ) : (
+      <h2 className="text-2xl font-semibold mb-6">{t('existingUsersTitle')}</h2>
+       {isLoading && (
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-md" />
+          <Skeleton className="h-12 w-full rounded-md" />
+          <Skeleton className="h-12 w-full rounded-md" />
+        </div>
+      )}
+      {error && !isLoading && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle /> {t('errorLoadingUsersTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-destructive">{error}</p>
+            <Button onClick={fetchUsers} className="mt-4">{t('retryButtonLabel')}</Button>
+          </CardContent>
+        </Card>
+      )}
+      {!isLoading && !error && users.length === 0 && (
+        <p className="text-muted-foreground">{t('noUsersCreatedHint')}</p>
+      )}
+      {!isLoading && !error && users.length > 0 && (
         <Card className="shadow-md">
           <ScrollArea className="max-h-[500px]">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('userNameTableHeader')}</TableHead>
+                  <TableHead>{t('usernameTableHeader')}</TableHead>
+                  <TableHead>{t('userRoleTableHeader')}</TableHead>
+                  <TableHead className="text-right">{t('actionsTableHeader')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -119,30 +221,30 @@ export default function ManageUsersPage() {
                     <TableCell>{user.username}</TableCell>
                     <TableCell>
                       <ShadBadge variant={user.role === 'admin' ? 'default' : 'secondary'}>
-                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                        {t(user.role === 'admin' ? 'adminRoleLabel' : 'delegateRoleLabel')}
                       </ShadBadge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(user)} aria-label="Edit User">
+                      <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(user)} aria-label={t('editUserButtonLabel')}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
                        <AlertDialog>
                         <AlertDialogTrigger asChild>
-                           <Button variant="destructive" size="icon" aria-label="Delete User" disabled={user.username === 'admin_user'}> {/* Prevent deleting main admin by username */}
+                           <Button variant="destructive" size="icon" aria-label={t('deleteUserButtonLabel')} disabled={user.username === 'admin_user'}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('alertDialogTitle')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the user account for "{user.name}".
+                              {t('deleteUserConfirmation', { name: user.name })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(user.id)}>
-                              Delete
+                              {t('deleteButton')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

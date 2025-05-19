@@ -29,9 +29,6 @@ interface Translations {
 
   // For PublicClassPage
   classPageTitle: string; 
-  noClassAnnouncementsHint: string;
-  noClassExamsHint: string;
-  noClassDeadlinesHint: string;
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
@@ -59,16 +56,19 @@ interface Translations {
   submissionSubmittedToastDescription: string; 
   submissionDeletedToastTitle: string;
   submissionDeletedToastDescription: string; 
+  errorLoadingSubmissionsTitle: string;
+  noAssignedClassesToSubmitHint: string;
 
-  // For DelegateInputForm (tabs)
+
+  // For DelegateInputForm (tabs & fields)
   announcementTabLabel: string;
   examTabLabel: string;
   deadlineTabLabel: string;
-  // For DelegateInputForm (fields)
   formTitleLabel: string;
   formTitlePlaceholder: string; 
   formDateTimeLabel: string;
   formPickDateTimeButton: string;
+  formSelectTimeLabel: string;
   formClassLabel: string;
   formSelectClassPlaceholder: string;
   formNoAssignedClassesWarning: string;
@@ -83,7 +83,7 @@ interface Translations {
   formSubmitButton: string;
   formUpdateButton: string;
 
-  // School Name Editing
+  // School Name Editing (Admin Dashboard)
   editSchoolNameCardTitle: string;
   schoolNameInputLabel: string;
   schoolNameInputPlaceholder: string;
@@ -94,27 +94,63 @@ interface Translations {
   // Admin Dashboard Announcement Management
   editAnnouncementTitle: string;
   postNewAnnouncementTitle: string;
-  editingAnnouncementDescription: string; // e.g. "Editing: {title}"
+  editingAnnouncementDescription: string; 
   currentAnnouncementsTitle: string;
   noAnnouncementsPostedHint: string;
   schoolWideTarget: string;
-  classesTargetLabel: string; // e.g. "Classes"
-  targetLabel: string; // e.g. "Target"
+  classesTargetLabel: string; 
+  targetLabel: string; 
   editButtonLabel: string;
   deleteButtonLabel: string;
-  deleteAnnouncementConfirmation: string; // e.g. "This will permanently delete the announcement titled "{title}"."
+  deleteAnnouncementConfirmation: string; 
   announcementUpdatedToastTitle: string;
   announcementPostedToastTitle: string;
-  announcementActionSuccessToastDescription: string; // e.g. "{title} has been successfully {action}."
-  updated: string; // "updated"
-  posted: string; // "posted"
+  announcementActionSuccessToastDescription: string; 
+  updated: string; 
+  posted: string; 
   announcementDeletedToastTitle: string;
   announcementDeletedToastDescription: string;
-  errorDialogTitle: string; // Generic error title for dialogs/toasts
-  errorFetchingAnnouncements: string; // e.g. "Error fetching announcements: {message}"
-  errorLoadingAnnouncementsTitle: string; // e.g. "Error Loading Announcements"
+  errorDialogTitle: string; 
+  errorFetchingAnnouncements: string; 
+  errorLoadingAnnouncementsTitle: string; 
   retryButtonLabel: string;
 
+  // Manage Users Page
+  userUpdatedToastTitle: string; // e.g. User "{name}" Updated!
+  userCreatedToastTitle: string; // e.g. User "{name}" Created!
+  userActionSuccessToastDescription: string; // e.g. Account for "{name}" has been successfully {action}.
+  actionProhibitedToastTitle: string; // e.g. Action Prohibited
+  cannotDeleteDefaultAdminToastDescription: string; // e.g. This demo admin user cannot be deleted.
+  userDeletedToastTitle: string; // e.g. User "{name}" Deleted
+  userDeletedToastDescription: string; // e.g. The user account has been successfully deleted.
+  editUserAccountTitle: string; // e.g. Edit User Account
+  createNewUserAccountTitle: string; // e.g. Create New User Account
+  editingUserAccountDescription: string; // e.g. You are editing account for: "{name}".
+  existingUsersTitle: string; // e.g. Existing Users
+  errorLoadingUsersTitle: string; // e.g. Error Loading Users
+  noUsersCreatedHint: string; // e.g. No users created yet.
+  userNameTableHeader: string; // e.g. Name (for table header)
+  usernameTableHeader: string; // e.g. Username (for table header)
+  userRoleTableHeader: string; // e.g. Role (for table header)
+  actionsTableHeader: string; // e.g. Actions (for table header)
+  adminRoleLabel: string; // e.g. Admin
+  delegateRoleLabel: string; // e.g. Delegate
+  editUserButtonLabel: string; // e.g. Edit User
+  deleteUserButtonLabel: string; // e.g. Delete User
+  deleteUserConfirmation: string; // e.g. This action cannot be undone. This will permanently delete the user account for "{name}".
+
+  // ClassForm
+  classNameLabel: string; // e.g. Class Name
+  classNamePlaceholder: string; // e.g. Grade 10A, Computer Science Club
+  classDelegateLabel: string; // e.g. Delegate
+  optionalLabel: string; // e.g. Optional
+  loadingDelegatesPlaceholder: string; // e.g. Loading delegates...
+  selectDelegatePlaceholder: string; // e.g. Select a delegate
+  noDelegateOption: string; // e.g. None
+  noDelegatesAvailableHint: string; // e.g. No delegates available to assign. Create delegate users first.
+  updateClassButton: string; // e.g. Update Class
+  createClassButton: string; // e.g. Create Class
+  errorFetchingDelegates: string; // e.g. Error fetching delegates: {message}
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -140,18 +176,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesHint: "No classes available",
     loginButtonLabel: "Login",
     footerAllRightsReserved: "All rights reserved.",
-
     classPageTitle: "Events for {className}",
-    noClassAnnouncementsHint: "No current announcements for this class.",
-    noClassExamsHint: "No upcoming exams scheduled for this class.",
-    noClassDeadlinesHint: "No assignment deadlines approaching for this class.",
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
     delegateIdLabel: "Delegate", 
     noEventsForClassHint: "Looks like this class is on a secret mission! Nothing to show right now.",
     loadingLabel: "Loading...",
-
     assignedClassesLabel: "Assigned classes",
     noAssignedClassesLabel: "You currently have no classes assigned.",
     editInformationTitle: "Edit Information",
@@ -160,7 +191,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     cancelEditButton: "Cancel Edit",
     delegateFormDescription: "Enter announcements, exam schedules, or assignment deadlines for your assigned classes.",
     yourRecentSubmissionsTitle: "Your Recent Submissions",
-    noSubmissionsYetHint: "You haven't submitted any information yet, or you have no classes assigned.",
+    noSubmissionsYetHint: "You haven't submitted any information yet.",
     alertDialogTitle: "Are you absolutely sure?",
     alertDialogDescription: "This action cannot be undone. This will permanently delete your submission titled \"{title}\".",
     cancelButton: "Cancel",
@@ -171,6 +202,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     submissionSubmittedToastDescription: "\"{title}\" has been submitted.",
     submissionDeletedToastTitle: "Submission Deleted",
     submissionDeletedToastDescription: "\"{title}\" has been successfully deleted.",
+    errorLoadingSubmissionsTitle: "Error Loading Submissions",
+    noAssignedClassesToSubmitHint: "You have no classes assigned to submit information for.",
     announcementTabLabel: "Announcement",
     examTabLabel: "Exam",
     deadlineTabLabel: "Deadline",
@@ -178,6 +211,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formTitlePlaceholder: "Title for {tabName}",
     formDateTimeLabel: "Date and Time",
     formPickDateTimeButton: "Pick date and time",
+    formSelectTimeLabel: "Select time",
     formClassLabel: "Class",
     formSelectClassPlaceholder: "Select a class",
     formNoAssignedClassesWarning: "You have no classes assigned to submit information for.",
@@ -191,14 +225,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Any extra details or notes...",
     formSubmitButton: "Submit Information",
     formUpdateButton: "Update Information",
-
     editSchoolNameCardTitle: "Edit School Name",
     schoolNameInputLabel: "School Name",
     schoolNameInputPlaceholder: "Enter the name of your school",
     saveSchoolNameButton: "Save Name",
     schoolNameUpdatedToastTitle: "School Name Updated",
     schoolNameUpdatedToastDescription: "The school name has been updated to \"{schoolName}\".",
-
     editAnnouncementTitle: "Edit Announcement",
     postNewAnnouncementTitle: "Post New School-Wide Announcement",
     editingAnnouncementDescription: "You are editing: \"{title}\"",
@@ -221,6 +253,39 @@ export const translations: Record<SupportedLanguage, Translations> = {
     errorFetchingAnnouncements: "Error fetching announcements: {message}",
     errorLoadingAnnouncementsTitle: "Error Loading Announcements",
     retryButtonLabel: "Retry",
+    userUpdatedToastTitle: "User \"{name}\" Updated!",
+    userCreatedToastTitle: "User \"{name}\" Created!",
+    userActionSuccessToastDescription: "Account for \"{name}\" has been successfully {action}.",
+    actionProhibitedToastTitle: "Action Prohibited",
+    cannotDeleteDefaultAdminToastDescription: "This demo admin user cannot be deleted.",
+    userDeletedToastTitle: "User \"{name}\" Deleted",
+    userDeletedToastDescription: "The user account has been successfully deleted.",
+    editUserAccountTitle: "Edit User Account",
+    createNewUserAccountTitle: "Create New User Account",
+    editingUserAccountDescription: "You are editing account for: \"{name}\".",
+    existingUsersTitle: "Existing Users",
+    errorLoadingUsersTitle: "Error Loading Users",
+    noUsersCreatedHint: "No users created yet.",
+    userNameTableHeader: "Name",
+    usernameTableHeader: "Username",
+    userRoleTableHeader: "Role",
+    actionsTableHeader: "Actions",
+    adminRoleLabel: "Admin",
+    delegateRoleLabel: "Delegate",
+    editUserButtonLabel: "Edit User",
+    deleteUserButtonLabel: "Delete User",
+    deleteUserConfirmation: "This action cannot be undone. This will permanently delete the user account for \"{name}\".",
+    classNameLabel: "Class Name",
+    classNamePlaceholder: "e.g., Grade 10A, Computer Science Club",
+    classDelegateLabel: "Delegate",
+    optionalLabel: "Optional",
+    loadingDelegatesPlaceholder: "Loading delegates...",
+    selectDelegatePlaceholder: "Select a delegate",
+    noDelegateOption: "None",
+    noDelegatesAvailableHint: "No delegates available to assign. Create delegate users first.",
+    updateClassButton: "Update Class",
+    createClassButton: "Create Class",
+    errorFetchingDelegates: "Error fetching delegates: {message}",
   },
   es: {
     appTitle: "Portal Escolar",
@@ -244,18 +309,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesHint: "No hay clases disponibles",
     loginButtonLabel: "Iniciar Sesión",
     footerAllRightsReserved: "Todos los derechos reservados.",
-
     classPageTitle: "Eventos para {className}",
-    noClassAnnouncementsHint: "No hay anuncios actuales para esta clase.",
-    noClassExamsHint: "No hay exámenes programados para esta clase.",
-    noClassDeadlinesHint: "No hay fechas de entrega próximas para esta clase.",
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
     delegateIdLabel: "Delegado/a", 
     noEventsForClassHint: "¡Parece que esta clase está en una misión secreta! No hay nada que mostrar por ahora.",
     loadingLabel: "Cargando...",
-
     assignedClassesLabel: "Clases asignadas",
     noAssignedClassesLabel: "Actualmente no tienes clases asignadas.",
     editInformationTitle: "Editar Información",
@@ -264,7 +324,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     cancelEditButton: "Cancelar Edición",
     delegateFormDescription: "Introduce anuncios, horarios de exámenes o fechas de entrega para tus clases asignadas.",
     yourRecentSubmissionsTitle: "Tus Envíos Recientes",
-    noSubmissionsYetHint: "Aún no has enviado ninguna información, o no tienes clases asignadas.",
+    noSubmissionsYetHint: "Aún no has enviado ninguna información.",
     alertDialogTitle: "¿Estás absolutamente seguro?",
     alertDialogDescription: "Esta acción no se puede deshacer. Esto eliminará permanentemente tu envío titulado \"{title}\".",
     cancelButton: "Cancelar",
@@ -275,6 +335,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     submissionSubmittedToastDescription: "\"{title}\" ha sido enviado.",
     submissionDeletedToastTitle: "Envío Eliminado",
     submissionDeletedToastDescription: "\"{title}\" ha sido eliminado correctamente.",
+    errorLoadingSubmissionsTitle: "Error al Cargar Envíos",
+    noAssignedClassesToSubmitHint: "No tienes clases asignadas para enviar información.",
     announcementTabLabel: "Anuncio",
     examTabLabel: "Examen",
     deadlineTabLabel: "Plazo",
@@ -282,6 +344,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formTitlePlaceholder: "Título para {tabName}",
     formDateTimeLabel: "Fecha y Hora",
     formPickDateTimeButton: "Elige fecha y hora",
+    formSelectTimeLabel: "Seleccionar hora",
     formClassLabel: "Clase",
     formSelectClassPlaceholder: "Selecciona una clase",
     formNoAssignedClassesWarning: "No tienes clases asignadas para enviar información.",
@@ -295,14 +358,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Cualquier detalle o nota extra...",
     formSubmitButton: "Enviar Información",
     formUpdateButton: "Actualizar Información",
-
     editSchoolNameCardTitle: "Editar Nombre de la Escuela",
     schoolNameInputLabel: "Nombre de la Escuela",
     schoolNameInputPlaceholder: "Introduce el nombre de tu escuela",
     saveSchoolNameButton: "Guardar Nombre",
     schoolNameUpdatedToastTitle: "Nombre de Escuela Actualizado",
     schoolNameUpdatedToastDescription: "El nombre de la escuela ha sido actualizado a \"{schoolName}\".",
-
     editAnnouncementTitle: "Editar Anuncio",
     postNewAnnouncementTitle: "Publicar Nuevo Anuncio Escolar",
     editingAnnouncementDescription: "Estás editando: \"{title}\"",
@@ -325,6 +386,39 @@ export const translations: Record<SupportedLanguage, Translations> = {
     errorFetchingAnnouncements: "Error al cargar los anuncios: {message}",
     errorLoadingAnnouncementsTitle: "Error al Cargar Anuncios",
     retryButtonLabel: "Reintentar",
+    userUpdatedToastTitle: "¡Usuario \"{name}\" Actualizado!",
+    userCreatedToastTitle: "¡Usuario \"{name}\" Creado!",
+    userActionSuccessToastDescription: "La cuenta de \"{name}\" ha sido {action} correctamente.",
+    actionProhibitedToastTitle: "Acción Prohibida",
+    cannotDeleteDefaultAdminToastDescription: "Este usuario administrador de demostración no se puede eliminar.",
+    userDeletedToastTitle: "Usuario \"{name}\" Eliminado",
+    userDeletedToastDescription: "La cuenta de usuario ha sido eliminada correctamente.",
+    editUserAccountTitle: "Editar Cuenta de Usuario",
+    createNewUserAccountTitle: "Crear Nueva Cuenta de Usuario",
+    editingUserAccountDescription: "Estás editando la cuenta de: \"{name}\".",
+    existingUsersTitle: "Usuarios Existentes",
+    errorLoadingUsersTitle: "Error al Cargar Usuarios",
+    noUsersCreatedHint: "No hay usuarios creados todavía.",
+    userNameTableHeader: "Nombre",
+    usernameTableHeader: "Usuario",
+    userRoleTableHeader: "Rol",
+    actionsTableHeader: "Acciones",
+    adminRoleLabel: "Admin",
+    delegateRoleLabel: "Delegado",
+    editUserButtonLabel: "Editar Usuario",
+    deleteUserButtonLabel: "Eliminar Usuario",
+    deleteUserConfirmation: "Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario de \"{name}\".",
+    classNameLabel: "Nombre de la Clase",
+    classNamePlaceholder: "p.ej., 10A, Club de Informática",
+    classDelegateLabel: "Delegado",
+    optionalLabel: "Opcional",
+    loadingDelegatesPlaceholder: "Cargando delegados...",
+    selectDelegatePlaceholder: "Selecciona un delegado",
+    noDelegateOption: "Ninguno",
+    noDelegatesAvailableHint: "No hay delegados disponibles para asignar. Crea usuarios delegados primero.",
+    updateClassButton: "Actualizar Clase",
+    createClassButton: "Crear Clase",
+    errorFetchingDelegates: "Error al obtener delegados: {message}",
   },
   fr: {
     appTitle: "Portail Scolaire",
@@ -348,18 +442,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesHint: "Aucune classe disponible",
     loginButtonLabel: "Connexion",
     footerAllRightsReserved: "Tous droits réservés.",
-
     classPageTitle: "Événements pour {className}",
-    noClassAnnouncementsHint: "Aucune annonce actuelle pour cette classe.",
-    noClassExamsHint: "Aucun examen prévu pour cette classe.",
-    noClassDeadlinesHint: "Aucune date limite d'affectation approchant pour cette classe.",
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
     delegateIdLabel: "Délégué(e)", 
     noEventsForClassHint: "On dirait que cette classe est en mission secrète ! Rien à afficher pour le moment.",
     loadingLabel: "Chargement...",
-
     assignedClassesLabel: "Classes assignées",
     noAssignedClassesLabel: "Vous n'avez actuellement aucune classe assignée.",
     editInformationTitle: "Modifier les Informations",
@@ -368,7 +457,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     cancelEditButton: "Annuler la Modification",
     delegateFormDescription: "Saisissez les annonces, les horaires d'examens ou les dates limites de devoirs pour vos classes assignées.",
     yourRecentSubmissionsTitle: "Vos Soumissions Récentes",
-    noSubmissionsYetHint: "Vous n'avez encore soumis aucune information ou vous n'avez aucune classe assignée.",
+    noSubmissionsYetHint: "Vous n'avez encore soumis aucune information.",
     alertDialogTitle: "Êtes-vous absolument sûr(e) ?",
     alertDialogDescription: "Cette action est irréversible. Cela supprimera définitivement votre soumission intitulée \"{title}\".",
     cancelButton: "Annuler",
@@ -379,6 +468,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     submissionSubmittedToastDescription: "\"{title}\" a été soumis.",
     submissionDeletedToastTitle: "Soumission Supprimée",
     submissionDeletedToastDescription: "\"{title}\"a été supprimé avec succès.",
+    errorLoadingSubmissionsTitle: "Erreur de Chargement des Soumissions",
+    noAssignedClassesToSubmitHint: "Vous n'avez aucune classe assignée pour laquelle soumettre des informations.",
     announcementTabLabel: "Annonce",
     examTabLabel: "Examen",
     deadlineTabLabel: "Date Limite",
@@ -386,6 +477,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formTitlePlaceholder: "Titre pour {tabName}",
     formDateTimeLabel: "Date et Heure",
     formPickDateTimeButton: "Choisir date et heure",
+    formSelectTimeLabel: "Sélectionner l'heure",
     formClassLabel: "Classe",
     formSelectClassPlaceholder: "Sélectionner une classe",
     formNoAssignedClassesWarning: "Vous n'avez aucune classe assignée pour soumettre des informations.",
@@ -399,14 +491,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Tout détail ou note supplémentaire...",
     formSubmitButton: "Soumettre les Informations",
     formUpdateButton: "Mettre à Jour les Informations",
-
     editSchoolNameCardTitle: "Modifier le Nom de l'École",
     schoolNameInputLabel: "Nom de l'École",
     schoolNameInputPlaceholder: "Entrez le nom de votre école",
     saveSchoolNameButton: "Enregistrer le Nom",
     schoolNameUpdatedToastTitle: "Nom de l'École Mis à Jour",
     schoolNameUpdatedToastDescription: "Le nom de l'école a été mis à jour à \"{schoolName}\".",
-
     editAnnouncementTitle: "Modifier l'Annonce",
     postNewAnnouncementTitle: "Publier une Nouvelle Annonce Scolaire",
     editingAnnouncementDescription: "Vous modifiez : \"{title}\"",
@@ -429,6 +519,39 @@ export const translations: Record<SupportedLanguage, Translations> = {
     errorFetchingAnnouncements: "Erreur lors de la récupération des annonces: {message}",
     errorLoadingAnnouncementsTitle: "Erreur de Chargement des Annonces",
     retryButtonLabel: "Réessayer",
+    userUpdatedToastTitle: "Utilisateur \"{name}\" Mis à Jour !",
+    userCreatedToastTitle: "Utilisateur \"{name}\" Créé !",
+    userActionSuccessToastDescription: "Le compte de \"{name}\" a été {action} avec succès.",
+    actionProhibitedToastTitle: "Action Interdite",
+    cannotDeleteDefaultAdminToastDescription: "Cet utilisateur admin de démonstration ne peut pas être supprimé.",
+    userDeletedToastTitle: "Utilisateur \"{name}\" Supprimé",
+    userDeletedToastDescription: "Le compte utilisateur a été supprimé avec succès.",
+    editUserAccountTitle: "Modifier le Compte Utilisateur",
+    createNewUserAccountTitle: "Créer un Nouveau Compte Utilisateur",
+    editingUserAccountDescription: "Vous modifiez le compte de : \"{name}\".",
+    existingUsersTitle: "Utilisateurs Existants",
+    errorLoadingUsersTitle: "Erreur de Chargement des Utilisateurs",
+    noUsersCreatedHint: "Aucun utilisateur créé pour l'instant.",
+    userNameTableHeader: "Nom",
+    usernameTableHeader: "Nom d'utilisateur",
+    userRoleTableHeader: "Rôle",
+    actionsTableHeader: "Actions",
+    adminRoleLabel: "Admin",
+    delegateRoleLabel: "Délégué",
+    editUserButtonLabel: "Modifier Utilisateur",
+    deleteUserButtonLabel: "Supprimer Utilisateur",
+    deleteUserConfirmation: "Cette action est irréversible. Cela supprimera définitivement le compte utilisateur de \"{name}\".",
+    classNameLabel: "Nom de la Classe",
+    classNamePlaceholder: "ex: Seconde A, Club d'Informatique",
+    classDelegateLabel: "Délégué",
+    optionalLabel: "Optionnel",
+    loadingDelegatesPlaceholder: "Chargement des délégués...",
+    selectDelegatePlaceholder: "Sélectionner un délégué",
+    noDelegateOption: "Aucun",
+    noDelegatesAvailableHint: "Aucun délégué disponible à assigner. Créez d'abord des utilisateurs délégués.",
+    updateClassButton: "Mettre à Jour Classe",
+    createClassButton: "Créer Classe",
+    errorFetchingDelegates: "Erreur lors de la récupération des délégués: {message}",
   },
   gl: {
     appTitle: "Portal Escolar",
@@ -452,18 +575,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesHint: "Non hai clases dispoñibles",
     loginButtonLabel: "Iniciar Sesión",
     footerAllRightsReserved: "Todos os dereitos reservados.",
-
     classPageTitle: "Eventos para {className}",
-    noClassAnnouncementsHint: "Non hai anuncios actuais para esta clase.",
-    noClassExamsHint: "Non hai exames programados para esta clase.",
-    noClassDeadlinesHint: "Non hai prazos de entrega de tarefas próximos para esta clase.",
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
     delegateIdLabel: "Delegado/a", 
     noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.",
     loadingLabel: "Cargando...",
-
     assignedClassesLabel: "Clases asignadas",
     noAssignedClassesLabel: "Actualmente non tes clases asignadas.",
     editInformationTitle: "Editar Información",
@@ -472,7 +590,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     cancelEditButton: "Cancelar Edición",
     delegateFormDescription: "Introduce anuncios, horarios de exames ou datas de entrega para as túas clases asignadas.",
     yourRecentSubmissionsTitle: "Os Teus Envíos Recentes",
-    noSubmissionsYetHint: "Aínda non enviaches ningunha información, ou non tes clases asignadas.",
+    noSubmissionsYetHint: "Aínda non enviaches ningunha información.",
     alertDialogTitle: "Estás absolutamente seguro/a?",
     alertDialogDescription: "Esta acción non se pode desfacer. Isto eliminará permanentemente o teu envío titulado \"{title}\".",
     cancelButton: "Cancelar",
@@ -483,6 +601,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     submissionSubmittedToastDescription: "\"{title}\" foi enviado.",
     submissionDeletedToastTitle: "Envío Eliminado",
     submissionDeletedToastDescription: "\"{title}\" foi eliminado correctamente.",
+    errorLoadingSubmissionsTitle: "Erro ao Cargar Envíos",
+    noAssignedClassesToSubmitHint: "Non tes clases asignadas para enviar información.",
     announcementTabLabel: "Anuncio",
     examTabLabel: "Exame",
     deadlineTabLabel: "Prazo",
@@ -490,6 +610,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formTitlePlaceholder: "Título para {tabName}",
     formDateTimeLabel: "Data e Hora",
     formPickDateTimeButton: "Escolle data e hora",
+    formSelectTimeLabel: "Seleccionar hora",
     formClassLabel: "Clase",
     formSelectClassPlaceholder: "Selecciona unha clase",
     formNoAssignedClassesWarning: "Non tes clases asignadas para enviar información.",
@@ -503,14 +624,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Calquera detalle ou nota extra...",
     formSubmitButton: "Enviar Información",
     formUpdateButton: "Actualizar Información",
-
     editSchoolNameCardTitle: "Editar Nome da Escola",
     schoolNameInputLabel: "Nome da Escola",
     schoolNameInputPlaceholder: "Introduce o nome da túa escola",
     saveSchoolNameButton: "Gardar Nome",
     schoolNameUpdatedToastTitle: "Nome da Escola Actualizado",
     schoolNameUpdatedToastDescription: "O nome da escola actualizouse a \"{schoolName}\".",
-    
     editAnnouncementTitle: "Editar Anuncio",
     postNewAnnouncementTitle: "Publicar Novo Anuncio Escolar",
     editingAnnouncementDescription: "Estás a editar: \"{title}\"",
@@ -533,10 +652,43 @@ export const translations: Record<SupportedLanguage, Translations> = {
     errorFetchingAnnouncements: "Erro ao obter os anuncios: {message}",
     errorLoadingAnnouncementsTitle: "Erro ao Cargar os Anuncios",
     retryButtonLabel: "Reintentar",
+    userUpdatedToastTitle: "Usuario \"{name}\" Actualizado!",
+    userCreatedToastTitle: "Usuario \"{name}\" Creado!",
+    userActionSuccessToastDescription: "A conta de \"{name}\" foi {action} correctamente.",
+    actionProhibitedToastTitle: "Acción Prohibida",
+    cannotDeleteDefaultAdminToastDescription: "Este usuario administrador de demostración non se pode eliminar.",
+    userDeletedToastTitle: "Usuario \"{name}\" Eliminado",
+    userDeletedToastDescription: "A conta de usuario eliminouse correctamente.",
+    editUserAccountTitle: "Editar Conta de Usuario",
+    createNewUserAccountTitle: "Crear Nova Conta de Usuario",
+    editingUserAccountDescription: "Estás a editar a conta de: \"{name}\".",
+    existingUsersTitle: "Usuarios Existentes",
+    errorLoadingUsersTitle: "Erro ao Cargar Usuarios",
+    noUsersCreatedHint: "Aínda non hai usuarios creados.",
+    userNameTableHeader: "Nome",
+    usernameTableHeader: "Usuario",
+    userRoleTableHeader: "Rol",
+    actionsTableHeader: "Accións",
+    adminRoleLabel: "Admin",
+    delegateRoleLabel: "Delegado",
+    editUserButtonLabel: "Editar Usuario",
+    deleteUserButtonLabel: "Eliminar Usuario",
+    deleteUserConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente a conta de usuario de \"{name}\".",
+    classNameLabel: "Nome da Clase",
+    classNamePlaceholder: "p.ex., 10A, Club de Informática",
+    classDelegateLabel: "Delegado",
+    optionalLabel: "Opcional",
+    loadingDelegatesPlaceholder: "Cargando delegados...",
+    selectDelegatePlaceholder: "Selecciona un delegado",
+    noDelegateOption: "Ningún",
+    noDelegatesAvailableHint: "Non hai delegados dispoñibles para asignar. Crea usuarios delegados primeiro.",
+    updateClassButton: "Actualizar Clase",
+    createClassButton: "Crear Clase",
+    errorFetchingDelegates: "Erro ao obter delegados: {message}",
   },
 };
 
-export type TranslationKey = keyof Translations;
+export type TranslationKey = keyof Translations[SupportedLanguage]; // Corrected to index Translations with a language
 export type TranslationVariables = { [key: string]: string | number | undefined };
 
 // Helper function type for the 't' function to allow for variables

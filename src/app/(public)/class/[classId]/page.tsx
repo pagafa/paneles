@@ -3,15 +3,14 @@
 
 import { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+// Image component from next/image removed as per previous request
 
-// mockSchoolEvents and mockUsers are no longer the primary source for this page.
 import type { SchoolClass, SchoolEvent, Announcement, Exam, Deadline, User } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { Separator } from '@/components/ui/separator';
-import { Book, Megaphone, BookOpenCheck, FileText, Info, AlertTriangle } from 'lucide-react';
+import { Book, Megaphone, BookOpenCheck, FileText, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,23 +19,21 @@ const sortEvents = (events: SchoolEvent[]) => {
   return [...events].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
-// Fetch class details from API
 async function getClassDetails(classId: string): Promise<SchoolClass | undefined> {
   try {
     const response = await fetch(`/api/classes/${classId}`);
     if (!response.ok) {
-      if (response.status === 404) return undefined; // Class not found
+      if (response.status === 404) return undefined;
       console.error(`Failed to fetch class details for ${classId}: ${response.status}`);
       throw new Error(`API error: ${response.status}`);
     }
     return await response.json();
   } catch (error) {
     console.error(`Error in getClassDetails for ${classId}:`, error);
-    return undefined; // Treat as not found on network or parsing error
+    return undefined;
   }
 }
 
-// Fetch ALL school-wide announcements from API
 async function getSchoolWideAnnouncements(): Promise<Announcement[]> {
    try {
     const response = await fetch('/api/announcements');
@@ -52,10 +49,9 @@ async function getSchoolWideAnnouncements(): Promise<Announcement[]> {
   }
 }
 
-// Fetch class-specific announcements from API
 async function getClassSpecificAnnouncements(classId: string): Promise<Announcement[]> {
   try {
-    const response = await fetch('/api/announcements'); // Fetch all, then filter. Could be an API param like /api/announcements?classId=...
+    const response = await fetch('/api/announcements');
     if (!response.ok) {
         console.error("Failed to fetch announcements for class page (specific)", response.status, await response.text().catch(() => ""));
         return [];
@@ -68,30 +64,37 @@ async function getClassSpecificAnnouncements(classId: string): Promise<Announcem
   }
 }
 
-
-// TODO: Implement API for class-specific exams and deadlines
-// For now, these might be empty or use limited mock data.
-// These should filter based on event.class === classDetails.name (if class name is reliable)
-// or better, event.classId === classId
-async function getClassExams(className: string): Promise<Exam[]> {
-  // Placeholder: In a real app, fetch from `/api/schoolevents?type=exam&className=${className}`
-  return [];
-}
-
-async function getClassDeadlines(className: string): Promise<Deadline[]> {
-  // Placeholder: In a real app, fetch from `/api/schoolevents?type=deadline&className=${className}`
-  return [];
-}
-
-// Fetch users to get delegate name
-async function getUsers(): Promise<User[]> {
-   // This should ideally fetch from /api/users, but for now, to avoid making ManageUsersPage API dependent first.
-  // return new Promise((resolve) => setTimeout(() => resolve(mockUsers), 100));
-  // For now, return empty array if mockUsers are not guaranteed to be up-to-date with DB.
-  // The delegate name feature will rely on a proper /api/users endpoint eventually.
-  // For now, let's assume we can fetch users for delegate display
+async function getClassExams(classId: string): Promise<Exam[]> {
   try {
-    const response = await fetch('/api/users'); // Assuming /api/users is implemented
+    const response = await fetch(`/api/schoolevents?type=exam&classId=${classId}`);
+    if (!response.ok) {
+      console.error("Failed to fetch exams for class:", classId, response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching class exams for ${classId}:`, error);
+    return [];
+  }
+}
+
+async function getClassDeadlines(classId: string): Promise<Deadline[]> {
+   try {
+    const response = await fetch(`/api/schoolevents?type=deadline&classId=${classId}`);
+    if (!response.ok) {
+      console.error("Failed to fetch deadlines for class:", classId, response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching class deadlines for ${classId}:`, error);
+    return [];
+  }
+}
+
+async function getUsers(): Promise<User[]> {
+  try {
+    const response = await fetch('/api/users');
     if (!response.ok) {
       console.error("Failed to fetch users for class page", response.status, await response.text().catch(() => ""));
       return [];
@@ -117,7 +120,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   const [deadlines, setDeadlines] = useState<Deadline[]>([]);
   
   const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(true);
-  const [isLoadingEvents, setIsLoadingEvents] = useState(true); // Combined loading for all event types
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true); 
   const [error, setError] = useState<string | null>(null);
 
   const loading = isLoadingClassDetails || isLoadingEvents;
@@ -126,7 +129,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     if (!classId) {
         setIsLoadingClassDetails(false);
         setIsLoadingEvents(false);
-        setError(t('classNotFoundMessage')); // Or a more specific error
+        setError(t('classNotFoundMessage'));
         return;
     }
 
@@ -145,30 +148,26 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         return;
       }
       
-      // Fetch users for delegate name
       const usersData = await getUsers();
       setUsers(usersData);
 
-      // Fetch events
-      const [schoolWideAnns, classSpecificAnns, classExams, classDeadlines] = await Promise.all([
+      const [schoolWideAnns, classSpecificAnns, classExamsData, classDeadlinesData] = await Promise.all([
         getSchoolWideAnnouncements(),
         getClassSpecificAnnouncements(classId),
-        getClassExams(details.name), // Assuming filter by name for now
-        getClassDeadlines(details.name) // Assuming filter by name for now
+        getClassExams(classId), 
+        getClassDeadlines(classId)
       ]);
       
       const combinedAnnouncements = sortEvents([...schoolWideAnns, ...classSpecificAnns]);
-      // Remove duplicates if any announcement is both school-wide and targeted (by ID)
       const uniqueAnnouncements = Array.from(new Map(combinedAnnouncements.map(ann => [ann.id, ann])).values());
 
       setAnnouncements(uniqueAnnouncements);
-      setExams(sortEvents(classExams));
-      setDeadlines(sortEvents(classDeadlines));
+      setExams(sortEvents(classExamsData));
+      setDeadlines(sortEvents(classDeadlinesData));
 
     } catch (err) {
       console.error("Error fetching data for class page:", err);
       setError((err as Error).message || "An unexpected error occurred");
-      // Reset states on error
       setClassDetails(null);
       setAnnouncements([]);
       setExams([]);
@@ -195,7 +194,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-  if (error && !classDetails) { // Error occurred and no class details could be loaded
+  if (error && !classDetails) { 
     return (
       <div className="w-full max-w-lg text-center py-10">
         <Card className="shadow-lg">
@@ -215,7 +214,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
   
-  if (!classDetails) { // Should be caught by error state above if initial fetch failed
+  if (!classDetails) { 
      return (
       <div className="w-full max-w-lg text-center py-10">
         <Card className="shadow-lg">
@@ -258,7 +257,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             <Book className="h-10 w-10 text-primary" />
             <div>
               <CardTitle className="text-3xl font-bold text-primary">{classDetails.name}</CardTitle>
-              {/* Subtitle removed as per previous request */}
             </div>
           </div>
         </CardHeader>
@@ -273,7 +271,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
       {isLoadingEvents && visibleClassSections.length > 0 && (
          <div className="space-y-12">
-          {sectionsConfig.map(section => ( // Show skeletons for all potential sections during load
+          {sectionsConfig.map(section => ( 
             <div key={section.titleKey} className="w-full mb-12">
               <div className="flex items-center mb-6">
                 <section.icon className="h-8 w-8 text-primary mr-3" />
@@ -287,7 +285,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
       {!isLoadingEvents && visibleClassSections.length > 0 && (
         visibleClassSections.map((section, index) => (
-          section.events.length > 0 && // Only render section if it has events after loading
+          (section.events.length > 0) && 
           <section key={section.titleKey} className="w-full mb-12">
             <div className="flex items-center mb-6">
               <section.icon className="h-8 w-8 text-primary mr-3" />
@@ -303,7 +301,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       
       {noEventsForAllSections && (
         <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
-          {/* Image removed as per previous request */}
           <p className="text-xl font-medium text-muted-foreground">{t('noEventsForClassHint')}</p>
           <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
         </div>

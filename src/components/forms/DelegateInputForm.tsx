@@ -22,40 +22,44 @@ import { CalendarIcon, PlusCircle, Megaphone, BookOpenCheck, FileText } from "lu
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/types";
-import { mockClasses } from "@/lib/placeholder-data";
+// mockClasses removed as availableClasses is now a prop
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/context/LanguageContext";
 
 const commonSchema = {
-  title: z.string().min(3, "Title is too short.").default(""), // Added .default("")
+  title: z.string().min(3, "Title is too short.").default(""),
   date: z.date({ required_error: "Date is required." }),
-  classId: z.string().min(1, "Class selection is required.").default(""), // Added .default("") for consistency
+  classId: z.string().min(1, "Class selection is required.").default(""),
   description: z.string().optional().default(""),
+  submittedByDelegateId: z.string().optional(), // For tracking who submitted
 };
 
 const announcementSchema = z.object({
   ...commonSchema,
   type: z.literal("announcement"),
   content: z.string().min(10, "Content is too short.").optional().default(""),
-  subject: z.string().optional().default(""), // Ensured .default("")
-  assignmentName: z.string().optional().default(""), // Ensured .default("")
+  // Fields not relevant to announcement, but part of the discriminated union base
+  subject: z.string().optional().default(""), 
+  assignmentName: z.string().optional().default(""),
 });
 
 const examSchema = z.object({
   ...commonSchema,
   type: z.literal("exam"),
-  subject: z.string().min(2, "Subject is too short.").optional().default(""),
-  content: z.string().optional().default(""), // Ensured .default("")
-  assignmentName: z.string().optional().default(""), // Ensured .default("")
+  subject: z.string().min(2, "Subject is too short.").default(""), // Made .default("") instead of optional
+  // Fields not relevant to exam
+  content: z.string().optional().default(""),
+  assignmentName: z.string().optional().default(""),
 });
 
 const deadlineSchema = z.object({
   ...commonSchema,
   type: z.literal("deadline"),
-  assignmentName: z.string().min(3, "Assignment name is too short.").optional().default(""),
-  content: z.string().optional().default(""), // Ensured .default("")
-  subject: z.string().optional().default(""), // Ensured .default("")
+  assignmentName: z.string().min(3, "Assignment name is too short.").default(""), // Made .default("")
+  // Fields not relevant to deadline
+  content: z.string().optional().default(""),
+  subject: z.string().optional().default(""),
 });
 
 const delegateInputFormSchema = z.discriminatedUnion("type", [
@@ -68,13 +72,13 @@ type DelegateInputFormValues = z.infer<typeof delegateInputFormSchema>;
 
 interface DelegateInputFormProps {
   onSubmitSuccess?: (data: SchoolEvent) => void;
-  availableClasses?: SchoolClass[];
+  availableClasses?: SchoolClass[]; // Now explicitly passed
   initialData?: SchoolEvent | null;
 }
 
 export function DelegateInputForm({
   onSubmitSuccess,
-  availableClasses = mockClasses,
+  availableClasses = [], // Default to empty array if not provided
   initialData
 }: DelegateInputFormProps) {
   const { t } = useLanguage();
@@ -84,30 +88,38 @@ export function DelegateInputForm({
 
   const form = useForm<DelegateInputFormValues>({
     resolver: zodResolver(delegateInputFormSchema),
-    defaultValues: { // Provide explicit default values for all fields
+    defaultValues: { 
       type: initialData?.type || activeTab || "announcement",
-      title: "",
-      date: new Date(),
-      classId: (availableClasses && availableClasses.length === 1 && !initialData) ? availableClasses[0].id : "",
-      description: "",
-      content: "",
-      subject: "",
-      assignmentName: "",
+      title: initialData?.title || "",
+      date: initialData?.date ? new Date(initialData.date) : new Date(),
+      classId: initialData?.type === 'announcement' ? (initialData as Announcement & {classId?:string}).classId || "" 
+               : initialData?.type === 'exam' ? (initialData as Exam).classId || "" 
+               : initialData?.type === 'deadline' ? (initialData as Deadline).classId || ""
+               : (availableClasses && availableClasses.length === 1 && !initialData) ? availableClasses[0].id : "",
+      description: initialData?.description || "",
+      content: initialData?.type === 'announcement' ? (initialData as Announcement).content || "" : "",
+      subject: initialData?.type === 'exam' ? (initialData as Exam).subject || "" : "",
+      assignmentName: initialData?.type === 'deadline' ? (initialData as Deadline).assignmentName || "" : "",
+      submittedByDelegateId: initialData?.submittedByDelegateId || undefined,
     },
   });
 
   useEffect(() => {
     let classIdToSet = "";
-    if (!initialData && availableClasses && availableClasses.length === 1) {
-      classIdToSet = availableClasses[0].id;
-    } else if (initialData) {
-      classIdToSet = availableClasses.find(c => c.name === initialData.class)?.id || "";
-    }
-
     if (initialData) {
       if (initialData.type !== activeTab) {
         setActiveTab(initialData.type);
       }
+      // Determine classId from initialData based on its type, as 'class' (name) might be on old data.
+      // Prioritize classId if present.
+      if (initialData.type === 'announcement') {
+        classIdToSet = (initialData as Announcement & { classId?: string }).classId || availableClasses.find(c => (initialData as Announcement).targetClassIds?.includes(c.id))?.id || "";
+      } else if (initialData.type === 'exam') {
+        classIdToSet = (initialData as Exam).classId || "";
+      } else if (initialData.type === 'deadline') {
+        classIdToSet = (initialData as Deadline).classId || "";
+      }
+
       form.reset({
         type: initialData.type,
         title: initialData.title || "",
@@ -117,9 +129,13 @@ export function DelegateInputForm({
         content: initialData.type === 'announcement' ? (initialData as Announcement).content || "" : "",
         subject: initialData.type === 'exam' ? (initialData as Exam).subject || "" : "",
         assignmentName: initialData.type === 'deadline' ? (initialData as Deadline).assignmentName || "" : "",
+        submittedByDelegateId: initialData.submittedByDelegateId || undefined,
       });
     } else {
-      // New submission: form state should reflect the activeTab and pre-select class if only one.
+      // New submission
+      if (availableClasses && availableClasses.length === 1) {
+        classIdToSet = availableClasses[0].id;
+      }
       form.reset({
         type: activeTab,
         title: "",
@@ -129,24 +145,25 @@ export function DelegateInputForm({
         content: "",
         subject: "",
         assignmentName: "",
+        submittedByDelegateId: undefined, // Reset for new submissions
       });
     }
-  }, [initialData, activeTab, availableClasses, form, setActiveTab]);
+  }, [initialData, activeTab, availableClasses, form]);
 
 
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
     setActiveTab(newType);
-    // useEffect above will handle form reset if !initialData
+    // useEffect above will handle form reset based on newType and !initialData
   };
 
 
   async function onSubmit(values: DelegateInputFormValues) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // await new Promise(resolve => setTimeout(resolve, 500)); // Artificial delay removed
 
-    const selectedClass = availableClasses.find(c => c.id === values.classId);
+    // const selectedClass = availableClasses.find(c => c.id === values.classId); // Not strictly needed if submitting classId
     let submissionData: SchoolEvent;
-    const id = initialData?.id || `del-${values.type}-${Date.now()}`;
+    const id = initialData?.id || `evt-${values.type}-${Date.now()}`;
 
     switch (values.type) {
       case 'announcement':
@@ -156,9 +173,10 @@ export function DelegateInputForm({
           date: values.date.toISOString(),
           type: 'announcement',
           content: values.content || "",
-          class: selectedClass?.name,
+          classId: values.classId, // Delegate announcements target a single class via classId
           description: values.description,
-        } as Announcement;
+          submittedByDelegateId: values.submittedByDelegateId,
+        } as Announcement & {classId?: string}; // Ensure type compatibility
         break;
       case 'exam':
         submissionData = {
@@ -167,8 +185,9 @@ export function DelegateInputForm({
           date: values.date.toISOString(),
           type: 'exam',
           subject: values.subject || "",
-          class: selectedClass?.name,
+          classId: values.classId,
           description: values.description,
+          submittedByDelegateId: values.submittedByDelegateId,
         } as Exam;
         break;
       case 'deadline':
@@ -178,12 +197,12 @@ export function DelegateInputForm({
           date: values.date.toISOString(),
           type: 'deadline',
           assignmentName: values.assignmentName || "",
-          class: selectedClass?.name,
+          classId: values.classId,
           description: values.description,
+          submittedByDelegateId: values.submittedByDelegateId,
         } as Deadline;
         break;
       default:
-        // This should be unreachable if types are correct
         const _exhaustiveCheck: never = values;
         console.error("Invalid form type submitted", _exhaustiveCheck);
         return;
@@ -194,22 +213,22 @@ export function DelegateInputForm({
     }
 
     if (!initialData) {
-      const preservedClassId = form.getValues('classId'); // Keep selected class
-      let newClassIdToSet = preservedClassId;
-      // If only one class available, ensure it's pre-selected after reset
-      if (!preservedClassId && availableClasses && availableClasses.length === 1) {
-        newClassIdToSet = availableClasses[0].id;
+      // Reset form for new submission, keeping activeTab and classId if only one available
+      let classIdToSet = values.classId; // Keep user's selection or auto-selection
+      if (availableClasses && availableClasses.length === 1 && !values.classId) {
+         classIdToSet = availableClasses[0].id; // Re-apply auto-selection if user cleared it
       }
 
       form.reset({
-        type: activeTab, // Keep current tab
+        type: activeTab, 
         title: "",
         date: new Date(),
-        classId: newClassIdToSet,
+        classId: classIdToSet,
         description: "",
         content: "",
         subject: "",
         assignmentName: "",
+        submittedByDelegateId: undefined, // Important to reset this
       });
     }
   }
@@ -239,7 +258,7 @@ export function DelegateInputForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>{t('formTitleLabel')}</FormLabel>
-                <FormControl><Input placeholder={t('formTitlePlaceholder', { tabName: getTabName(activeTab) })} {...field} /></FormControl>
+                <FormControl><Input placeholder={t('formTitlePlaceholder', { tabName: getTabName(activeTab) })} {...field} value={field.value || ""} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -293,7 +312,7 @@ export function DelegateInputForm({
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar mode="single" selected={field.value} onSelect={handleDateSelect} initialFocus />
                            <div className="p-2 border-t border-border">
-                            <p className="text-sm font-medium mb-2 text-center">Select time</p>
+                            <p className="text-sm font-medium mb-2 text-center">{t('formSelectTimeLabel')}</p>
                             <div className="flex gap-2 justify-center">
                                 <Select
                                     value={String(currentHour).padStart(2, '0')}
@@ -353,7 +372,7 @@ export function DelegateInputForm({
           <TabsContent value="announcement" className="space-y-6 mt-0 border-none p-0">
              <FormField
               control={form.control}
-              name="content"
+              name="content" // This should be "content" for announcement type
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formAnnouncementContentLabel')}</FormLabel>
@@ -366,7 +385,7 @@ export function DelegateInputForm({
           <TabsContent value="exam" className="space-y-6 mt-0 border-none p-0">
             <FormField
               control={form.control}
-              name="subject"
+              name="subject" // This should be "subject" for exam type
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formExamSubjectLabel')}</FormLabel>
@@ -379,7 +398,7 @@ export function DelegateInputForm({
           <TabsContent value="deadline" className="space-y-6 mt-0 border-none p-0">
             <FormField
               control={form.control}
-              name="assignmentName"
+              name="assignmentName" // This should be "assignmentName" for deadline type
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formDeadlineAssignmentNameLabel')}</FormLabel>
@@ -410,5 +429,3 @@ export function DelegateInputForm({
     </Tabs>
   );
 }
-
-    

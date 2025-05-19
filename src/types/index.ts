@@ -1,3 +1,4 @@
+
 import type { SupportedLanguage } from '@/lib/i18n';
 
 export type AnnouncementItemType = 'announcement' | 'exam' | 'deadline';
@@ -8,24 +9,26 @@ export interface BaseSchoolItem {
   date: string; // ISO string format
   type: AnnouncementItemType;
   description?: string;
+  // For delegate submissions, to link back to the delegate user
+  submittedByDelegateId?: string; 
 }
 
 export interface Announcement extends BaseSchoolItem {
   type: 'announcement';
   content: string;
-  targetClassIds?: string[]; // Added for specific class targeting
+  targetClassIds?: string[]; 
 }
 
 export interface Exam extends BaseSchoolItem {
   type: 'exam';
   subject: string;
-  class?: string; // Optional, for class-specific exams
+  classId?: string; // Changed from class?: string
 }
 
 export interface Deadline extends BaseSchoolItem {
   type: 'deadline';
   assignmentName: string;
-  class?: string; // Optional, for class-specific deadlines
+  classId?: string; // Changed from class?: string
 }
 
 export type SchoolEvent = Announcement | Exam | Deadline;
@@ -35,13 +38,13 @@ export type UserRole = 'admin' | 'delegate' | 'guest';
 export interface User {
   id: string;
   name: string;
-  username: string; // Changed from email to username
+  username: string; 
   role: UserRole;
 }
 
 export interface SchoolClass {
   id: string;
   name: string;
-  delegateId?: string; // Optional delegate user ID
-  language?: SupportedLanguage; // Added language field
+  delegateId?: string; 
+  language?: SupportedLanguage; 
 }
