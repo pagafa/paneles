@@ -2,38 +2,18 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { getAnnouncementsDb } from '@/lib/db';
 import type { Announcement } from '@/types';
-
-const dataFilePath = path.join(process.cwd(), 'src', 'lib', 'announcements.data.json');
-
-async function readData(): Promise<Announcement[]> {
-  try {
-    const jsonData = await fs.readFile(dataFilePath, 'utf-8');
-    return JSON.parse(jsonData) as Announcement[];
-  } catch (error) {
-    // If file doesn't exist or other error, return empty array or handle appropriately
-    console.error('Error reading announcements data file:', error);
-    return [];
-  }
-}
-
-async function writeData(data: Announcement[]): Promise<void> {
-  try {
-    await fs.writeFile(dataFilePath, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error writing announcements data file:', error);
-    throw new Error('Could not write announcements data.');
-  }
-}
 
 // GET all announcements
 export async function GET() {
   try {
-    const announcements = await readData();
+    const db = await getAnnouncementsDb();
+    // Sort by date descending (newest first)
+    const announcements = await db.find({}).sort({ date: -1 });
     return NextResponse.json(announcements);
   } catch (error) {
+    console.error('Error fetching announcements:', error);
     return NextResponse.json({ message: 'Error fetching announcements', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -41,22 +21,32 @@ export async function GET() {
 // POST a new announcement
 export async function POST(request: Request) {
   try {
-    const newAnnouncement: Omit<Announcement, 'id'> & { id?: string } = await request.json();
-    if (!newAnnouncement.title || !newAnnouncement.content || !newAnnouncement.date) {
-      return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
+    const newAnnouncementData: Omit<Announcement, 'id' | 'type'> & { id?: string; type?: string } = await request.json();
+    
+    if (!newAnnouncementData.title || !newAnnouncementData.content || !newAnnouncementData.date) {
+      return NextResponse.json({ message: 'Missing required fields (title, content, date)' }, { status: 400 });
     }
 
-    const announcements = await readData();
+    const db = await getAnnouncementsDb();
+    
     const announcementToAdd: Announcement = {
-      ...newAnnouncement,
-      id: newAnnouncement.id || `ann-${Date.now()}`, // Assign new ID if not provided
-      type: 'announcement', // Ensure type is set
+      id: newAnnouncementData.id || `ann-${Date.now()}`, // Ensure our app-level ID
+      title: newAnnouncementData.title,
+      content: newAnnouncementData.content,
+      date: newAnnouncementData.date,
+      type: 'announcement', // Always 'announcement' for this endpoint
+      targetClassIds: newAnnouncementData.targetClassIds || [],
+      // NeDB will add _id, createdAt, updatedAt automatically
     };
 
-    announcements.push(announcementToAdd);
-    await writeData(announcements);
-    return NextResponse.json(announcementToAdd, { status: 201 });
+    const savedAnnouncement = await db.insert(announcementToAdd);
+    return NextResponse.json(savedAnnouncement, { status: 201 });
   } catch (error) {
+    console.error('Error creating announcement:', error);
+    // Handle unique constraint violation for 'id' if it occurs
+    if ((error as Error).message.includes('unique constraint violated')) {
+        return NextResponse.json({ message: 'Error creating announcement: ID already exists.', error: (error as Error).message }, { status: 409 });
+    }
     return NextResponse.json({ message: 'Error creating announcement', error: (error as Error).message }, { status: 500 });
   }
 }
