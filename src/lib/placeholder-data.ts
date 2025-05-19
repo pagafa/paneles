@@ -7,6 +7,7 @@ export const mockAnnouncements: Announcement[] = [
     date: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(),
     type: 'announcement',
     content: 'Welcome back everyone! School reopens this Monday. Please check the updated schedule on the notice board.',
+    targetClassIds: [], // School-wide
   },
   {
     id: 'ann2',
@@ -14,6 +15,15 @@ export const mockAnnouncements: Announcement[] = [
     date: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
     type: 'announcement',
     content: 'Get ready for the Annual Sports Day! Events will be held throughout next week. Sign up for your favorite sports.',
+    targetClassIds: [], // School-wide
+  },
+  {
+    id: 'ann3',
+    title: 'Special Meeting for Grade 10A',
+    date: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(),
+    type: 'announcement',
+    content: 'There will be a special meeting for all students of Grade 10A regarding the upcoming science fair.',
+    targetClassIds: ['class1'] // Assuming 'class1' is Grade 10A
   },
 ];
 

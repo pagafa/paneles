@@ -13,6 +13,7 @@ export interface BaseSchoolItem {
 export interface Announcement extends BaseSchoolItem {
   type: 'announcement';
   content: string;
+  targetClassIds?: string[]; // Added for specific class targeting
 }
 
 export interface Exam extends BaseSchoolItem {

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,13 +23,16 @@ import { CalendarIcon, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import type { Announcement } from "@/types";
+import type { Announcement, SchoolClass } from "@/types";
 import React, { useEffect } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { mockClasses } from "@/lib/placeholder-data"; // For class selection
 
 const announcementFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
   content: z.string().min(10, { message: "Content must be at least 10 characters." }),
   date: z.date({ required_error: "A date for the announcement is required." }),
+  targetClassIds: z.array(z.string()).optional(),
 });
 
 type AnnouncementFormValues = z.infer<typeof announcementFormSchema>;
@@ -36,9 +40,14 @@ type AnnouncementFormValues = z.infer<typeof announcementFormSchema>;
 interface AdminAnnouncementFormProps {
   onSubmitSuccess?: (data: Announcement) => void;
   initialData?: Partial<AnnouncementFormValues & { id?: string }>;
+  availableClasses?: SchoolClass[]; // Pass available classes
 }
 
-export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnnouncementFormProps) {
+export function AdminAnnouncementForm({ 
+  onSubmitSuccess, 
+  initialData,
+  availableClasses = mockClasses // Use mockClasses as default
+}: AdminAnnouncementFormProps) {
   const { toast } = useToast();
   const form = useForm<AnnouncementFormValues>({
     resolver: zodResolver(announcementFormSchema),
@@ -46,16 +55,30 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
       title: initialData?.title || "",
       content: initialData?.content || "",
       date: initialData?.date ? new Date(initialData.date) : new Date(),
+      targetClassIds: initialData?.targetClassIds || [],
     },
   });
+
+   useEffect(() => {
+    if (initialData) {
+      form.reset({
+        title: initialData.title || "",
+        content: initialData.content || "",
+        date: initialData.date ? new Date(initialData.date) : new Date(),
+        targetClassIds: initialData.targetClassIds || [],
+      });
+    }
+  }, [initialData, form]);
 
   async function onSubmit(values: AnnouncementFormValues) {
     await new Promise(resolve => setTimeout(resolve, 500));
     const newAnnouncement: Announcement = {
       id: initialData?.id || `ann-${Date.now()}`,
-      ...values,
+      title: values.title,
+      content: values.content,
       date: values.date.toISOString(),
       type: 'announcement',
+      targetClassIds: values.targetClassIds && values.targetClassIds.length > 0 ? values.targetClassIds : [], // Store empty array if none selected
     };
     
     toast({
@@ -66,7 +89,7 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
       onSubmitSuccess(newAnnouncement);
     }
     if (!initialData?.id) { 
-      form.reset({ title: "", content: "", date: new Date() });
+      form.reset({ title: "", content: "", date: new Date(), targetClassIds: [] });
     }
   }
 
@@ -198,6 +221,59 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
             );
           }}
         />
+
+        <FormField
+          control={form.control}
+          name="targetClassIds"
+          render={() => (
+            <FormItem>
+              <div className="mb-4">
+                <FormLabel className="text-base">Target Classes</FormLabel>
+                <FormDescription>
+                  Select classes to target. Leave all unchecked for a school-wide announcement.
+                </FormDescription>
+              </div>
+              <div className="space-y-2">
+                {(availableClasses || []).map((classItem) => (
+                  <FormField
+                    key={classItem.id}
+                    control={form.control}
+                    name="targetClassIds"
+                    render={({ field }) => {
+                      return (
+                        <FormItem
+                          key={classItem.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(classItem.id)}
+                              onCheckedChange={(checked) => {
+                                const currentValue = field.value || [];
+                                return checked
+                                  ? field.onChange([...currentValue, classItem.id])
+                                  : field.onChange(
+                                      currentValue.filter(
+                                        (id) => id !== classItem.id
+                                      )
+                                    );
+                              }}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {classItem.name}
+                          </FormLabel>
+                        </FormItem>
+                      );
+                    }}
+                  />
+                ))}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
           {initialData?.id ? "Update Announcement" : "Post Announcement"}

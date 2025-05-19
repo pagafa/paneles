@@ -5,10 +5,10 @@ import { AdminAnnouncementForm } from "@/components/forms/AdminAnnouncementForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { mockAnnouncements as initialAnnouncements } from "@/lib/placeholder-data";
-import type { Announcement } from "@/types";
+import { mockAnnouncements as initialAnnouncements, mockClasses } from "@/lib/placeholder-data";
+import type { Announcement, SchoolClass } from "@/types";
 import { format } from "date-fns";
-import { Megaphone, Edit3, Trash2, Settings, Save } from "lucide-react"; // Added Settings, Save icons
+import { Megaphone, Edit3, Trash2, Settings, Save } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,15 +22,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input"; // Added Input
-import { Label } from "@/components/ui/label"; // Added Label
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
-import { useSchoolName } from "@/context/SchoolNameContext"; // Added useSchoolName
+import { useSchoolName } from "@/context/SchoolNameContext";
 
 export default function AdminDashboardPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [allClasses, setAllClasses] = useState<SchoolClass[]>(mockClasses); // For resolving class names
   const { toast } = useToast();
   const { t } = useLanguage();
   const { schoolName, setSchoolName } = useSchoolName();
@@ -69,6 +70,17 @@ export default function AdminDashboardPage() {
       title: t('schoolNameUpdatedToastTitle'),
       description: t('schoolNameUpdatedToastDescription', { schoolName: editableSchoolName.trim() || "My School" }),
     });
+  };
+
+  const getTargetDisplay = (targetClassIds?: string[]): string => {
+    if (!targetClassIds || targetClassIds.length === 0) {
+      return "School-wide";
+    }
+    const targetedClassNames = targetClassIds.map(id => {
+      const cls = allClasses.find(c => c.id === id);
+      return cls ? cls.name : id;
+    }).join(', ');
+    return `Classes: ${targetedClassNames}`;
   };
 
   return (
@@ -117,7 +129,8 @@ export default function AdminDashboardPage() {
         <CardContent>
           <AdminAnnouncementForm 
             onSubmitSuccess={handleFormSubmit} 
-            initialData={editingAnnouncement || undefined} 
+            initialData={editingAnnouncement || undefined}
+            availableClasses={allClasses}
             key={editingAnnouncement ? editingAnnouncement.id : 'new'}
           />
         </CardContent>
@@ -169,6 +182,7 @@ export default function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-foreground/90">{ann.content}</p>
+                  <p className="text-xs text-muted-foreground mt-2">Target: {getTargetDisplay(ann.targetClassIds)}</p>
                 </CardContent>
               </Card>
             ))}

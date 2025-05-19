@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { Separator } from '@/components/ui/separator';
-import { Book, Megaphone, BookOpenCheck, FileText, Info } from 'lucide-react'; // Changed Library to Book
+import { Book, Megaphone, BookOpenCheck, FileText, Info } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 
@@ -23,15 +23,12 @@ async function getClassDetails(classId: string): Promise<SchoolClass | undefined
   });
 }
 
-async function getEventsForClass(className: string): Promise<SchoolEvent[]> {
+// Fetch ALL school events, filtering will happen client-side
+async function getAllSchoolEvents(): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const today = new Date(new Date().toDateString());
-      resolve(
-        mockSchoolEvents.filter(event =>
-          event.class === className && new Date(event.date) >= today
-        ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      );
+      const now = new Date();
+      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= now));
     }, 300);
   });
 }
@@ -52,7 +49,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   const { t } = useLanguage();
 
   const [classDetails, setClassDetails] = useState<SchoolClass | null | undefined>(undefined);
-  const [classEvents, setClassEvents] = useState<SchoolEvent[]>([]);
+  const [allSchoolEvents, setAllSchoolEvents] = useState<SchoolEvent[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -65,10 +62,9 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       const usersData = await getUsers();
       setUsers(usersData);
 
-      if (details) {
-        const events = await getEventsForClass(details.name);
-        setClassEvents(events);
-      }
+      const events = await getAllSchoolEvents(); // Fetch all events
+      setAllSchoolEvents(events);
+      
       setLoading(false);
     }
     if (classId) {
@@ -104,9 +100,24 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-  const announcements = classEvents.filter(event => event.type === 'announcement') as Announcement[];
-  const exams = classEvents.filter(event => event.type === 'exam') as Exam[];
-  const deadlines = classEvents.filter(event => event.type === 'deadline') as Deadline[];
+  // Filter announcements: school-wide OR targeted to this class
+  const announcements = allSchoolEvents.filter(event =>
+    event.type === 'announcement' &&
+    (
+      (!event.targetClassIds || event.targetClassIds.length === 0) || // School-wide
+      (event.targetClassIds && event.targetClassIds.includes(classId))   // Targeted to this class
+    )
+  ) as Announcement[];
+
+  // Exams and Deadlines are filtered by exact class name match (if event.class is defined)
+  const exams = allSchoolEvents.filter(event => 
+    event.type === 'exam' && event.class === classDetails.name
+  ) as Exam[];
+  
+  const deadlines = allSchoolEvents.filter(event => 
+    event.type === 'deadline' && event.class === classDetails.name
+  ) as Deadline[];
+
 
   const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone class empty' },
@@ -129,10 +140,9 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       <Card className="shadow-xl overflow-hidden mb-12 bg-card">
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex items-center gap-3">
-            <Book className="h-10 w-10 text-primary" /> {/* Changed Library to Book */}
+            <Book className="h-10 w-10 text-primary" />
             <div>
               <CardTitle className="text-3xl font-bold text-primary">{classDetails.name}</CardTitle>
-              {/* <CardDescription className="text-primary/80">{t('classPageTitle', { className: classDetails.name })}</CardDescription> Removed this line */}
             </div>
           </div>
         </CardHeader>

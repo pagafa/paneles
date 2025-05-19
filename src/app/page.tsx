@@ -23,7 +23,9 @@ import type { TranslationKey } from '@/lib/i18n';
 async function getSchoolEvents(): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= new Date(new Date().toDateString())));
+      // Filter out past events, including those from today but earlier time
+      const now = new Date();
+      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= now));
     }, 500);
   });
 }
@@ -57,7 +59,11 @@ export default function KioskPage() {
     fetchData();
   }, []);
 
-  const announcements = allEvents.filter(event => event.type === 'announcement') as Announcement[];
+  const announcements = allEvents.filter(event => 
+    event.type === 'announcement' && 
+    (!event.targetClassIds || event.targetClassIds.length === 0)
+  ) as Announcement[];
+  
   const exams = allEvents.filter(event => event.type === 'exam') as Exam[];
   const deadlines = allEvents.filter(event => event.type === 'deadline') as Deadline[];
 
@@ -72,7 +78,7 @@ export default function KioskPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
-        <p>{t('kioskMainTitle')}</p> 
+        <p>{t('loadingLabel')}</p> 
       </div>
     );
   }
