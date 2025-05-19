@@ -1,3 +1,4 @@
+
 // src/lib/i18n.ts
 export const supportedLanguages = ['en', 'es', 'fr', 'gl'] as const;
 export type SupportedLanguage = typeof supportedLanguages[number];
@@ -16,12 +17,13 @@ interface Translations {
   announcementsSectionTitle: string;
   examsSectionTitle: string;
   deadlinesSectionTitle: string;
-  noAnnouncementsHint: string;
-  noExamsHint: string;
-  noDeadlinesHint: string;
+  noAnnouncementsHint: string; // Used if a specific section is empty, but others might have content
+  noExamsHint: string; // Used if a specific section is empty
+  noDeadlinesHint: string; // Used if a specific section is empty
+  noEventsGeneralHint: string; // New: Used on KioskPage if ALL sections are empty
   checkBackLaterHint: string;
   viewClassesButtonLabel: string;
-  noClassesHint: string; // Added from KioskPage
+  noClassesHint: string; 
   loginButtonLabel: string;
   footerAllRightsReserved: string;
 
@@ -30,15 +32,15 @@ interface Translations {
   announcementsForClassSectionTitle: string; 
   examsForClassSectionTitle: string; 
   deadlinesForClassSectionTitle: string; 
-  noClassAnnouncementsHint: string; 
-  noClassExamsHint: string; 
-  noClassDeadlinesHint: string; 
+  noClassAnnouncementsHint: string; // Used if class announcements section is empty
+  noClassExamsHint: string; // Used if class exams section is empty
+  noClassDeadlinesHint: string; // Used if class deadlines section is empty
   classNotFoundTitle: string; 
   classNotFoundMessage: string; 
   backToHomeButton: string; 
   backToAllAnnouncementsButton: string;
   delegateIdLabel: string;
-  noEventsForClassHint: string;
+  noEventsForClassHint: string; // Used on ClassPage if ALL sections for that class are empty
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -58,6 +60,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noAnnouncementsHint: "No current announcements.",
     noExamsHint: "No upcoming exams scheduled.",
     noDeadlinesHint: "No assignment deadlines approaching.",
+    noEventsGeneralHint: "No events posted at the moment.",
     checkBackLaterHint: "Please check back later for updates.",
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
@@ -94,6 +97,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noAnnouncementsHint: "No hay anuncios actualmente.",
     noExamsHint: "No hay exámenes programados.",
     noDeadlinesHint: "No hay fechas de entrega próximas.",
+    noEventsGeneralHint: "No hay eventos publicados por el momento.",
     checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
@@ -130,6 +134,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noAnnouncementsHint: "Aucune annonce pour le moment.", 
     noExamsHint: "Aucun examen prévu.", 
     noDeadlinesHint: "Aucune date limite d'affectation approchant.", 
+    noEventsGeneralHint: "Aucun événement publié pour le moment.",
     checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", 
     viewClassesButtonLabel: "Voir les Classes", 
     noClassesHint: "Aucune classe disponible",
@@ -166,6 +171,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noAnnouncementsHint: "Non hai anuncios actualmente.",
     noExamsHint: "Non hai exames programados.",
     noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
+    noEventsGeneralHint: "Non hai eventos publicados polo momento.",
     checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
@@ -189,7 +195,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
 };
 
 export type TranslationKey = keyof Translations;
-export type TranslationVariables = { [key: string]: string | number };
+export type TranslationVariables = { [key: string]: string | number | undefined };
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;

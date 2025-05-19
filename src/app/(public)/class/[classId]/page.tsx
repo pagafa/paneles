@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, use } from 'react'; // Import 'use'
+import { useEffect, useState, use } from 'react'; 
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -11,11 +11,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { Separator } from '@/components/ui/separator';
-import { School, Megaphone, BookOpenCheck, FileText } from 'lucide-react';
+import { School, Megaphone, BookOpenCheck, FileText, Info } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 
-// Simulate fetching data
 async function getClassDetails(classId: string): Promise<SchoolClass | undefined> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -27,7 +26,7 @@ async function getClassDetails(classId: string): Promise<SchoolClass | undefined
 async function getEventsForClass(className: string): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const today = new Date(new Date().toDateString()); // Date without time for comparison
+      const today = new Date(new Date().toDateString()); 
       resolve(
         mockSchoolEvents.filter(event => 
           event.class === className && new Date(event.date) >= today
@@ -39,12 +38,12 @@ async function getEventsForClass(className: string): Promise<SchoolEvent[]> {
 
 
 export default function PublicClassPage({ params: paramsPromise }: { params: Promise<{ classId: string }> }) {
-  const actualParams = use(paramsPromise); // Resolve the params promise
-  const { classId } = actualParams;         // Destructure classId from the resolved params
+  const actualParams = use(paramsPromise); 
+  const { classId } = actualParams;        
 
   const { t } = useLanguage();
   
-  const [classDetails, setClassDetails] = useState<SchoolClass | null | undefined>(undefined); // undefined for loading, null for not found
+  const [classDetails, setClassDetails] = useState<SchoolClass | null | undefined>(undefined); 
   const [classEvents, setClassEvents] = useState<SchoolEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -60,7 +59,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       }
       setLoading(false);
     }
-    if (classId) { // Ensure classId is resolved before fetching
+    if (classId) { 
         fetchData();
     }
   }, [classId]);
@@ -68,8 +67,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   if (loading) {
     return (
       <div className="w-full max-w-lg text-center py-10">
-        {/* Use a general loading message or a specific one if translated */}
-        <p>{t('kioskMainTitle', 'Loading...')}</p> 
+        <p>{t('kioskMainTitle', {className: 'Loading...'})}</p> 
       </div>
     );
   }
@@ -98,12 +96,13 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   const exams = classEvents.filter(event => event.type === 'exam') as Exam[];
   const deadlines = classEvents.filter(event => event.type === 'deadline') as Deadline[];
 
-  const sections: { titleKey: TranslationKey; translationPayload?: object; events: SchoolEvent[]; icon: React.ElementType, emptyHintKey: TranslationKey; emptyImageHint: string }[] = [
-    { titleKey: 'announcementsForClassSectionTitle', translationPayload: { className: classDetails.name }, events: announcements, icon: Megaphone, emptyHintKey: 'noClassAnnouncementsHint', emptyImageHint: 'megaphone class empty' },
-    { titleKey: 'examsForClassSectionTitle', translationPayload: { className: classDetails.name }, events: exams, icon: BookOpenCheck, emptyHintKey: 'noClassExamsHint', emptyImageHint: 'exam calendar class empty' },
-    { titleKey: 'deadlinesForClassSectionTitle', translationPayload: { className: classDetails.name }, events: deadlines, icon: FileText, emptyHintKey: 'noClassDeadlinesHint', emptyImageHint: 'deadline list class empty' },
+  const sectionsConfig: { titleKey: TranslationKey; translationPayload?: object; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
+    { titleKey: 'announcementsForClassSectionTitle', translationPayload: { className: classDetails.name }, events: announcements, icon: Megaphone, emptyImageHint: 'megaphone class empty' },
+    { titleKey: 'examsForClassSectionTitle', translationPayload: { className: classDetails.name }, events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar class empty' },
+    { titleKey: 'deadlinesForClassSectionTitle', translationPayload: { className: classDetails.name }, events: deadlines, icon: FileText, emptyImageHint: 'deadline list class empty' },
   ];
-
+  
+  const visibleClassSections = sectionsConfig.filter(section => section.events.length > 0);
 
   return (
     <div className="w-full max-w-4xl py-8">
@@ -126,38 +125,23 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         )}
       </Card>
 
-      {sections.map((section, index) => (
-        <section key={section.titleKey} className="w-full mb-12">
-          <div className="flex items-center mb-6">
-            <section.icon className="h-8 w-8 text-primary mr-3" />
-            <h2 className="text-3xl font-semibold text-primary/90">
-              {t(section.titleKey, section.translationPayload as any)}
-            </h2>
-          </div>
-          {section.events.length > 0 ? (
-            <KioskCarousel items={section.events} />
-          ) : (
-            <div className="text-center py-8 px-4 bg-card rounded-lg shadow-md">
-              <Image 
-                src={`https://placehold.co/300x200.png`} 
-                alt={t(section.emptyHintKey)}
-                width={200} 
-                height={133} 
-                className="mx-auto mb-4 rounded-lg shadow-sm"
-                data-ai-hint={section.emptyImageHint}
-              />
-              <p className="text-xl font-medium text-muted-foreground">{t(section.emptyHintKey)}</p>
-              <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
+      {visibleClassSections.length > 0 ? (
+        visibleClassSections.map((section, index) => (
+          <section key={section.titleKey} className="w-full mb-12">
+            <div className="flex items-center mb-6">
+              <section.icon className="h-8 w-8 text-primary mr-3" />
+              <h2 className="text-3xl font-semibold text-primary/90">
+                {t(section.titleKey, section.translationPayload as any)}
+              </h2>
             </div>
-          )}
-          {index < sections.length - 1 && <Separator className="my-12" />}
-        </section>
-      ))}
-
-      {classEvents.length === 0 && sections.every(sec => sec.events.length === 0) && (
+            <KioskCarousel items={section.events} />
+            {index < visibleClassSections.length - 1 && <Separator className="my-12" />}
+          </section>
+        ))
+      ) : (
         <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
            <Image 
-            src={`https://placehold.co/300x200.png`} 
+            src="https://placehold.co/300x200.png" 
             alt={t('noEventsForClassHint')}
             width={200} 
             height={133} 

@@ -1,11 +1,12 @@
-"use client"; // Make KioskPage a Client Component
+
+"use client"; 
 
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { mockSchoolEvents, mockClasses } from '@/lib/placeholder-data';
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from '@/types';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
-import { Megaphone, BookOpenCheck, FileText, LogIn, ChevronDown } from 'lucide-react';
+import { Megaphone, BookOpenCheck, FileText, LogIn, ChevronDown, Info } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,12 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useLanguage } from '@/context/LanguageContext'; // Import useLanguage
+import { useLanguage } from '@/context/LanguageContext'; 
 import { useEffect, useState } from 'react';
 import type { TranslationKey } from '@/lib/i18n';
 
 
-// Simulate fetching data (can remain as is, or be moved to useEffect if it becomes client-side specific)
 async function getSchoolEvents(): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -38,7 +38,7 @@ async function getClassesData(): Promise<SchoolClass[]> {
 
 
 export default function KioskPage() {
-  const { t } = useLanguage(); // Get translation function
+  const { t } = useLanguage(); 
   const [allEvents, setAllEvents] = useState<SchoolEvent[]>([]);
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,11 +61,13 @@ export default function KioskPage() {
   const exams = allEvents.filter(event => event.type === 'exam') as Exam[];
   const deadlines = allEvents.filter(event => event.type === 'deadline') as Deadline[];
 
-  const sections: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyHintKey: TranslationKey, emptyImageHint: string }[] = [
-    { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyHintKey: 'noAnnouncementsHint', emptyImageHint: 'megaphone empty' },
-    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyHintKey: 'noExamsHint', emptyImageHint: 'exam calendar' },
-    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyHintKey: 'noDeadlinesHint', emptyImageHint: 'deadline list' },
+  const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
+    { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone empty' },
+    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar' },
+    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list' },
   ];
+
+  const visibleSections = sectionsConfig.filter(section => section.events.length > 0);
 
   if (loading) {
     return (
@@ -121,31 +123,31 @@ export default function KioskPage() {
         </header>
 
         <main className="w-full flex-grow flex flex-col items-center space-y-12">
-          {sections.map((section, index) => (
-            <section key={section.titleKey} className="w-full max-w-4xl">
-              <div className="flex items-center mb-6">
-                <section.icon className="h-8 w-8 text-primary mr-3" />
-                <h2 className="text-3xl font-semibold text-primary/90">{t(section.titleKey)}</h2>
-              </div>
-              {section.events.length > 0 ? (
-                <KioskCarousel items={section.events} />
-              ) : (
-                <div className="text-center py-8 px-4 bg-card rounded-lg shadow-md">
-                  <Image 
-                    src={`https://placehold.co/300x200.png`} 
-                    alt={t(section.emptyHintKey)}
-                    width={200} 
-                    height={133} 
-                    className="mx-auto mb-4 rounded-lg shadow-sm"
-                    data-ai-hint={section.emptyImageHint}
-                  />
-                  <p className="text-xl font-medium text-muted-foreground">{t(section.emptyHintKey)}</p>
-                  <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
+          {visibleSections.length > 0 ? (
+            visibleSections.map((section, index) => (
+              <section key={section.titleKey} className="w-full max-w-4xl">
+                <div className="flex items-center mb-6">
+                  <section.icon className="h-8 w-8 text-primary mr-3" />
+                  <h2 className="text-3xl font-semibold text-primary/90">{t(section.titleKey)}</h2>
                 </div>
-              )}
-              {index < sections.length - 1 && <Separator className="my-12" />}
-            </section>
-          ))}
+                <KioskCarousel items={section.events} />
+                {index < visibleSections.length - 1 && <Separator className="my-12" />}
+              </section>
+            ))
+          ) : (
+            <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
+              <Image 
+                src="https://placehold.co/300x200.png"
+                alt={t('noEventsGeneralHint')} 
+                width={200}
+                height={133}
+                className="mx-auto mb-4 rounded-lg shadow-sm"
+                data-ai-hint="empty board"
+              />
+              <p className="text-xl font-medium text-muted-foreground">{t('noEventsGeneralHint')}</p>
+              <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
+            </div>
+          )}
         </main>
 
         <footer className="w-full max-w-6xl mt-16 text-center">

@@ -3,7 +3,7 @@
 
 import type { SchoolEvent, Announcement, Exam, Deadline } from '@/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Megaphone, BookOpenCheck, FileText, CalendarDays } from 'lucide-react';
+// import { Megaphone, BookOpenCheck, FileText, CalendarDays } from 'lucide-react'; // Icons no longer used here
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 
@@ -11,28 +11,35 @@ interface AnnouncementCardProps {
   item: SchoolEvent;
 }
 
-const IconMap: Record<SchoolEvent['type'], React.ElementType> = {
-  announcement: Megaphone,
-  exam: BookOpenCheck,
-  deadline: FileText,
-};
+// IconMap no longer needed as icons are removed from the card itself
+// const IconMap: Record<SchoolEvent['type'], React.ElementType> = {
+//   announcement: Megaphone,
+//   exam: BookOpenCheck,
+//   deadline: FileText,
+// };
 
 export function AnnouncementCard({ item }: AnnouncementCardProps) {
-  const Icon = IconMap[item.type] || CalendarDays;
+  // const Icon = IconMap[item.type] || CalendarDays; // Icon no longer used
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
 
   useEffect(() => {
-    try {
-      setFormattedDate(format(new Date(item.date), 'PPP p'));
-    } catch (error) {
-      setFormattedDate("Invalid Date");
+    // This useEffect is to prevent hydration errors by ensuring date formatting happens client-side
+    if (item.date) {
+      try {
+        setFormattedDate(format(new Date(item.date), 'PPP p'));
+      } catch (error) {
+        console.error("Error formatting date:", item.date, error);
+        setFormattedDate("Invalid Date");
+      }
+    } else {
+      setFormattedDate("Date not available");
     }
   }, [item.date]);
 
   return (
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
-      <CardHeader className="flex flex-row items-center gap-4 pb-2">
-        <Icon className="h-8 w-8 text-primary" aria-hidden="true" />
+      <CardHeader className="pb-2">
+        {/* Icon removed from here */}
         <div>
           <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
