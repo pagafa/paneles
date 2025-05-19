@@ -160,20 +160,10 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         ))
       ) : (
         <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
-           <Image
-            src="https://placehold.co/300x200.png"
-            alt={t('noEventsForClassHint')}
-            width={200}
-            height={133}
-            className="mx-auto mb-4 rounded-lg shadow-sm"
-            data-ai-hint="empty classroom secret mission"
-          />
           <p className="text-xl font-medium text-muted-foreground">{t('noEventsForClassHint')}</p>
           <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
         </div>
       )}
-
-      {/* The "Back to All Announcements" button has been removed from here */}
     </div>
   );
 }
