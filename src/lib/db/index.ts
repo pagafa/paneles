@@ -5,7 +5,7 @@ import Datastore from 'nedb-promises';
 import path from 'path';
 import fs from 'fs/promises';
 import type { Announcement, SchoolClass, User, SchoolEvent } from '@/types';
-import { mockClasses, mockUsers, mockSchoolEvents } from '@/lib/placeholder-data';
+import { mockClasses, mockUsers, mockSchoolEvents, mockAnnouncements } from '@/lib/placeholder-data';
 
 const dataDir = path.join(process.cwd(), 'data');
 let announcementsDbInstance: Datastore<Announcement> | null = null;
@@ -37,8 +37,15 @@ async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement
   });
   await db.ensureIndex({ fieldName: 'id', unique: true });
   
-  // No longer seeding mockAnnouncements here as admin announcements are API driven.
-  // Seeding could be done via a separate script if needed, or ensure first admin creates some.
+  const count = await db.count({});
+  if (count === 0 && mockAnnouncements && mockAnnouncements.length > 0) {
+    try {
+      await db.insert(mockAnnouncements);
+      console.log('Announcements DB seeded with mockAnnouncements.');
+    } catch (seedError) {
+      console.error('Error seeding announcements DB:', seedError);
+    }
+  }
   return db;
 }
 
@@ -125,7 +132,7 @@ async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>>
   const count = await db.count({});
   if (count === 0 && mockSchoolEvents && mockSchoolEvents.length > 0) {
     try {
-      await db.insert(mockSchoolEvents); // Seed with exams, deadlines, delegate announcements
+      await db.insert(mockSchoolEvents); 
       console.log('SchoolEvents DB seeded with mockSchoolEvents.');
     } catch (seedError) {
       console.error('Error seeding schoolEvents DB:', seedError);

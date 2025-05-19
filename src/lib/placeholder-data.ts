@@ -1,102 +1,101 @@
 
 import type { SchoolEvent, User, SchoolClass, Announcement, Exam, Deadline } from '@/types';
 
-// mockClasses will be seeded into classes.db on first DB creation.
+// --- Mock Classes (Used for DB seeding) ---
 export const mockClasses: SchoolClass[] = [
-  { id: 'class1', name: 'Grade 10A', delegateId: 'user2' },
-  { id: 'class2', name: 'Grade 10B' },
-  { id: 'class3', name: 'Grade 11C', delegateId: 'user3' },
-  { id: 'class4', name: 'Grade 12B' },
+  { id: 'eso1a', name: '1º ESO A', delegateId: 'laura_g' },
+  { id: 'eso1b', name: '1º ESO B' },
+  { id: 'eso2a', name: '2º ESO A' },
+  { id: 'bach1a', name: '1º Bacharelato A', delegateId: 'carlos_p' },
+  { id: 'bach2a', name: '2º Bacharelato A' },
 ];
 
-// mockUsers will be seeded into users.db on first DB creation.
+// --- Mock Users (Used for DB seeding) ---
 export const mockUsers: User[] = [
-  { id: 'user1', name: 'Admin User', username: 'admin_user', role: 'admin' },
-  { id: 'user2', name: 'John Delegate', username: 'john_delegate', role: 'delegate' },
-  { id: 'user3', name: 'Jane Delegate', username: 'jane_delegate', role: 'delegate' },
+  { id: 'admin_mv_id', name: 'Administrador Principal', username: 'admin_mv', role: 'admin' },
+  { id: 'laura_g_id', name: 'Laura Gómez', username: 'laura_g', role: 'delegate' },
+  { id: 'carlos_p_id', name: 'Carlos Pérez', username: 'carlos_p', role: 'delegate' },
+  { id: 'ana_r_id', name: 'Ana Rodríguez', username: 'ana_r', role: 'delegate' },
 ];
 
-
-// Example announcements (admin-created, school-wide or targeted) are now managed by announcements.db and its API.
-// This section can be removed or kept for reference.
-/*
-export const exampleAdminAnnouncements: Announcement[] = [
-    {
-    id: 'admin-ann1',
-    title: 'Welcome to Our School Portal!',
-    date: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+// --- Mock Admin Announcements (Used for DB seeding) ---
+export const mockAnnouncements: Announcement[] = [
+  {
+    id: 'admin-ann1-mv',
+    title: 'Benvida ao curso 2024-2025 no IES Monte da Vila!',
+    content: 'Todo o equipo do IES Monte da Vila deséxavos un bo comezo de curso. Consultade o calendario e os horarios na web do centro.',
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
     type: 'announcement',
-    content: 'Find all your school news and updates here.',
-    targetClassIds: [], 
+    targetClassIds: [], // School-wide
   },
-   {
-    id: 'admin-ann2',
-    title: 'Library Books Due',
-    date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+  {
+    id: 'admin-ann2-mv',
+    title: 'Reunión Informativa para Familias de 1º ESO',
+    content: 'Convócase ás familias do alumnado de 1º da ESO a unha reunión informativa o vindeiro luns ás 18:00h no salón de actos.',
+    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
     type: 'announcement',
-    content: 'Remember to return your library books by Friday.',
-    targetClassIds: ['class1'],
-  }
+    targetClassIds: ['eso1a', 'eso1b'],
+  },
 ];
-*/
 
-// mockExams and mockDeadlines are for seeding schoolevents.db (delegate-type events)
-// They now use classId.
+// --- Mock Exams (Used for SchoolEvents DB seeding) ---
 export const mockExams: Exam[] = [
   {
-    id: 'exam1',
-    title: 'Mathematics Mid-Term Exam',
-    date: new Date(new Date().setDate(new Date().getDate() + 10)).toISOString(),
+    id: 'exam1-mv',
+    title: 'Exame Matemáticas Aplicadas 1º ESO',
+    date: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
     type: 'exam',
-    subject: 'Mathematics',
-    classId: 'class1', 
-    submittedByDelegateId: 'user2',
+    subject: 'Matemáticas Aplicadas',
+    classId: 'eso1a',
+    submittedByDelegateId: 'laura_g_id',
+    description: "Temas 1-5. Traer calculadora."
   },
   {
-    id: 'exam2',
-    title: 'Science Final Exam',
-    date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
+    id: 'exam2-mv',
+    title: 'Exame Lingua Galega 1º Bacharelato',
+    date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
     type: 'exam',
-    subject: 'Science',
-    classId: 'class4', 
+    subject: 'Lingua Galega e Literatura',
+    classId: 'bach1a',
+    submittedByDelegateId: 'carlos_p_id',
   },
 ];
 
+// --- Mock Deadlines (Used for SchoolEvents DB seeding) ---
 export const mockDeadlines: Deadline[] = [
   {
-    id: 'dead1',
-    title: 'History Essay Submission',
-    date: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString(),
+    id: 'dead1-mv',
+    title: 'Entrega Traballo Historia 2º ESO',
+    date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     type: 'deadline',
-    assignmentName: 'World War II Essay',
-    classId: 'class3', 
-    submittedByDelegateId: 'user3',
+    assignmentName: 'Investigación Idade Media',
+    classId: 'eso2a',
+    submittedByDelegateId: 'ana_r_id', // Assuming Ana Rodriguez is delegate for 2º ESO A
+    description: "Extensión mínima de 5 páxinas."
   },
   {
-    id: 'dead2',
-    title: 'Art Project Deadline',
-    date: new Date(new Date().setDate(new Date().getDate() + 9)).toISOString(),
+    id: 'dead2-mv',
+    title: 'Prazo Proxecto Tecnoloxía 2º Bacharelato',
+    date: new Date(Date.now() + 9 * 24 * 60 * 60 * 1000).toISOString(), // 9 days from now
     type: 'deadline',
-    assignmentName: 'Modern Art Sculpture',
-    // classId: undefined, // Example of a general deadline if applicable
+    assignmentName: 'Deseño App Móbil',
+    classId: 'bach2a', 
+    // submittedByDelegateId: 'carlos_p_id', // Example: No specific delegate if a general class project
   },
 ];
 
-// This composite mockSchoolEvents is used for seeding schoolevents.db.
-// It primarily contains delegate-submitted type events.
-// Admin announcements (school-wide or targeted) are managed via announcements.db.
+// --- Mock SchoolEvents (Composite for DB seeding - primarily delegate-type submissions) ---
 export const mockSchoolEvents: SchoolEvent[] = [
   ...mockExams,
   ...mockDeadlines,
-  // Example of an announcement that might be submitted by a delegate for their class,
-  // distinguished from admin announcements.
   {
-    id: 'delegate-ann1',
-    title: 'Class 10A Meeting',
-    date: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(),
+    id: 'delegate-ann1-mv',
+    title: 'Recordatorio: Material de Plástica para 1º ESO A',
+    date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days from now
     type: 'announcement',
-    content: 'Short meeting for all Grade 10A students after school on Wednesday in Room 5.',
-    classId: 'class1', // This could be a way to scope delegate announcements if not using targetClassIds
-    submittedByDelegateId: 'user2',
-  } as Announcement, // Cast as Announcement to satisfy SchoolEvent union
+    content: 'Lembrade traer o material de plástica solicitado para a clase do venres.',
+    classId: 'eso1a', 
+    submittedByDelegateId: 'laura_g_id',
+    description: 'A lista completa está na aula virtual.'
+  } as Announcement,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
