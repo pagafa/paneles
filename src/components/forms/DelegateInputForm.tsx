@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,10 +21,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon, PlusCircle, Megaphone, BookOpenCheck, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast"; // Toast will be handled by parent
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/types";
-import { mockClasses } from "@/lib/placeholder-data"; // For class selection
-import { useState } from "react";
+import { mockClasses } from "@/lib/placeholder-data"; 
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const commonSchema = {
@@ -61,43 +62,91 @@ type DelegateInputFormValues = z.infer<typeof delegateInputFormSchema>;
 
 interface DelegateInputFormProps {
   onSubmitSuccess?: (data: SchoolEvent) => void;
-  availableClasses?: SchoolClass[]; // Pass available classes for the delegate
+  availableClasses?: SchoolClass[];
+  initialData?: SchoolEvent | null;
 }
 
 export function DelegateInputForm({ 
   onSubmitSuccess, 
-  availableClasses = mockClasses /* In real app, filter by delegate's classes */ 
+  availableClasses = mockClasses,
+  initialData 
 }: DelegateInputFormProps) {
-  const { toast } = useToast();
+  // const { toast } = useToast(); // Toast handled by parent
   const [activeTab, setActiveTab] = useState<"announcement" | "exam" | "deadline">("announcement");
 
   const form = useForm<DelegateInputFormValues>({
     resolver: zodResolver(delegateInputFormSchema),
-    defaultValues: {
-      type: activeTab,
-      title: "",
-      date: new Date(),
-      classId: "",
-      // Specific fields will be conditionally rendered or handled
-    } as any, // Cast to any due to discriminated union complexity with defaultValues
-  });
+    // Default values will be set by useEffect based on initialData or activeTab
+  } as any); 
   
-  // Update form's 'type' field when tab changes
+  useEffect(() => {
+    if (initialData) {
+      setActiveTab(initialData.type);
+      const classIdForForm = availableClasses.find(c => c.name === initialData.class)?.id || "";
+      
+      let resetValues: Partial<DelegateInputFormValues> = {
+        // Common fields
+        title: initialData.title,
+        date: new Date(initialData.date),
+        classId: classIdForForm,
+        description: initialData.description || "",
+        type: initialData.type,
+      };
+
+      // Type-specific fields
+      switch (initialData.type) {
+        case 'announcement':
+          resetValues.content = (initialData as Announcement).content;
+          resetValues.subject = undefined;
+          resetValues.assignmentName = undefined;
+          break;
+        case 'exam':
+          resetValues.subject = (initialData as Exam).subject;
+          resetValues.content = undefined;
+          resetValues.assignmentName = undefined;
+          break;
+        case 'deadline':
+          resetValues.assignmentName = (initialData as Deadline).assignmentName;
+          resetValues.content = undefined;
+          resetValues.subject = undefined;
+          break;
+      }
+      form.reset(resetValues as DelegateInputFormValues);
+    } else {
+      // Reset to a new form state for the currently active tab
+      form.reset({
+        type: activeTab,
+        title: "",
+        date: new Date(),
+        classId: "",
+        description: "",
+        content: activeTab === "announcement" ? "" : undefined,
+        subject: activeTab === "exam" ? "" : undefined,
+        assignmentName: activeTab === "deadline" ? "" : undefined,
+      } as any);
+    }
+  }, [initialData, form, activeTab, availableClasses]);
+
+
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
     setActiveTab(newType);
-    form.setValue("type", newType);
-    form.reset({ // Reset specific fields to avoid validation errors from previous tab
-        type: newType,
-        title: form.getValues("title"),
-        date: form.getValues("date"),
-        classId: form.getValues("classId"),
-        description: form.getValues("description"),
-        // Clear other fields not relevant to the new type
-        content: newType === "announcement" ? form.getValues("content") : undefined,
-        subject: newType === "exam" ? form.getValues("subject") : undefined,
-        assignmentName: newType === "deadline" ? form.getValues("assignmentName") : undefined,
-    });
+    // If not editing, reset form fields for the new type
+    if (!initialData) {
+        form.reset({ 
+            type: newType,
+            title: "", // Keep common fields or reset them based on desired UX
+            date: new Date(),
+            classId: "",
+            description: "",
+            content: newType === "announcement" ? "" : undefined,
+            subject: newType === "exam" ? "" : undefined,
+            assignmentName: newType === "deadline" ? "" : undefined,
+        } as any);
+    } else {
+      // If editing, just set the type, useEffect will handle reset if initialData changes
+      form.setValue("type", newType);
+    }
   };
 
 
@@ -106,11 +155,12 @@ export function DelegateInputForm({
     
     const selectedClass = availableClasses.find(c => c.id === values.classId);
     let submissionData: SchoolEvent;
+    const id = initialData?.id || `del-${values.type}-${Date.now()}`;
 
     switch (values.type) {
       case 'announcement':
         submissionData = {
-          id: `del-ann-${Date.now()}`,
+          id,
           title: values.title,
           date: values.date.toISOString(),
           type: 'announcement',
@@ -121,7 +171,7 @@ export function DelegateInputForm({
         break;
       case 'exam':
         submissionData = {
-          id: `del-exam-${Date.now()}`,
+          id,
           title: values.title,
           date: values.date.toISOString(),
           type: 'exam',
@@ -132,7 +182,7 @@ export function DelegateInputForm({
         break;
       case 'deadline':
         submissionData = {
-          id: `del-dead-${Date.now()}`,
+          id,
           title: values.title,
           date: values.date.toISOString(),
           type: 'deadline',
@@ -142,27 +192,15 @@ export function DelegateInputForm({
         } as Deadline;
         break;
       default:
-        toast({ title: "Error", description: "Invalid form type.", variant: "destructive" });
+        // This case should ideally not be reached due to schema validation
+        console.error("Invalid form type submitted");
         return;
     }
     
-    toast({
-      title: "Information Submitted!",
-      description: `Your ${values.type} "${values.title}" for class ${selectedClass?.name || 'N/A'} has been submitted.`,
-    });
     if (onSubmitSuccess) {
       onSubmitSuccess(submissionData);
     }
-    form.reset({
-      type: activeTab, // Keep current tab
-      title: "", 
-      date: new Date(), 
-      classId: "", 
-      content: "", 
-      subject: "", 
-      assignmentName: "",
-      description: ""
-    } as any); // Reset form
+    // Form reset is handled by parent component by clearing initialData or by useEffect if !initialData
   }
 
   return (
@@ -175,7 +213,6 @@ export function DelegateInputForm({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Common Fields */}
           <FormField control={form.control} name="type" render={({ field }) => <Input type="hidden" {...field} />} />
           <FormField
             control={form.control}
@@ -206,7 +243,6 @@ export function DelegateInputForm({
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                      {/* Add time picker here if needed, e.g. react-datetime-picker or custom inputs */}
                     </PopoverContent>
                   </Popover>
                   <FormMessage />
@@ -219,19 +255,19 @@ export function DelegateInputForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Class</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || ""} disabled={availableClasses.length === 0}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select a class" /></SelectTrigger></FormControl>
                     <SelectContent>
                       {availableClasses.map(cls => <SelectItem key={cls.id} value={cls.id}>{cls.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
+                  {availableClasses.length === 0 && <p className="text-xs text-muted-foreground">No classes assigned to you to submit for.</p>}
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
           
-          {/* Specific Fields based on Tab */}
           <TabsContent value="announcement" className="space-y-6 mt-0 border-none p-0">
              <FormField
               control={form.control}
@@ -284,12 +320,11 @@ export function DelegateInputForm({
             )}
           />
 
-          <Button type="submit" className="w-full sm:w-auto">
-            <PlusCircle className="mr-2 h-4 w-4" /> Submit Information
+          <Button type="submit" className="w-full sm:w-auto" disabled={availableClasses.length === 0 && !initialData}>
+            <PlusCircle className="mr-2 h-4 w-4" /> {initialData ? "Update Information" : "Submit Information"}
           </Button>
         </form>
       </Form>
     </Tabs>
   );
 }
-

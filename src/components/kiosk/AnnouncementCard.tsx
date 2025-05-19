@@ -3,35 +3,51 @@
 
 import type { SchoolEvent, Announcement, Exam, Deadline } from '@/types';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
+import { Edit3, Trash2 } from 'lucide-react';
+// AlertDialog components are not directly used here if onDeleteRequest triggers parent dialog
+// If AlertDialog is self-contained, import them. For this iteration, parent handles dialog.
 
 interface AnnouncementCardProps {
   item: SchoolEvent;
+  onEdit?: (item: SchoolEvent) => void;
+  onDeleteRequest?: (item: SchoolEvent) => void; // Renamed to clarify it requests deletion (e.g. shows dialog)
+  showDelegateActions?: boolean;
 }
 
-export function AnnouncementCard({ item }: AnnouncementCardProps) {
+export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateActions = false }: AnnouncementCardProps) {
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
 
   useEffect(() => {
-    if (item.date) {
-      try {
-        setFormattedDate(format(new Date(item.date), 'PPP p'));
-      } catch (error) {
-        console.error("Error formatting date:", item.date, error);
-        setFormattedDate("Invalid Date");
-      }
-    } else {
-      setFormattedDate("Date not available");
+    // Ensure date is only formatted on the client after mount
+    try {
+      setFormattedDate(format(new Date(item.date), 'PPP p'));
+    } catch (error) {
+      console.error("Error formatting date:", item.date, error);
+      setFormattedDate("Invalid Date");
     }
   }, [item.date]);
 
   return (
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
-      <CardHeader className="pb-3 pt-4"> {/* Adjusted padding */}
-        <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
+      <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
+        <div>
+          <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
+        </div>
+        {showDelegateActions && onEdit && onDeleteRequest && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" onClick={() => onEdit(item)} aria-label="Edit Submission">
+              <Edit3 className="h-4 w-4" />
+            </Button>
+            <Button variant="destructive" size="icon" onClick={() => onDeleteRequest(item)} aria-label="Delete Submission">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </CardHeader>
-      <CardContent className="pt-0"> {/* Adjusted padding */}
+      <CardContent className="pt-0">
         {item.type === 'announcement' && <p className="text-base text-foreground/90 mb-2">{(item as Announcement).content}</p>}
         {item.type === 'exam' && <p className="text-base text-foreground/90 mb-2">Subject: {(item as Exam).subject}</p>}
         {item.type === 'deadline' && <p className="text-base text-foreground/90 mb-2">Assignment: {(item as Deadline).assignmentName}</p>}
@@ -40,8 +56,7 @@ export function AnnouncementCard({ item }: AnnouncementCardProps) {
         
         <p className="text-sm text-muted-foreground">
           {formattedDate}
-          {item.type === 'exam' && (item as Exam).class && ` - Class: ${(item as Exam).class}`}
-          {item.type === 'deadline' && (item as Deadline).class && ` - Class: ${(item as Deadline).class}`}
+          {item.class && ` - Class: ${item.class}`}
         </p>
       </CardContent>
     </Card>
