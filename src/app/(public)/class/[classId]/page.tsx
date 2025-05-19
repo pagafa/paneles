@@ -1,12 +1,12 @@
 
 "use client";
 
-import { useEffect, useState, use } from 'react'; 
+import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
-import { mockClasses, mockSchoolEvents } from "@/lib/placeholder-data";
-import type { SchoolClass, SchoolEvent, Announcement, Exam, Deadline } from "@/types";
+import { mockClasses, mockSchoolEvents, mockUsers } from "@/lib/placeholder-data";
+import type { SchoolClass, SchoolEvent, Announcement, Exam, Deadline, User } from "@/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
@@ -26,9 +26,9 @@ async function getClassDetails(classId: string): Promise<SchoolClass | undefined
 async function getEventsForClass(className: string): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const today = new Date(new Date().toDateString()); 
+      const today = new Date(new Date().toDateString());
       resolve(
-        mockSchoolEvents.filter(event => 
+        mockSchoolEvents.filter(event =>
           event.class === className && new Date(event.date) >= today
         ).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       );
@@ -36,15 +36,24 @@ async function getEventsForClass(className: string): Promise<SchoolEvent[]> {
   });
 }
 
+async function getUsers(): Promise<User[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(mockUsers);
+    }, 100);
+  });
+}
+
 
 export default function PublicClassPage({ params: paramsPromise }: { params: Promise<{ classId: string }> }) {
-  const actualParams = use(paramsPromise); 
-  const { classId } = actualParams;        
+  const actualParams = use(paramsPromise);
+  const { classId } = actualParams;
 
   const { t } = useLanguage();
-  
-  const [classDetails, setClassDetails] = useState<SchoolClass | null | undefined>(undefined); 
+
+  const [classDetails, setClassDetails] = useState<SchoolClass | null | undefined>(undefined);
   const [classEvents, setClassEvents] = useState<SchoolEvent[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -53,13 +62,16 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       const details = await getClassDetails(classId);
       setClassDetails(details);
 
+      const usersData = await getUsers();
+      setUsers(usersData);
+
       if (details) {
         const events = await getEventsForClass(details.name);
         setClassEvents(events);
       }
       setLoading(false);
     }
-    if (classId) { 
+    if (classId) {
         fetchData();
     }
   }, [classId]);
@@ -67,8 +79,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   if (loading) {
     return (
       <div className="w-full max-w-lg text-center py-10">
-        {/* Usamos a chave de tradución xenérica para o título do quiosco, pero con "className" para o estado de carga */}
-        <p>{t('kioskMainTitle', {className: t('loadingLabel')})}</p> 
+        <p>{t('loadingLabel')}</p>
       </div>
     );
   }
@@ -97,14 +108,23 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   const exams = classEvents.filter(event => event.type === 'exam') as Exam[];
   const deadlines = classEvents.filter(event => event.type === 'deadline') as Deadline[];
 
-  // Modificado: Usar chaves de tradución xenéricas para os títulos das seccións e eliminar translationPayload.
   const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone class empty' },
     { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar class empty' },
     { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list class empty' },
   ];
-  
+
   const visibleClassSections = sectionsConfig.filter(section => section.events.length > 0);
+
+  let delegateNameDisplay = "N/A";
+  if (classDetails.delegateId) {
+    const delegateUser = users.find(u => u.id === classDetails.delegateId && u.role === 'delegate');
+    if (delegateUser) {
+      delegateNameDisplay = delegateUser.name;
+    }
+    // If delegateUser is not found, delegateNameDisplay remains "N/A" or could show ID as fallback
+    // else { delegateNameDisplay = classDetails.delegateId; }
+  }
 
   return (
     <div className="w-full max-w-4xl py-8">
@@ -114,7 +134,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             <School className="h-10 w-10 text-primary" />
             <div>
               <CardTitle className="text-3xl font-bold text-primary">{classDetails.name}</CardTitle>
-              {/* O título principal da páxina da clase aínda usa o nome da clase */}
               <CardDescription className="text-primary/80">{t('classPageTitle', { className: classDetails.name })}</CardDescription>
             </div>
           </div>
@@ -122,7 +141,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         {classDetails.delegateId && (
              <CardContent className="p-4 border-t border-border">
                  <p className="text-sm text-muted-foreground">
-                    {t('delegateIdLabel')}: {classDetails.delegateId} 
+                    {t('delegateIdLabel')}: {delegateNameDisplay}
                  </p>
              </CardContent>
         )}
@@ -134,7 +153,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             <div className="flex items-center mb-6">
               <section.icon className="h-8 w-8 text-primary mr-3" />
               <h2 className="text-3xl font-semibold text-primary/90">
-                {/* Modificado: Chamar a t() só coa chave para os títulos das seccións */}
                 {t(section.titleKey)}
               </h2>
             </div>
@@ -144,11 +162,11 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         ))
       ) : (
         <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
-           <Image 
-            src="https://placehold.co/300x200.png" 
+           <Image
+            src="https://placehold.co/300x200.png"
             alt={t('noEventsForClassHint')}
-            width={200} 
-            height={133} 
+            width={200}
+            height={133}
             className="mx-auto mb-4 rounded-lg shadow-sm"
             data-ai-hint="empty classroom"
           />
@@ -165,5 +183,3 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     </div>
   );
 }
-
-    

@@ -17,34 +17,31 @@ interface Translations {
   announcementsSectionTitle: string;
   examsSectionTitle: string;
   deadlinesSectionTitle: string;
-  noAnnouncementsHint: string; 
-  noExamsHint: string; 
-  noDeadlinesHint: string; 
-  noEventsGeneralHint: string; 
+  noAnnouncementsHint: string;
+  noExamsHint: string;
+  noDeadlinesHint: string;
+  noEventsGeneralHint: string;
   checkBackLaterHint: string;
   viewClassesButtonLabel: string;
-  noClassesHint: string; 
+  noClassesHint: string;
   loginButtonLabel: string;
   footerAllRightsReserved: string;
 
   // For PublicClassPage
-  classPageTitle: string; 
-  // As chaves 'announcementsForClassSectionTitle', 'examsForClassSectionTitle', 'deadlinesForClassSectionTitle' xa non se usan para os títulos de sección na páxina da clase,
-  // no seu lugar úsanse as xenéricas de arriba ('announcementsSectionTitle', etc.)
-  // Mantemos as chaves que inclúen {className} no caso de que se necesiten noutro contexto, pero non para os títulos das seccións internas.
-  announcementsForClassSectionTitle: string; 
-  examsForClassSectionTitle: string; 
-  deadlinesForClassSectionTitle: string; 
-  noClassAnnouncementsHint: string; 
-  noClassExamsHint: string; 
-  noClassDeadlinesHint: string; 
-  classNotFoundTitle: string; 
-  classNotFoundMessage: string; 
-  backToHomeButton: string; 
+  classPageTitle: string;
+  announcementsForClassSectionTitle: string;
+  examsForClassSectionTitle: string;
+  deadlinesForClassSectionTitle: string;
+  noClassAnnouncementsHint: string;
+  noClassExamsHint: string;
+  noClassDeadlinesHint: string;
+  classNotFoundTitle: string;
+  classNotFoundMessage: string;
+  backToHomeButton: string;
   backToAllAnnouncementsButton: string;
-  delegateIdLabel: string;
-  noEventsForClassHint: string; 
-  loadingLabel: string; 
+  delegateIdLabel: string; // Changed this label's intent
+  noEventsForClassHint: string;
+  loadingLabel: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -59,8 +56,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Stay Informed",
     kioskMainSubtitle: "Latest school updates at your fingertips.",
     announcementsSectionTitle: "Announcements",
-    examsSectionTitle: "Exams", // Changed
-    deadlinesSectionTitle: "Assignments", // Changed
+    examsSectionTitle: "Exams",
+    deadlinesSectionTitle: "Assignments",
     noAnnouncementsHint: "No current announcements.",
     noExamsHint: "No upcoming exams scheduled.",
     noDeadlinesHint: "No assignment deadlines approaching.",
@@ -72,9 +69,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "All rights reserved.",
 
     classPageTitle: "Events for {className}",
-    announcementsForClassSectionTitle: "Announcements for {className}", 
-    examsForClassSectionTitle: "Exams for {className}", 
-    deadlinesForClassSectionTitle: "Deadlines for {className}", 
+    announcementsForClassSectionTitle: "Announcements for {className}",
+    examsForClassSectionTitle: "Exams for {className}",
+    deadlinesForClassSectionTitle: "Deadlines for {className}",
     noClassAnnouncementsHint: "No current announcements for this class.",
     noClassExamsHint: "No upcoming exams scheduled for this class.",
     noClassDeadlinesHint: "No assignment deadlines approaching for this class.",
@@ -82,7 +79,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
     backToAllAnnouncementsButton: "Back to All Announcements",
-    delegateIdLabel: "Delegate ID",
+    delegateIdLabel: "Delegate", // Changed
     noEventsForClassHint: "No events posted for this class yet.",
     loadingLabel: "Loading...",
   },
@@ -97,8 +94,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Mantente Informado",
     kioskMainSubtitle: "Últimas actualizaciones de la escuela al alcance de tu mano.",
     announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Exámenes", // Changed
-    deadlinesSectionTitle: "Tareas", // Changed
+    examsSectionTitle: "Exámenes",
+    deadlinesSectionTitle: "Tareas",
     noAnnouncementsHint: "No hay anuncios actualmente.",
     noExamsHint: "No hay exámenes programados.",
     noDeadlinesHint: "No hay fechas de entrega próximas.",
@@ -120,11 +117,11 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
     backToAllAnnouncementsButton: "Volver a Todos los Anuncios",
-    delegateIdLabel: "ID del Delegado",
+    delegateIdLabel: "Delegado/a", // Changed
     noEventsForClassHint: "No hay eventos publicados para esta clase todavía.",
     loadingLabel: "Cargando...",
   },
-  fr: { 
+  fr: {
     appTitle: "Annonces Scolaires",
     loginTitle: "Content de vous revoir!",
     loginDescription: "Connectez-vous pour gérer les annonces et les informations scolaires.",
@@ -132,20 +129,20 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gérer les Classes",
     manageUsersTitle: "Gérer les Utilisateurs",
     delegateDashboardTitle: "Tableau de bord Délégué",
-    kioskMainTitle: "Restez Informé", 
-    kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.", 
-    announcementsSectionTitle: "Annonces", 
-    examsSectionTitle: "Examens", // Changed
-    deadlinesSectionTitle: "Devoirs", // Changed
-    noAnnouncementsHint: "Aucune annonce pour le moment.", 
-    noExamsHint: "Aucun examen prévu.", 
-    noDeadlinesHint: "Aucune date limite d'affectation approchant.", 
+    kioskMainTitle: "Restez Informé",
+    kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.",
+    announcementsSectionTitle: "Annonces",
+    examsSectionTitle: "Examens",
+    deadlinesSectionTitle: "Devoirs",
+    noAnnouncementsHint: "Aucune annonce pour le moment.",
+    noExamsHint: "Aucun examen prévu.",
+    noDeadlinesHint: "Aucune date limite d'affectation approchant.",
     noEventsGeneralHint: "Aucun événement publié pour le moment.",
-    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", 
-    viewClassesButtonLabel: "Voir les Classes", 
+    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.",
+    viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
-    loginButtonLabel: "Connexion", 
-    footerAllRightsReserved: "Tous droits réservés.", 
+    loginButtonLabel: "Connexion",
+    footerAllRightsReserved: "Tous droits réservés.",
 
     classPageTitle: "Événements pour {className}",
     announcementsForClassSectionTitle: "Annonces pour {className}",
@@ -158,11 +155,11 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
     backToAllAnnouncementsButton: "Retour à Toutes les Annonces",
-    delegateIdLabel: "ID du Délégué",
+    delegateIdLabel: "Délégué(e)", // Changed
     noEventsForClassHint: "Aucun événement publié pour cette classe pour le moment.",
     loadingLabel: "Chargement...",
   },
-  gl: { 
+  gl: {
     appTitle: "Avisos Escolares",
     loginTitle: "Benvido de novo!",
     loginDescription: "Inicia sesión para xestionar avisos e información escolar.",
@@ -173,8 +170,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Mantente Informado",
     kioskMainSubtitle: "Últimas actualizacións da escola ao teu alcance.",
     announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Exames", // Cambiado
-    deadlinesSectionTitle: "Tarefas", // Cambiado
+    examsSectionTitle: "Exames",
+    deadlinesSectionTitle: "Tarefas",
     noAnnouncementsHint: "Non hai anuncios actualmente.",
     noExamsHint: "Non hai exames programados.",
     noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
@@ -187,8 +184,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
 
     classPageTitle: "Eventos para {className}",
     announcementsForClassSectionTitle: "Anuncios para {className}",
-    examsForClassSectionTitle: "Exames para {className}", 
-    deadlinesForClassSectionTitle: "Prazos para {className}", 
+    examsForClassSectionTitle: "Exames para {className}",
+    deadlinesForClassSectionTitle: "Prazos para {className}",
     noClassAnnouncementsHint: "Non hai anuncios actuais para esta clase.",
     noClassExamsHint: "Non hai exames programados para esta clase.",
     noClassDeadlinesHint: "Non hai prazos de entrega de tarefas próximos para esta clase.",
@@ -196,7 +193,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
     backToAllAnnouncementsButton: "Volver a Todos os Anuncios",
-    delegateIdLabel: "ID do Delegado",
+    delegateIdLabel: "Delegado/a", // Changed
     noEventsForClassHint: "Aínda non hai eventos publicados para esta clase.",
     loadingLabel: "Cargando...",
   },
@@ -207,6 +204,3 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
-
-
-    
