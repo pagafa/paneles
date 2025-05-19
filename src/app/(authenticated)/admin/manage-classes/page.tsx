@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { mockClasses as initialClasses, mockUsers } from "@/lib/placeholder-data";
 import type { SchoolClass, User } from "@/types";
-import { Edit3, Library, Trash2 } from "lucide-react"; // Changed School to Library
+import { Edit3, Book, Trash2 } from "lucide-react"; // Changed Library to Book
 import { useState, useMemo } from "react";
 import {
   AlertDialog,
@@ -74,7 +74,7 @@ export default function ManageClassesPage() {
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Library className="h-6 w-6 text-accent" /> {/* Changed School to Library */}
+            <Book className="h-6 w-6 text-accent" /> {/* Changed Library to Book */}
             {editingClass ? "Edit Class" : "Add New Class"}
           </CardTitle>
            {editingClass && (

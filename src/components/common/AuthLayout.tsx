@@ -8,7 +8,7 @@ import {
   // Megaphone, // Not used directly
   // ClipboardList, // Not used directly
   Users,
-  Library, // Changed from SchoolIcon
+  Book, // Changed from Library
   UserCheck,
   ShieldCheck,
   // BookOpenCheck, // Not used directly
@@ -44,7 +44,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/admin/dashboard", labelKey: "adminDashboardTitle", icon: ShieldCheck, roles: ["admin"] },
-  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Library, roles: ["admin"] }, // Changed icon here
+  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Book, roles: ["admin"] }, // Changed icon here
   { href: "/admin/manage-users", labelKey: "manageUsersTitle", icon: Users, roles: ["admin"] },
   { href: "/delegate/dashboard", labelKey: "delegateDashboardTitle", icon: UserCheck, roles: ["delegate"] },
 ];

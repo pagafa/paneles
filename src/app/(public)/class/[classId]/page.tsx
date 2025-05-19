@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { Separator } from '@/components/ui/separator';
-import { Library, Megaphone, BookOpenCheck, FileText, Info } from 'lucide-react'; // Changed School to Library
+import { Book, Megaphone, BookOpenCheck, FileText, Info } from 'lucide-react'; // Changed Library to Book
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 
@@ -129,7 +129,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       <Card className="shadow-xl overflow-hidden mb-12 bg-card">
         <CardHeader className="bg-primary/10 p-6">
           <div className="flex items-center gap-3">
-            <Library className="h-10 w-10 text-primary" /> {/* Changed School to Library */}
+            <Book className="h-10 w-10 text-primary" /> {/* Changed Library to Book */}
             <div>
               <CardTitle className="text-3xl font-bold text-primary">{classDetails.name}</CardTitle>
               {/* <CardDescription className="text-primary/80">{t('classPageTitle', { className: classDetails.name })}</CardDescription> Removed this line */}
