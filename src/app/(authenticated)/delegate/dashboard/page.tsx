@@ -22,9 +22,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
 
 export default function DelegateDashboardPage() {
   const { toast } = useToast();
+  const { t } = useLanguage(); // Get t function
+
   // In a real app, fetch classes assigned to this delegate and their submissions
   const [mySubmissions, setMySubmissions] = useState<SchoolEvent[]>(
     mockSchoolEvents.filter(event => {
@@ -62,9 +65,9 @@ export default function DelegateDashboardPage() {
 
       // Filter submissions based on assigned classes
       if(assigned.length > 0){
-        const assignedClassNames = assigned.map(c => c.name);
+        const assignedClassNamesMap = assigned.map(c => c.name);
         setMySubmissions(
-            mockSchoolEvents.filter(event => event.class && assignedClassNames.includes(event.class))
+            mockSchoolEvents.filter(event => event.class && assignedClassNamesMap.includes(event.class))
             .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         );
       } else if (userRole === 'delegate') {
@@ -77,11 +80,11 @@ export default function DelegateDashboardPage() {
   const handleFormSubmit = (data: SchoolEvent) => {
     if (editingSubmission) {
       setMySubmissions(prev => prev.map(s => s.id === editingSubmission.id ? data : s).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-      toast({ title: "Information Updated", description: `"${data.title}" has been updated.` });
+      toast({ title: t('submissionUpdatedToastTitle'), description: t('submissionUpdatedToastDescription', { title: data.title }) });
       setEditingSubmission(null);
     } else {
       setMySubmissions(prev => [data, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime() ));
-      toast({ title: "Information Submitted", description: `"${data.title}" has been submitted.` });
+      toast({ title: t('submissionSubmittedToastTitle'), description: t('submissionSubmittedToastDescription', { title: data.title }) });
     }
   };
 
@@ -99,36 +102,30 @@ export default function DelegateDashboardPage() {
     if (submissionToDelete) {
       setMySubmissions(prev => prev.filter(s => s.id !== submissionToDelete.id));
       toast({
-        title: "Submission Deleted",
-        description: `"${submissionToDelete.title}" has been successfully deleted.`,
+        title: t('submissionDeletedToastTitle'),
+        description: t('submissionDeletedToastDescription', { title: submissionToDelete.title }),
         variant: "destructive"
       });
     }
     setShowDeleteDialog(false);
     setSubmissionToDelete(null);
   };
-
-  const assignedClassNames = useMemo(() => {
-    if (delegateAssignedClasses.length === 0 && mySubmissions.length > 0 && typeof window !== 'undefined' && localStorage.getItem('userRole') === 'delegate') {
-        // Fallback for john_delegate if no specific classes are loaded but submissions exist (old logic path)
-        const johnDelegate = mockUsers.find(u => u.username === 'john_delegate');
-        if (johnDelegate) {
-            return mockClasses.filter(c => c.delegateId === johnDelegate.id).map(c => c.name).join(', ');
-        }
-        return 'N/A (check assignments)';
-    }
-    return delegateAssignedClasses.length > 0 ? delegateAssignedClasses.map(c => c.name).join(', ') : 'No classes assigned';
-  }, [delegateAssignedClasses, mySubmissions]);
+  
+  const assignedClassNamesString = useMemo(() => {
+    return delegateAssignedClasses.map(c => c.name).join(', ');
+  }, [delegateAssignedClasses]);
 
 
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <h1 className="text-3xl font-bold text-primary">Delegate Dashboard</h1>
+        <h1 className="text-3xl font-bold text-primary">{t('delegateDashboardTitle')}</h1>
         <Card className="w-full md:w-auto bg-accent/20 border-accent">
           <CardHeader className="p-4">
             <CardTitle className="text-md text-accent-foreground">
-              You are managing information for: {assignedClassNames}
+              {delegateAssignedClasses.length > 0
+                ? `${t('assignedClassesLabel')}: ${assignedClassNamesString}`
+                : t('noAssignedClassesLabel')}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -138,16 +135,16 @@ export default function DelegateDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <UserCheck className="h-6 w-6 text-accent" />
-            {editingSubmission ? "Edit Information" : "Submit New Information"}
+            {editingSubmission ? t('editInformationTitle') : t('submitNewInformationTitle')}
           </CardTitle>
           {editingSubmission ? (
             <CardDescription>
-              Editing: "{editingSubmission.title}".{' '}
-              <Button variant="link" size="sm" onClick={() => setEditingSubmission(null)}>Cancel Edit</Button>
+              {t('editingSubmissionDescription', { title: editingSubmission.title })}.{' '}
+              <Button variant="link" size="sm" onClick={() => setEditingSubmission(null)}>{t('cancelEditButton')}</Button>
             </CardDescription>
           ) : (
             <CardDescription>
-              Enter announcements, exam schedules, or assignment deadlines for your assigned classes.
+              {t('delegateFormDescription')}
             </CardDescription>
           )}
         </CardHeader>
@@ -165,10 +162,10 @@ export default function DelegateDashboardPage() {
 
       <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
         <ListChecks className="h-6 w-6 text-primary" />
-        Your Recent Submissions
+        {t('yourRecentSubmissionsTitle')}
       </h2>
       {mySubmissions.length === 0 ? (
-        <p className="text-muted-foreground">You haven't submitted any information yet, or you have no classes assigned.</p>
+        <p className="text-muted-foreground">{t('noSubmissionsYetHint')}</p>
       ) : (
         <ScrollArea className="h-[500px] rounded-md border p-1 bg-background">
           <div className="space-y-4 p-3">
@@ -189,14 +186,14 @@ export default function DelegateDashboardPage() {
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>{t('alertDialogTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your submission titled "{submissionToDelete.title}".
+                {t('alertDialogDescription', { title: submissionToDelete.title })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={() => {setShowDeleteDialog(false); setSubmissionToDelete(null);}}>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+              <AlertDialogCancel onClick={() => {setShowDeleteDialog(false); setSubmissionToDelete(null);}}>{t('cancelButton')}</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDelete}>{t('deleteButton')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

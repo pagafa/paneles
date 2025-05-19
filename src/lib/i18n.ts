@@ -29,9 +29,9 @@ interface Translations {
 
   // For PublicClassPage
   classPageTitle: string;
-  announcementsForClassSectionTitle: string;
-  examsForClassSectionTitle: string;
-  deadlinesForClassSectionTitle: string;
+  // announcementsForClassSectionTitle: string; // No longer needed, using generic
+  // examsForClassSectionTitle: string; // No longer needed, using generic
+  // deadlinesForClassSectionTitle: string; // No longer needed, using generic
   noClassAnnouncementsHint: string;
   noClassExamsHint: string;
   noClassDeadlinesHint: string;
@@ -39,9 +39,54 @@ interface Translations {
   classNotFoundMessage: string;
   backToHomeButton: string;
   backToAllAnnouncementsButton: string;
-  delegateIdLabel: string; // Changed this label's intent
+  delegateIdLabel: string; 
   noEventsForClassHint: string;
   loadingLabel: string;
+
+  // For DelegateDashboardPage
+  assignedClassesLabel: string;
+  noAssignedClassesLabel: string;
+  editInformationTitle: string;
+  submitNewInformationTitle: string;
+  editingSubmissionDescription: string; // e.g., "Editing: {title}"
+  cancelEditButton: string;
+  delegateFormDescription: string;
+  yourRecentSubmissionsTitle: string;
+  noSubmissionsYetHint: string;
+  alertDialogTitle: string;
+  alertDialogDescription: string; // e.g., "This action cannot be undone. This will permanently delete your submission titled "{title}"."
+  cancelButton: string;
+  deleteButton: string;
+  submissionUpdatedToastTitle: string;
+  submissionUpdatedToastDescription: string; // e.g., "{title} has been updated."
+  submissionSubmittedToastTitle: string;
+  submissionSubmittedToastDescription: string; // e.g., "{title} has been submitted."
+  submissionDeletedToastTitle: string;
+  submissionDeletedToastDescription: string; // e.g., "{title} has been successfully deleted."
+
+  // For DelegateInputForm (tabs)
+  announcementTabLabel: string;
+  examTabLabel: string;
+  deadlineTabLabel: string;
+  // For DelegateInputForm (fields)
+  formTitleLabel: string;
+  formTitlePlaceholder: string; // e.g. Title for {tabName} -> Title for announcement
+  formDateTimeLabel: string;
+  formPickDateTimeButton: string;
+  formClassLabel: string;
+  formSelectClassPlaceholder: string;
+  formNoAssignedClassesWarning: string;
+  formAnnouncementContentLabel: string;
+  formAnnouncementContentPlaceholder: string;
+  formExamSubjectLabel: string;
+  formExamSubjectPlaceholder: string;
+  formDeadlineAssignmentNameLabel: string;
+  formDeadlineAssignmentNamePlaceholder: string;
+  formAdditionalDescriptionLabel: string;
+  formAdditionalDescriptionPlaceholder: string;
+  formSubmitButton: string;
+  formUpdateButton: string;
+
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -69,9 +114,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "All rights reserved.",
 
     classPageTitle: "Events for {className}",
-    announcementsForClassSectionTitle: "Announcements for {className}",
-    examsForClassSectionTitle: "Exams for {className}",
-    deadlinesForClassSectionTitle: "Deadlines for {className}",
     noClassAnnouncementsHint: "No current announcements for this class.",
     noClassExamsHint: "No upcoming exams scheduled for this class.",
     noClassDeadlinesHint: "No assignment deadlines approaching for this class.",
@@ -79,9 +121,49 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
     backToAllAnnouncementsButton: "Back to All Announcements",
-    delegateIdLabel: "Delegate", // Changed
+    delegateIdLabel: "Delegate", 
     noEventsForClassHint: "No events posted for this class yet.",
     loadingLabel: "Loading...",
+
+    assignedClassesLabel: "Assigned classes",
+    noAssignedClassesLabel: "You currently have no classes assigned.",
+    editInformationTitle: "Edit Information",
+    submitNewInformationTitle: "Submit New Information",
+    editingSubmissionDescription: "Editing: \"{title}\"",
+    cancelEditButton: "Cancel Edit",
+    delegateFormDescription: "Enter announcements, exam schedules, or assignment deadlines for your assigned classes.",
+    yourRecentSubmissionsTitle: "Your Recent Submissions",
+    noSubmissionsYetHint: "You haven't submitted any information yet, or you have no classes assigned.",
+    alertDialogTitle: "Are you absolutely sure?",
+    alertDialogDescription: "This action cannot be undone. This will permanently delete your submission titled \"{title}\".",
+    cancelButton: "Cancel",
+    deleteButton: "Delete",
+    submissionUpdatedToastTitle: "Information Updated",
+    submissionUpdatedToastDescription: "\"{title}\" has been updated.",
+    submissionSubmittedToastTitle: "Information Submitted",
+    submissionSubmittedToastDescription: "\"{title}\" has been submitted.",
+    submissionDeletedToastTitle: "Submission Deleted",
+    submissionDeletedToastDescription: "\"{title}\" has been successfully deleted.",
+    announcementTabLabel: "Announcement",
+    examTabLabel: "Exam",
+    deadlineTabLabel: "Deadline",
+    formTitleLabel: "Title",
+    formTitlePlaceholder: "Title for {tabName}",
+    formDateTimeLabel: "Date and Time",
+    formPickDateTimeButton: "Pick date and time",
+    formClassLabel: "Class",
+    formSelectClassPlaceholder: "Select a class",
+    formNoAssignedClassesWarning: "You have no classes assigned to submit information for.",
+    formAnnouncementContentLabel: "Announcement Content",
+    formAnnouncementContentPlaceholder: "Detailed information...",
+    formExamSubjectLabel: "Exam Subject",
+    formExamSubjectPlaceholder: "e.g., Mathematics, Physics",
+    formDeadlineAssignmentNameLabel: "Assignment Name",
+    formDeadlineAssignmentNamePlaceholder: "e.g., History Essay, Science Project",
+    formAdditionalDescriptionLabel: "Additional Description (Optional)",
+    formAdditionalDescriptionPlaceholder: "Any extra details or notes...",
+    formSubmitButton: "Submit Information",
+    formUpdateButton: "Update Information",
   },
   es: {
     appTitle: "Avisos Escolares",
@@ -107,9 +189,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "Todos los derechos reservados.",
 
     classPageTitle: "Eventos para {className}",
-    announcementsForClassSectionTitle: "Anuncios para {className}",
-    examsForClassSectionTitle: "Exámenes para {className}",
-    deadlinesForClassSectionTitle: "Fechas de Entrega para {className}",
     noClassAnnouncementsHint: "No hay anuncios actuales para esta clase.",
     noClassExamsHint: "No hay exámenes programados para esta clase.",
     noClassDeadlinesHint: "No hay fechas de entrega próximas para esta clase.",
@@ -117,9 +196,49 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
     backToAllAnnouncementsButton: "Volver a Todos los Anuncios",
-    delegateIdLabel: "Delegado/a", // Changed
+    delegateIdLabel: "Delegado/a", 
     noEventsForClassHint: "No hay eventos publicados para esta clase todavía.",
     loadingLabel: "Cargando...",
+
+    assignedClassesLabel: "Clases asignadas",
+    noAssignedClassesLabel: "Actualmente no tienes clases asignadas.",
+    editInformationTitle: "Editar Información",
+    submitNewInformationTitle: "Enviar Nueva Información",
+    editingSubmissionDescription: "Editando: \"{title}\"",
+    cancelEditButton: "Cancelar Edición",
+    delegateFormDescription: "Introduce anuncios, horarios de exámenes o fechas de entrega para tus clases asignadas.",
+    yourRecentSubmissionsTitle: "Tus Envíos Recientes",
+    noSubmissionsYetHint: "Aún no has enviado ninguna información, o no tienes clases asignadas.",
+    alertDialogTitle: "¿Estás absolutamente seguro?",
+    alertDialogDescription: "Esta acción no se puede deshacer. Esto eliminará permanentemente tu envío titulado \"{title}\".",
+    cancelButton: "Cancelar",
+    deleteButton: "Eliminar",
+    submissionUpdatedToastTitle: "Información Actualizada",
+    submissionUpdatedToastDescription: "\"{title}\" ha sido actualizado.",
+    submissionSubmittedToastTitle: "Información Enviada",
+    submissionSubmittedToastDescription: "\"{title}\" ha sido enviado.",
+    submissionDeletedToastTitle: "Envío Eliminado",
+    submissionDeletedToastDescription: "\"{title}\" ha sido eliminado correctamente.",
+    announcementTabLabel: "Anuncio",
+    examTabLabel: "Examen",
+    deadlineTabLabel: "Plazo",
+    formTitleLabel: "Título",
+    formTitlePlaceholder: "Título para {tabName}",
+    formDateTimeLabel: "Fecha y Hora",
+    formPickDateTimeButton: "Elige fecha y hora",
+    formClassLabel: "Clase",
+    formSelectClassPlaceholder: "Selecciona una clase",
+    formNoAssignedClassesWarning: "No tienes clases asignadas para enviar información.",
+    formAnnouncementContentLabel: "Contenido del Anuncio",
+    formAnnouncementContentPlaceholder: "Información detallada...",
+    formExamSubjectLabel: "Asignatura del Examen",
+    formExamSubjectPlaceholder: "p.ej., Matemáticas, Física",
+    formDeadlineAssignmentNameLabel: "Nombre de la Tarea",
+    formDeadlineAssignmentNamePlaceholder: "p.ej., Ensayo de Historia, Proyecto de Ciencias",
+    formAdditionalDescriptionLabel: "Descripción Adicional (Opcional)",
+    formAdditionalDescriptionPlaceholder: "Cualquier detalle o nota extra...",
+    formSubmitButton: "Enviar Información",
+    formUpdateButton: "Actualizar Información",
   },
   fr: {
     appTitle: "Annonces Scolaires",
@@ -145,9 +264,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "Tous droits réservés.",
 
     classPageTitle: "Événements pour {className}",
-    announcementsForClassSectionTitle: "Annonces pour {className}",
-    examsForClassSectionTitle: "Examens pour {className}",
-    deadlinesForClassSectionTitle: "Dates Limites pour {className}",
     noClassAnnouncementsHint: "Aucune annonce actuelle pour cette classe.",
     noClassExamsHint: "Aucun examen prévu pour cette classe.",
     noClassDeadlinesHint: "Aucune date limite d'affectation approchant pour cette classe.",
@@ -155,9 +271,49 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
     backToAllAnnouncementsButton: "Retour à Toutes les Annonces",
-    delegateIdLabel: "Délégué(e)", // Changed
+    delegateIdLabel: "Délégué(e)", 
     noEventsForClassHint: "Aucun événement publié pour cette classe pour le moment.",
     loadingLabel: "Chargement...",
+
+    assignedClassesLabel: "Classes assignées",
+    noAssignedClassesLabel: "Vous n'avez actuellement aucune classe assignée.",
+    editInformationTitle: "Modifier les Informations",
+    submitNewInformationTitle: "Soumettre de Nouvelles Informations",
+    editingSubmissionDescription: "Modification de : \"{title}\"",
+    cancelEditButton: "Annuler la Modification",
+    delegateFormDescription: "Saisissez les annonces, les horaires d'examens ou les dates limites de devoirs pour vos classes assignées.",
+    yourRecentSubmissionsTitle: "Vos Soumissions Récentes",
+    noSubmissionsYetHint: "Vous n'avez encore soumis aucune information ou vous n'avez aucune classe assignée.",
+    alertDialogTitle: "Êtes-vous absolument sûr(e) ?",
+    alertDialogDescription: "Cette action est irréversible. Cela supprimera définitivement votre soumission intitulée \"{title}\".",
+    cancelButton: "Annuler",
+    deleteButton: "Supprimer",
+    submissionUpdatedToastTitle: "Informations Mises à Jour",
+    submissionUpdatedToastDescription: "\"{title}\" a été mis à jour.",
+    submissionSubmittedToastTitle: "Informations Soumises",
+    submissionSubmittedToastDescription: "\"{title}\" a été soumis.",
+    submissionDeletedToastTitle: "Soumission Supprimée",
+    submissionDeletedToastDescription: "\"{title}\"a été supprimé avec succès.",
+    announcementTabLabel: "Annonce",
+    examTabLabel: "Examen",
+    deadlineTabLabel: "Date Limite",
+    formTitleLabel: "Titre",
+    formTitlePlaceholder: "Titre pour {tabName}",
+    formDateTimeLabel: "Date et Heure",
+    formPickDateTimeButton: "Choisir date et heure",
+    formClassLabel: "Classe",
+    formSelectClassPlaceholder: "Sélectionner une classe",
+    formNoAssignedClassesWarning: "Vous n'avez aucune classe assignée pour soumettre des informations.",
+    formAnnouncementContentLabel: "Contenu de l'Annonce",
+    formAnnouncementContentPlaceholder: "Informations détaillées...",
+    formExamSubjectLabel: "Matière de l'Examen",
+    formExamSubjectPlaceholder: "ex: Mathématiques, Physique",
+    formDeadlineAssignmentNameLabel: "Nom du Devoir",
+    formDeadlineAssignmentNamePlaceholder: "ex: Dissertation d'Histoire, Projet Scientifique",
+    formAdditionalDescriptionLabel: "Description Supplémentaire (Optionnel)",
+    formAdditionalDescriptionPlaceholder: "Tout détail ou note supplémentaire...",
+    formSubmitButton: "Soumettre les Informations",
+    formUpdateButton: "Mettre à Jour les Informations",
   },
   gl: {
     appTitle: "Avisos Escolares",
@@ -183,9 +339,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "Todos os dereitos reservados.",
 
     classPageTitle: "Eventos para {className}",
-    announcementsForClassSectionTitle: "Anuncios para {className}",
-    examsForClassSectionTitle: "Exames para {className}",
-    deadlinesForClassSectionTitle: "Prazos para {className}",
     noClassAnnouncementsHint: "Non hai anuncios actuais para esta clase.",
     noClassExamsHint: "Non hai exames programados para esta clase.",
     noClassDeadlinesHint: "Non hai prazos de entrega de tarefas próximos para esta clase.",
@@ -193,9 +346,49 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
     backToAllAnnouncementsButton: "Volver a Todos os Anuncios",
-    delegateIdLabel: "Delegado/a", // Changed
+    delegateIdLabel: "Delegado/a", 
     noEventsForClassHint: "Aínda non hai eventos publicados para esta clase.",
     loadingLabel: "Cargando...",
+
+    assignedClassesLabel: "Clases asignadas",
+    noAssignedClassesLabel: "Actualmente non tes clases asignadas.",
+    editInformationTitle: "Editar Información",
+    submitNewInformationTitle: "Enviar Nova Información",
+    editingSubmissionDescription: "Editando: \"{title}\"",
+    cancelEditButton: "Cancelar Edición",
+    delegateFormDescription: "Introduce anuncios, horarios de exames ou datas de entrega para as túas clases asignadas.",
+    yourRecentSubmissionsTitle: "Os Teus Envíos Recentes",
+    noSubmissionsYetHint: "Aínda non enviaches ningunha información, ou non tes clases asignadas.",
+    alertDialogTitle: "Estás absolutamente seguro/a?",
+    alertDialogDescription: "Esta acción non se pode desfacer. Isto eliminará permanentemente o teu envío titulado \"{title}\".",
+    cancelButton: "Cancelar",
+    deleteButton: "Eliminar",
+    submissionUpdatedToastTitle: "Información Actualizada",
+    submissionUpdatedToastDescription: "\"{title}\" foi actualizado.",
+    submissionSubmittedToastTitle: "Información Enviada",
+    submissionSubmittedToastDescription: "\"{title}\" foi enviado.",
+    submissionDeletedToastTitle: "Envío Eliminado",
+    submissionDeletedToastDescription: "\"{title}\" foi eliminado correctamente.",
+    announcementTabLabel: "Anuncio",
+    examTabLabel: "Exame",
+    deadlineTabLabel: "Prazo",
+    formTitleLabel: "Título",
+    formTitlePlaceholder: "Título para {tabName}",
+    formDateTimeLabel: "Data e Hora",
+    formPickDateTimeButton: "Escolle data e hora",
+    formClassLabel: "Clase",
+    formSelectClassPlaceholder: "Selecciona unha clase",
+    formNoAssignedClassesWarning: "Non tes clases asignadas para enviar información.",
+    formAnnouncementContentLabel: "Contido do Anuncio",
+    formAnnouncementContentPlaceholder: "Información detallada...",
+    formExamSubjectLabel: "Materia do Exame",
+    formExamSubjectPlaceholder: "p.ex., Matemáticas, Física",
+    formDeadlineAssignmentNameLabel: "Nome da Tarefa",
+    formDeadlineAssignmentNamePlaceholder: "p.ex., Ensaio de Historia, Proxecto de Ciencias",
+    formAdditionalDescriptionLabel: "Descrición Adicional (Opcional)",
+    formAdditionalDescriptionPlaceholder: "Calquera detalle ou nota extra...",
+    formSubmitButton: "Enviar Información",
+    formUpdateButton: "Actualizar Información",
   },
 };
 
@@ -204,3 +397,4 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
+

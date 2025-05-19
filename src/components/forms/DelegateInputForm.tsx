@@ -25,6 +25,7 @@ import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/t
 import { mockClasses } from "@/lib/placeholder-data"; 
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
 
 const commonSchema = {
   title: z.string().min(3, "Title is too short."),
@@ -37,24 +38,24 @@ const announcementSchema = z.object({
   ...commonSchema,
   type: z.literal("announcement"),
   content: z.string().min(10, "Content is too short.").optional().default(""),
-  subject: z.string().optional(),
-  assignmentName: z.string().optional(),
+  subject: z.string().optional(), // Optional here
+  assignmentName: z.string().optional(), // Optional here
 });
 
 const examSchema = z.object({
   ...commonSchema,
   type: z.literal("exam"),
   subject: z.string().min(2, "Subject is too short.").optional().default(""),
-  content: z.string().optional(),
-  assignmentName: z.string().optional(),
+  content: z.string().optional(), // Optional here
+  assignmentName: z.string().optional(), // Optional here
 });
 
 const deadlineSchema = z.object({
   ...commonSchema,
   type: z.literal("deadline"),
   assignmentName: z.string().min(3, "Assignment name is too short.").optional().default(""),
-  content: z.string().optional(),
-  subject: z.string().optional(),
+  content: z.string().optional(), // Optional here
+  subject: z.string().optional(), // Optional here
 });
 
 const delegateInputFormSchema = z.discriminatedUnion("type", [
@@ -76,6 +77,7 @@ export function DelegateInputForm({
   availableClasses = mockClasses,
   initialData 
 }: DelegateInputFormProps) {
+  const { t } = useLanguage(); // Get t function
   const [activeTab, setActiveTab] = useState<"announcement" | "exam" | "deadline">(initialData?.type || "announcement");
 
   const form = useForm<DelegateInputFormValues>({
@@ -93,28 +95,27 @@ export function DelegateInputForm({
   }); 
   
   useEffect(() => {
+    const classIdForForm = initialData?.class ? availableClasses.find(c => c.name === initialData.class)?.id || "" : form.getValues('classId') || "";
+    
     if (initialData) {
       setActiveTab(initialData.type);
-      const classIdForForm = availableClasses.find(c => c.name === initialData.class)?.id || "";
-      
       form.reset({
-        title: initialData.title,
-        date: new Date(initialData.date),
+        type: initialData.type,
+        title: initialData.title || "",
+        date: initialData.date ? new Date(initialData.date) : new Date(),
         classId: classIdForForm,
         description: initialData.description || "",
-        type: initialData.type,
         content: initialData.type === 'announcement' ? (initialData as Announcement).content || "" : "",
         subject: initialData.type === 'exam' ? (initialData as Exam).subject || "" : "",
         assignmentName: initialData.type === 'deadline' ? (initialData as Deadline).assignmentName || "" : "",
       });
     } else {
       // Reset for new entry or when activeTab changes for a new entry
-      const preservedClassId = form.getValues('classId');
       form.reset({
         type: activeTab,
         title: "",
         date: new Date(),
-        classId: preservedClassId,
+        classId: classIdForForm, // Preserve selected class if any, or default
         description: "",
         content: "", 
         subject: "",
@@ -127,12 +128,11 @@ export function DelegateInputForm({
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
     setActiveTab(newType); 
-
+    // useEffect will handle resetting fields based on activeTab for new entries
+    // For existing entries, type is already part of initialData and form.reset
+    // If switching tab for a new entry, ensure the type is set for validation
     if (!initialData) {
-      form.setValue("type", newType, { shouldValidate: true });
-      // The useEffect will handle resetting fields based on activeTab for new entries
-    } else {
-       form.setValue("type", newType, { shouldValidate: true });
+        form.setValue("type", newType, { shouldValidate: true });
     }
   };
 
@@ -179,7 +179,6 @@ export function DelegateInputForm({
         } as Deadline;
         break;
       default:
-        // This should not happen due to Zod validation
         const _exhaustiveCheck: never = values;
         console.error("Invalid form type submitted", _exhaustiveCheck);
         return;
@@ -190,11 +189,12 @@ export function DelegateInputForm({
     }
 
     if (!initialData) { // If it was a new submission
+      const preservedClassId = form.getValues('classId');
       form.reset({
-        type: activeTab, // Keep current tab
+        type: activeTab, 
         title: "",
-        date: new Date(), // Reset date to now
-        classId: form.getValues('classId'), // Preserve selected class
+        date: new Date(), 
+        classId: preservedClassId, 
         description: "",
         content: "",
         subject: "",
@@ -202,13 +202,20 @@ export function DelegateInputForm({
       });
     }
   }
+  
+  const getTabName = (tabValue: "announcement" | "exam" | "deadline"): string => {
+    if (tabValue === "announcement") return t("announcementTabLabel");
+    if (tabValue === "exam") return t("examTabLabel");
+    if (tabValue === "deadline") return t("deadlineTabLabel");
+    return "";
+  }
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-3 mb-6">
-        <TabsTrigger value="announcement"><Megaphone className="mr-2 h-4 w-4 inline-block" />Anuncio</TabsTrigger>
-        <TabsTrigger value="exam"><BookOpenCheck className="mr-2 h-4 w-4 inline-block" />Exame</TabsTrigger>
-        <TabsTrigger value="deadline"><FileText className="mr-2 h-4 w-4 inline-block" />Prazo</TabsTrigger>
+        <TabsTrigger value="announcement"><Megaphone className="mr-2 h-4 w-4 inline-block" />{t('announcementTabLabel')}</TabsTrigger>
+        <TabsTrigger value="exam"><BookOpenCheck className="mr-2 h-4 w-4 inline-block" />{t('examTabLabel')}</TabsTrigger>
+        <TabsTrigger value="deadline"><FileText className="mr-2 h-4 w-4 inline-block" />{t('deadlineTabLabel')}</TabsTrigger>
       </TabsList>
 
       <Form {...form}>
@@ -220,8 +227,8 @@ export function DelegateInputForm({
             name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Título</FormLabel>
-                <FormControl><Input placeholder={`Título para ${activeTab}`} {...field} /></FormControl>
+                <FormLabel>{t('formTitleLabel')}</FormLabel>
+                <FormControl><Input placeholder={t('formTitlePlaceholder', { tabName: getTabName(activeTab) })} {...field} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -232,12 +239,12 @@ export function DelegateInputForm({
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Data e Hora</FormLabel>
+                  <FormLabel>{t('formDateTimeLabel')}</FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                          {field.value ? format(field.value, "PPP p") : <span>Escolle data e hora</span>}
+                          {field.value ? format(field.value, "PPP p") : <span>{t('formPickDateTimeButton')}</span>}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
@@ -255,14 +262,14 @@ export function DelegateInputForm({
               name="classId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Clase</FormLabel>
+                  <FormLabel>{t('formClassLabel')}</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value || ""} disabled={availableClasses.length === 0}>
-                    <FormControl><SelectTrigger><SelectValue placeholder="Selecciona unha clase" /></SelectTrigger></FormControl>
+                    <FormControl><SelectTrigger><SelectValue placeholder={t('formSelectClassPlaceholder')} /></SelectTrigger></FormControl>
                     <SelectContent>
                       {availableClasses.map(cls => <SelectItem key={cls.id} value={cls.id}>{cls.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  {availableClasses.length === 0 && <p className="text-xs text-muted-foreground">Non tes clases asignadas para enviar información.</p>}
+                  {availableClasses.length === 0 && <p className="text-xs text-muted-foreground">{t('formNoAssignedClassesWarning')}</p>}
                   <FormMessage />
                 </FormItem>
               )}
@@ -275,8 +282,8 @@ export function DelegateInputForm({
               name="content" 
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contido do Anuncio</FormLabel>
-                  <FormControl><Textarea placeholder="Información detallada..." {...field} value={field.value || ""} /></FormControl>
+                  <FormLabel>{t('formAnnouncementContentLabel')}</FormLabel>
+                  <FormControl><Textarea placeholder={t('formAnnouncementContentPlaceholder')} {...field} value={field.value || ""} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -288,8 +295,8 @@ export function DelegateInputForm({
               name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Materia do Exame</FormLabel>
-                  <FormControl><Input placeholder="p.ex., Matemáticas, Física" {...field} value={field.value || ""} /></FormControl>
+                  <FormLabel>{t('formExamSubjectLabel')}</FormLabel>
+                  <FormControl><Input placeholder={t('formExamSubjectPlaceholder')} {...field} value={field.value || ""} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -301,8 +308,8 @@ export function DelegateInputForm({
               name="assignmentName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nome da Tarefa</FormLabel>
-                  <FormControl><Input placeholder="p.ex., Ensaio de Historia, Proxecto de Ciencias" {...field} value={field.value || ""} /></FormControl>
+                  <FormLabel>{t('formDeadlineAssignmentNameLabel')}</FormLabel>
+                  <FormControl><Input placeholder={t('formDeadlineAssignmentNamePlaceholder')} {...field} value={field.value || ""} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -314,15 +321,15 @@ export function DelegateInputForm({
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Descrición Adicional (Opcional)</FormLabel>
-                <FormControl><Textarea placeholder="Calquera detalle ou nota extra..." {...field} rows={3} value={field.value || ""} /></FormControl>
+                <FormLabel>{t('formAdditionalDescriptionLabel')}</FormLabel>
+                <FormControl><Textarea placeholder={t('formAdditionalDescriptionPlaceholder')} rows={3} {...field} value={field.value || ""} /></FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
           <Button type="submit" className="w-full sm:w-auto" disabled={availableClasses.length === 0 && !initialData}>
-            <PlusCircle className="mr-2 h-4 w-4" /> {initialData ? "Actualizar Información" : "Enviar Información"}
+            <PlusCircle className="mr-2 h-4 w-4" /> {initialData ? t('formUpdateButton') : t('formSubmitButton')}
           </Button>
         </form>
       </Form>
