@@ -43,6 +43,8 @@ interface AdminAnnouncementFormProps {
   availableClasses?: SchoolClass[]; // Pass available classes
 }
 
+const CLASSES_COLUMN_THRESHOLD = 5; // Show columns if more than 5 classes
+
 export function AdminAnnouncementForm({ 
   onSubmitSuccess, 
   initialData,
@@ -225,53 +227,81 @@ export function AdminAnnouncementForm({
         <FormField
           control={form.control}
           name="targetClassIds"
-          render={() => (
-            <FormItem>
-              <div className="mb-4">
-                <FormLabel className="text-base">Target Classes</FormLabel>
-                <FormDescription>
-                  Select classes to target. Leave all unchecked for a school-wide announcement.
-                </FormDescription>
-              </div>
-              <div className="space-y-2">
-                {(availableClasses || []).map((classItem) => (
-                  <FormField
-                    key={classItem.id}
-                    control={form.control}
-                    name="targetClassIds"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={classItem.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(classItem.id)}
-                              onCheckedChange={(checked) => {
-                                const currentValue = field.value || [];
-                                return checked
-                                  ? field.onChange([...currentValue, classItem.id])
-                                  : field.onChange(
-                                      currentValue.filter(
-                                        (id) => id !== classItem.id
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {classItem.name}
-                          </FormLabel>
-                        </FormItem>
-                      );
+          render={({ field }) => {
+            const allClassIds = availableClasses ? availableClasses.map(cls => cls.id) : [];
+            const areAllSelected = availableClasses && field.value && field.value.length === allClassIds.length && field.value.length > 0;
+            const buttonText = areAllSelected ? "Deselect All Classes" : "Select All Classes";
+            
+            return (
+              <FormItem>
+                <div className="mb-2">
+                  <FormLabel className="text-base">Target Classes</FormLabel>
+                  <FormDescription>
+                    Select classes to target. Leave all unchecked for a school-wide announcement.
+                  </FormDescription>
+                </div>
+
+                {availableClasses && availableClasses.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mb-3 text-xs"
+                    onClick={() => {
+                      if (areAllSelected) {
+                        field.onChange([]);
+                      } else {
+                        field.onChange(allClassIds);
+                      }
                     }}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
+                  >
+                    {buttonText}
+                  </Button>
+                )}
+
+                <div className={cn(
+                  availableClasses && availableClasses.length > CLASSES_COLUMN_THRESHOLD 
+                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1" 
+                    : "space-y-1" 
+                )}>
+                  {(availableClasses || []).map((classItem) => (
+                    <FormField
+                      key={classItem.id}
+                      control={form.control}
+                      name="targetClassIds"
+                      render={({ field: checkboxField }) => {
+                        return (
+                          <FormItem
+                            className="flex flex-row items-center space-x-2 space-y-0 py-1"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={checkboxField.value?.includes(classItem.id)}
+                                onCheckedChange={(checked) => {
+                                  const currentValue = checkboxField.value || [];
+                                  if (checked) {
+                                    checkboxField.onChange([...currentValue, classItem.id]);
+                                  } else {
+                                    checkboxField.onChange(
+                                      currentValue.filter((id) => id !== classItem.id)
+                                    );
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal text-sm leading-none cursor-pointer">
+                              {classItem.name}
+                            </FormLabel>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
 
         <Button type="submit" className="w-full sm:w-auto">
