@@ -1,7 +1,7 @@
 // src/lib/i18n.ts
 export const supportedLanguages = ['en', 'es', 'fr', 'gl'] as const;
 export type SupportedLanguage = typeof supportedLanguages[number];
-export const defaultLanguage: SupportedLanguage = 'en';
+export const defaultLanguage: SupportedLanguage = 'gl';
 
 interface Translations {
   appTitle: string;
@@ -42,7 +42,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageUsersTitle: "Gérer les Utilisateurs",
     delegateDashboardTitle: "Tableau de bord Délégué",
   },
-  gl: { // Galician translations to be filled
+  gl: { 
     appTitle: "Avisos Escolares",
     loginTitle: "Benvido de novo!",
     loginDescription: "Inicia sesión para xestionar avisos e información escolar.",
