@@ -22,11 +22,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function AdminDashboardPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handleFormSubmit = (data: Announcement) => {
     if (editingAnnouncement) {
@@ -39,7 +41,6 @@ export default function AdminDashboardPage() {
 
   const handleEdit = (announcement: Announcement) => {
     setEditingAnnouncement(announcement);
-    // Scroll to form or open in a modal for better UX in a real app
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -54,7 +55,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8 text-primary">Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-8 text-primary">{t('adminDashboardTitle')}</h1>
       
       <Card className="mb-8 shadow-lg">
         <CardHeader>
@@ -72,7 +73,7 @@ export default function AdminDashboardPage() {
           <AdminAnnouncementForm 
             onSubmitSuccess={handleFormSubmit} 
             initialData={editingAnnouncement || undefined} 
-            key={editingAnnouncement ? editingAnnouncement.id : 'new'} // Force re-render on edit change
+            key={editingAnnouncement ? editingAnnouncement.id : 'new'}
           />
         </CardContent>
       </Card>

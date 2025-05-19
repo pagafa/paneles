@@ -1,21 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation"; // Corrected import
+import { usePathname, useRouter } from "next/navigation"; 
 import {
-  LayoutDashboard,
-  Megaphone,
-  ClipboardList,
+  // LayoutDashboard, // Not used directly, ShieldCheck used for Admin Dashboard
+  // Megaphone, // Not used directly
+  // ClipboardList, // Not used directly
   Users,
   School as SchoolIcon,
   UserCheck,
   ShieldCheck,
-  BookOpenCheck,
-  // Settings, // Removed Settings icon
+  // BookOpenCheck, // Not used directly
 } from "lucide-react";
 import { AppLogo } from "@/components/common/AppLogo";
 import { UserNav } from "@/components/common/UserNav";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button"; // Not used
 import {
   SidebarProvider,
   Sidebar,
@@ -24,32 +23,37 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
+  // SidebarFooter, // Removed
   SidebarTrigger,
   SidebarInset,
   useSidebar,
-} from "@/components/ui/sidebar"; // Assuming this path is correct based on project structure
+} from "@/components/ui/sidebar"; 
 import type { UserRole } from "@/types";
 import { useEffect, useState }  from 'react';
+import { useLanguage } from "@/context/LanguageContext";
+import type { TranslationKey } from "@/lib/i18n";
 
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: TranslationKey; // Changed from label to labelKey
   icon: React.ElementType;
   roles: UserRole[];
 }
 
 const navItems: NavItem[] = [
-  { href: "/admin/dashboard", label: "Admin Dashboard", icon: ShieldCheck, roles: ["admin"] },
-  { href: "/admin/manage-classes", label: "Manage Classes", icon: SchoolIcon, roles: ["admin"] },
-  { href: "/admin/manage-users", label: "Manage Users", icon: Users, roles: ["admin"] },
-  { href: "/delegate/dashboard", label: "Delegate Dashboard", icon: UserCheck, roles: ["delegate"] },
+  { href: "/admin/dashboard", labelKey: "adminDashboardTitle", icon: ShieldCheck, roles: ["admin"] },
+  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: SchoolIcon, roles: ["admin"] },
+  { href: "/admin/manage-users", labelKey: "manageUsersTitle", icon: Users, roles: ["admin"] },
+  { href: "/delegate/dashboard", labelKey: "delegateDashboardTitle", icon: UserCheck, roles: ["delegate"] },
 ];
 
 function SiteSidebar() {
   const pathname = usePathname();
   const [currentUserRole, setCurrentUserRole] = useState<UserRole | 'guest'>('guest');
+  const { state } = useSidebar();
+  const { t } = useLanguage();
+
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -58,13 +62,9 @@ function SiteSidebar() {
     }
   }, []);
   
-  const { state } = useSidebar();
-
-
   const filteredNavItems = navItems.filter(item => item.roles.includes(currentUserRole));
 
   if (currentUserRole === 'guest') {
-    // Or handle redirect, this is just for UI consistency if somehow landed here
     return null; 
   }
   
@@ -84,11 +84,11 @@ function SiteSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/admin/dashboard" && item.href !== "/delegate/dashboard")}
-                  tooltip={{ children: item.label, className: "text-xs" }}
+                  tooltip={{ children: t(item.labelKey), className: "text-xs" }}
                 >
                   <a>
                     <item.icon />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </a>
                 </SidebarMenuButton>
               </Link>
@@ -96,16 +96,6 @@ function SiteSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      {/* Removed SidebarFooter containing Settings link */}
-      {/* 
-      <SidebarFooter className="p-2">
-        <Link href="/settings" legacyBehavior passHref>
-          <SidebarMenuButton asChild tooltip={{children: "Settings", className:"text-xs"}}>
-            <a><Settings /><span>Settings</span></a>
-          </SidebarMenuButton>
-        </Link>
-      </SidebarFooter> 
-      */}
     </Sidebar>
   );
 }
@@ -129,7 +119,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   if (!isAuthCheckComplete) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p>Loading...</p> {/* Or a spinner component */}
+        <p>Loading...</p> 
       </div>
     );
   }

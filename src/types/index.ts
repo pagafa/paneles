@@ -1,3 +1,5 @@
+import type { SupportedLanguage } from '@/lib/i18n';
+
 export type AnnouncementItemType = 'announcement' | 'exam' | 'deadline';
 
 export interface BaseSchoolItem {
@@ -40,4 +42,5 @@ export interface SchoolClass {
   id: string;
   name: string;
   delegateId?: string; // Optional delegate user ID
+  language?: SupportedLanguage; // Added language field
 }

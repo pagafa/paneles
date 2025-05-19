@@ -17,7 +17,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { LogIn } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useRouter } from "next/navigation"; // Corrected import
+import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
 
 const loginFormSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -30,6 +31,7 @@ export function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -47,12 +49,10 @@ export function LoginForm() {
 
     // Mock authentication logic
     if (values.email === "admin@school.com" && values.password === "password") {
-      // Simulate setting a session/token and redirecting
-      // In a real app, you'd use a proper auth provider
-      localStorage.setItem("userRole", "admin"); // MOCK: Not secure!
+      localStorage.setItem("userRole", "admin"); 
       router.push("/admin/dashboard");
     } else if (values.email === "delegate@school.com" && values.password === "password") {
-      localStorage.setItem("userRole", "delegate"); // MOCK: Not secure!
+      localStorage.setItem("userRole", "delegate"); 
       router.push("/delegate/dashboard");
     } else {
       setError("Invalid email or password.");
@@ -63,9 +63,9 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-xl">
       <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center text-primary">Welcome Back!</CardTitle>
+        <CardTitle className="text-2xl font-bold text-center text-primary">{t('loginTitle')}</CardTitle>
         <CardDescription className="text-center">
-          Log in to manage announcements and school information.
+          {t('loginDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
