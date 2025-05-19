@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { LanguageProvider } from '@/context/LanguageContext';
+import { defaultLanguage } from '@/lib/i18n';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang={defaultLanguage}>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <LanguageProvider>
           {children}

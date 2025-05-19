@@ -11,7 +11,18 @@ interface Translations {
   manageClassesTitle: string;
   manageUsersTitle: string;
   delegateDashboardTitle: string;
-  // Add more keys as needed
+  kioskMainTitle: string;
+  kioskMainSubtitle: string;
+  announcementsSectionTitle: string;
+  examsSectionTitle: string;
+  deadlinesSectionTitle: string;
+  noAnnouncementsHint: string;
+  noExamsHint: string;
+  noDeadlinesHint: string;
+  checkBackLaterHint: string;
+  viewClassesButtonLabel: string;
+  loginButtonLabel: string;
+  footerAllRightsReserved: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -23,6 +34,18 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Manage Classes",
     manageUsersTitle: "Manage Users",
     delegateDashboardTitle: "Delegate Dashboard",
+    kioskMainTitle: "Stay Informed",
+    kioskMainSubtitle: "Latest school updates at your fingertips.",
+    announcementsSectionTitle: "Announcements",
+    examsSectionTitle: "Upcoming Exams",
+    deadlinesSectionTitle: "Assignment Deadlines",
+    noAnnouncementsHint: "No current announcements.",
+    noExamsHint: "No upcoming exams scheduled.",
+    noDeadlinesHint: "No assignment deadlines approaching.",
+    checkBackLaterHint: "Please check back later for updates.",
+    viewClassesButtonLabel: "View Classes",
+    loginButtonLabel: "Login",
+    footerAllRightsReserved: "All rights reserved.",
   },
   es: {
     appTitle: "Avisos Escolares",
@@ -32,8 +55,20 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gestionar Clases",
     manageUsersTitle: "Gestionar Usuarios",
     delegateDashboardTitle: "Panel de Delegado",
+    kioskMainTitle: "Mantente Informado",
+    kioskMainSubtitle: "Últimas actualizaciones de la escuela al alcance de tu mano.",
+    announcementsSectionTitle: "Anuncios",
+    examsSectionTitle: "Próximos Exámenes",
+    deadlinesSectionTitle: "Fechas de Entrega",
+    noAnnouncementsHint: "No hay anuncios actualmente.",
+    noExamsHint: "No hay exámenes programados.",
+    noDeadlinesHint: "No hay fechas de entrega próximas.",
+    checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
+    viewClassesButtonLabel: "Ver Clases",
+    loginButtonLabel: "Iniciar Sesión",
+    footerAllRightsReserved: "Todos los derechos reservados.",
   },
-  fr: { // French translations to be filled
+  fr: { 
     appTitle: "Annonces Scolaires",
     loginTitle: "Content de vous revoir!",
     loginDescription: "Connectez-vous pour gérer les annonces et les informations scolaires.",
@@ -41,6 +76,18 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gérer les Classes",
     manageUsersTitle: "Gérer les Utilisateurs",
     delegateDashboardTitle: "Tableau de bord Délégué",
+    kioskMainTitle: "Restez Informé", // Placeholder
+    kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.", // Placeholder
+    announcementsSectionTitle: "Annonces", // Placeholder
+    examsSectionTitle: "Examens à Venir", // Placeholder
+    deadlinesSectionTitle: "Dates Limites", // Placeholder
+    noAnnouncementsHint: "Aucune annonce pour le moment.", // Placeholder
+    noExamsHint: "Aucun examen prévu.", // Placeholder
+    noDeadlinesHint: "Aucune date limite d'affectation approchant.", // Placeholder
+    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", // Placeholder
+    viewClassesButtonLabel: "Voir les Classes", // Placeholder
+    loginButtonLabel: "Connexion", // Placeholder
+    footerAllRightsReserved: "Tous droits réservés.", // Placeholder
   },
   gl: { 
     appTitle: "Avisos Escolares",
@@ -50,6 +97,18 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Xestionar Clases",
     manageUsersTitle: "Xestionar Usuarios",
     delegateDashboardTitle: "Panel de Delegado",
+    kioskMainTitle: "Mantente Informado",
+    kioskMainSubtitle: "Últimas actualizacións da escola ao teu alcance.",
+    announcementsSectionTitle: "Anuncios",
+    examsSectionTitle: "Próximos Exames",
+    deadlinesSectionTitle: "Datas de Entrega de Tarefas",
+    noAnnouncementsHint: "Non hai anuncios actualmente.",
+    noExamsHint: "Non hai exames programados.",
+    noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
+    checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
+    viewClassesButtonLabel: "Ver Clases",
+    loginButtonLabel: "Iniciar Sesión",
+    footerAllRightsReserved: "Todos os dereitos reservados.",
   },
 };
 
