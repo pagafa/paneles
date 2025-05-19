@@ -13,7 +13,7 @@ interface AnnouncementCardProps {
   onEdit?: (item: SchoolEvent) => void;
   onDeleteRequest?: (item: SchoolEvent) => void;
   showDelegateActions?: boolean;
-  showTypeIcon?: boolean; // New prop
+  showTypeIcon?: boolean;
 }
 
 export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateActions = false, showTypeIcon = false }: AnnouncementCardProps) {
@@ -21,7 +21,6 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
 
   useEffect(() => {
     try {
-      // Display date in HH:mm format (24-hour)
       setFormattedDate(format(new Date(item.date), 'PPP HH:mm'));
     } catch (error) {
       console.error("Error formatting date:", item.date, error);
@@ -37,9 +36,9 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
   return (
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
       <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
-        <div className="flex items-center gap-2"> {/* Ensure icon and title are grouped and aligned */}
+        <div className="flex items-center gap-3"> {}
           {showTypeIcon && TypeSpecificIcon && (
-            <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" aria-label={item.type} />
+            <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" aria-label={item.type} />
           )}
           <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
         </div>
@@ -55,9 +54,9 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
         )}
       </CardHeader>
       <CardContent className="pt-0">
-        {item.type === 'announcement' && <p className="text-base text-foreground/90 mb-2">{(item as Announcement).content}</p>}
-        {item.type === 'exam' && <p className="text-base text-foreground/90 mb-2">Subject: {(item as Exam).subject}</p>}
-        {item.type === 'deadline' && <p className="text-base text-foreground/90 mb-2">Assignment: {(item as Deadline).assignmentName}</p>}
+        {item.type === 'announcement' && <p className="text-lg text-foreground/90 mb-2">{(item as Announcement).content}</p>}
+        {item.type === 'exam' && <p className="text-lg text-foreground/90 mb-2">Subject: {(item as Exam).subject}</p>}
+        {item.type === 'deadline' && <p className="text-lg text-foreground/90 mb-2">Assignment: {(item as Deadline).assignmentName}</p>}
         
         {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
         
