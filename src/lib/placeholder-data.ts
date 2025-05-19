@@ -68,8 +68,8 @@ export const mockUsers: User[] = [
 ];
 
 export const mockClasses: SchoolClass[] = [
-  { id: 'class1', name: 'Grade 10A', teacher: 'Mr. Smith', delegateId: 'user2' },
-  { id: 'class2', name: 'Grade 10B', teacher: 'Ms. Jones' },
-  { id: 'class3', name: 'Grade 11C', teacher: 'Dr. Brown', delegateId: 'user3' },
-  { id: 'class4', name: 'Grade 12B', teacher: 'Mr. Davis' },
+  { id: 'class1', name: 'Grade 10A', delegateId: 'user2' },
+  { id: 'class2', name: 'Grade 10B' },
+  { id: 'class3', name: 'Grade 11C', delegateId: 'user3' },
+  { id: 'class4', name: 'Grade 12B' },
 ];

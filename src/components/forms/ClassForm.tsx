@@ -22,7 +22,6 @@ import { mockUsers } from "@/lib/placeholder-data"; // For delegate selection
 
 const classFormSchema = z.object({
   name: z.string().min(2, { message: "Class name must be at least 2 characters." }),
-  teacher: z.string().optional(),
   delegateId: z.string().optional(),
 });
 
@@ -42,7 +41,6 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       name: initialData?.name || "",
-      teacher: initialData?.teacher || "",
       delegateId: initialData?.delegateId || "", // "" represents no delegate in form state
     },
   });
@@ -62,7 +60,7 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
       onSubmitSuccess(newClass);
     }
      if (!initialData?.id) {
-      form.reset({ name: "", teacher: "", delegateId: "" });
+      form.reset({ name: "", delegateId: "" });
     }
   }
 
@@ -77,19 +75,6 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
               <FormLabel>Class Name</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., Grade 10A, Computer Science Club" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="teacher"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Teacher (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="e.g., Mr. Smith" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -139,4 +124,3 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
     </Form>
   );
 }
-

@@ -39,6 +39,5 @@ export interface User {
 export interface SchoolClass {
   id: string;
   name: string;
-  teacher?: string; // Optional teacher name
   delegateId?: string; // Optional delegate user ID
 }

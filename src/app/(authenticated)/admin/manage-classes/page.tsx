@@ -104,7 +104,6 @@ export default function ManageClassesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Class Name</TableHead>
-                  <TableHead>Teacher</TableHead>
                   <TableHead>Delegate</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -113,7 +112,6 @@ export default function ManageClassesPage() {
                 {classes.map((cls) => (
                   <TableRow key={cls.id}>
                     <TableCell className="font-medium">{cls.name}</TableCell>
-                    <TableCell>{cls.teacher || "N/A"}</TableCell>
                     <TableCell>{getDelegateName(cls.delegateId)}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(cls)} aria-label="Edit Class">
@@ -151,4 +149,3 @@ export default function ManageClassesPage() {
     </div>
   );
 }
-

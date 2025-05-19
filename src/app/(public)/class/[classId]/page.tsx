@@ -51,22 +51,18 @@ export default async function PublicClassPage({ params }: { params: { classId: s
           </div>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
-          {classDetails.teacher && (
-            <div className="flex items-center gap-3">
-              <UserCircle className="h-6 w-6 text-accent" />
-              <div>
-                <h3 className="font-semibold text-lg">Profesor</h3>
-                <p className="text-muted-foreground">{classDetails.teacher}</p>
-              </div>
-            </div>
-          )}
-          
           {/* Placeholder for future class-specific announcements or events */}
           <div>
             <h3 className="font-semibold text-lg mb-2">Información Adicional</h3>
             <p className="text-sm text-muted-foreground">
               Más detalles sobre horarios, anuncios específicos de la clase y eventos aparecerán aquí.
             </p>
+            {classDetails.delegateId && (
+                 <p className="text-sm text-muted-foreground mt-2">
+                    ID del Delegado: {classDetails.delegateId} 
+                    {/* In a real app, you'd fetch and display delegate name */}
+                 </p>
+            )}
           </div>
 
           <div className="mt-8 text-center">
@@ -86,4 +82,3 @@ export default async function PublicClassPage({ params }: { params: { classId: s
 //     classId: cls.id,
 //   }));
 // }
-
