@@ -5,7 +5,7 @@ import { AdminAnnouncementForm } from "@/components/forms/AdminAnnouncementForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { mockClasses } from "@/lib/placeholder-data"; // Keep for availableClasses prop
+// mockClasses no longer used directly for allClasses state
 import type { Announcement, SchoolClass } from "@/types";
 import { format } from "date-fns";
 import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle } from "lucide-react";
@@ -36,17 +36,20 @@ const sortAnnouncements = (announcements: Announcement[]) => {
 export default function AdminDashboardPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
-  const [allClasses] = useState<SchoolClass[]>(mockClasses); 
+  const [allClasses, setAllClasses] = useState<SchoolClass[]>([]); // Fetched from API
+  const [isLoadingAnnouncements, setIsLoadingAnnouncements] = useState(true);
+  const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+  const [errorAnnouncements, setErrorAnnouncements] = useState<string | null>(null);
+  const [errorClasses, setErrorClasses] = useState<string | null>(null);
+  
   const { toast } = useToast();
   const { t } = useLanguage();
   const { schoolName, setSchoolName } = useSchoolName();
   const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchAnnouncements = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoadingAnnouncements(true);
+    setErrorAnnouncements(null);
     try {
       const response = await fetch('/api/announcements');
       if (!response.ok) {
@@ -54,25 +57,45 @@ export default function AdminDashboardPage() {
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-          // Ignore if response is not JSON
-        }
+        } catch (e) { /* Ignore if response is not JSON */ }
         throw new Error(errorMessage);
       }
       const data: Announcement[] = await response.json();
       setAnnouncements(sortAnnouncements(data));
     } catch (err) {
       console.error(err);
-      setError(t('errorFetchingAnnouncements', { message: (err as Error).message }) || 'Failed to load announcements. Please try again.');
-      setAnnouncements([]); // Clear announcements on error
+      setErrorAnnouncements(t('errorFetchingAnnouncements', { message: (err as Error).message }) || 'Failed to load announcements. Please try again.');
+      setAnnouncements([]);
     } finally {
-      setIsLoading(false);
+      setIsLoadingAnnouncements(false);
     }
   }, [t]);
 
+  const fetchAllClasses = useCallback(async () => {
+    setIsLoadingClasses(true);
+    setErrorClasses(null);
+    try {
+      const response = await fetch('/api/classes');
+      if (!response.ok) {
+         const errorData = await response.json().catch(() => ({ message: `Failed to fetch classes. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to fetch classes. Status: ${response.status}`);
+      }
+      const data: SchoolClass[] = await response.json();
+      setAllClasses(data);
+    } catch (err) {
+      console.error('Error fetching classes for admin form:', err);
+      setErrorClasses((err as Error).message);
+      setAllClasses([]);
+    } finally {
+      setIsLoadingClasses(false);
+    }
+  }, []);
+
+
   useEffect(() => {
     fetchAnnouncements();
-  }, [fetchAnnouncements]);
+    fetchAllClasses();
+  }, [fetchAnnouncements, fetchAllClasses]);
 
   useEffect(() => {
     setEditableSchoolName(schoolName);
@@ -95,19 +118,18 @@ export default function AdminDashboardPage() {
         try {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-            // Ignore if response is not JSON
-        }
+        } catch (e) { /* Ignore */ }
         throw new Error(errorMessage);
       }
       
-      toast({
-        title: isEditing ? t('announcementUpdatedToastTitle') : t('announcementPostedToastTitle'),
-        description: t('announcementActionSuccessToastDescription', { title: data.title, action: isEditing ? t('updated') : t('posted')})
-      });
+      // No need to call toast here if AdminAnnouncementForm handles its own success toast
+      // toast({
+      //   title: isEditing ? t('announcementUpdatedToastTitle') : t('announcementPostedToastTitle'),
+      //   description: t('announcementActionSuccessToastDescription', { title: data.title, action: isEditing ? t('updated') : t('posted')})
+      // });
 
       setEditingAnnouncement(null);
-      await fetchAnnouncements(); // Refresh list
+      await fetchAnnouncements(); 
     } catch (err) {
       console.error(err);
       toast({
@@ -133,9 +155,7 @@ export default function AdminDashboardPage() {
         try {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-             // Ignore if response is not JSON
-        }
+        } catch (e) { /* Ignore */ }
         throw new Error(errorMessage);
       }
       toast({
@@ -143,7 +163,7 @@ export default function AdminDashboardPage() {
         description: t('announcementDeletedToastDescription'),
         variant: "destructive"
       });
-      await fetchAnnouncements(); // Refresh list
+      await fetchAnnouncements(); 
     } catch (err) {
        console.error(err);
        toast({
@@ -167,7 +187,7 @@ export default function AdminDashboardPage() {
       return t('schoolWideTarget');
     }
     const targetedClassNames = targetClassIds.map(id => {
-      const cls = allClasses.find(c => c.id === id);
+      const cls = allClasses.find(c => c.id === id); // Use fetched allClasses
       return cls ? cls.name : id;
     }).join(', ');
     return `${t('classesTargetLabel')}: ${targetedClassNames}`;
@@ -217,26 +237,32 @@ export default function AdminDashboardPage() {
           )}
         </CardHeader>
         <CardContent>
-          <AdminAnnouncementForm 
-            onSubmitSuccess={handleFormSubmit} 
-            initialData={editingAnnouncement || undefined}
-            availableClasses={allClasses}
-            key={editingAnnouncement ? editingAnnouncement.id : 'new'}
-          />
+          {isLoadingClasses && <Skeleton className="h-40 w-full" />}
+          {errorClasses && !isLoadingClasses && (
+             <p className="text-sm text-destructive">Error loading classes for form: {errorClasses}. Some features might be unavailable.</p>
+          )}
+          {!isLoadingClasses && !errorClasses && (
+            <AdminAnnouncementForm 
+              onSubmitSuccess={handleFormSubmit} 
+              initialData={editingAnnouncement || undefined}
+              availableClasses={allClasses} // Pass fetched classes
+              key={editingAnnouncement ? editingAnnouncement.id : 'new'}
+            />
+          )}
         </CardContent>
       </Card>
 
       <Separator className="my-8" />
 
       <h2 className="text-2xl font-semibold mb-6">{t('currentAnnouncementsTitle')}</h2>
-      {isLoading && (
+      {isLoadingAnnouncements && (
         <div className="space-y-4">
           <Skeleton className="h-24 w-full rounded-md" />
           <Skeleton className="h-24 w-full rounded-md" />
           <Skeleton className="h-24 w-full rounded-md" />
         </div>
       )}
-      {error && !isLoading && (
+      {errorAnnouncements && !isLoadingAnnouncements && (
         <Card className="border-destructive bg-destructive/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
@@ -244,23 +270,23 @@ export default function AdminDashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-destructive">{error}</p>
+            <p className="text-destructive">{errorAnnouncements}</p>
             <Button onClick={fetchAnnouncements} className="mt-4">{t('retryButtonLabel')}</Button>
           </CardContent>
         </Card>
       )}
-      {!isLoading && !error && announcements.length === 0 && (
+      {!isLoadingAnnouncements && !errorAnnouncements && announcements.length === 0 && (
         <p className="text-muted-foreground">{t('noAnnouncementsPostedHint')}</p>
       )}
-      {!isLoading && !error && announcements.length > 0 && (
+      {!isLoadingAnnouncements && !errorAnnouncements && announcements.length > 0 && (
         <ScrollArea className="h-[400px] rounded-md border p-4 bg-card">
           <div className="space-y-4">
             {announcements.map((ann) => (
               <Card key={ann.id} className="shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-3 pt-4">
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-lg">{ann.title}</CardTitle>
+                      <CardTitle className="text-xl font-semibold">{ann.title}</CardTitle>
                       <CardDescription>{format(new Date(ann.date), "PPP HH:mm")}</CardDescription>
                     </div>
                     <div className="flex gap-2">
@@ -291,9 +317,9 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-foreground/90">{ann.content}</p>
-                  <p className="text-xs text-muted-foreground mt-2">{t('targetLabel')}: {getTargetDisplay(ann.targetClassIds)}</p>
+                <CardContent className="pt-0">
+                  <p className="text-lg text-foreground/90 mb-2">{ann.content}</p>
+                  <p className="text-sm text-muted-foreground mt-2">{t('targetLabel')}: {getTargetDisplay(ann.targetClassIds)}</p>
                 </CardContent>
               </Card>
             ))}

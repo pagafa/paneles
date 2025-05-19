@@ -1,7 +1,7 @@
 
 import type { SchoolEvent, User, SchoolClass, Announcement, Exam, Deadline } from '@/types';
 
-// mockAnnouncements is now managed by announcements.data.json and API routes.
+// mockAnnouncements is now managed by announcements.db and API routes.
 // Leaving this commented out for reference or if easy restoration is needed.
 /*
 export const mockAnnouncements: Announcement[] = [
@@ -13,32 +13,32 @@ export const mockAnnouncements: Announcement[] = [
     content: 'Welcome back everyone! School reopens this Monday. Please check the updated schedule on the notice board.',
     targetClassIds: [], // School-wide
   },
-  {
-    id: 'ann2',
-    title: 'Annual Sports Day Next Week',
-    date: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-    type: 'announcement',
-    content: 'Get ready for the Annual Sports Day! Events will be held throughout next week. Sign up for your favorite sports.',
-    targetClassIds: [], // School-wide
-  },
-  {
-    id: 'ann3',
-    title: 'Special Meeting for Grade 10A',
-    date: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(),
-    type: 'announcement',
-    content: 'There will be a special meeting for all students of Grade 10A regarding the upcoming science fair.',
-    targetClassIds: ['class1'] // Assuming 'class1' is Grade 10A
-  },
+  // ... other mock announcements
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 */
 
-// For mockSchoolEvents, we need to ensure it still has some announcements if other parts of the app use it directly.
-// Ideally, those parts would also fetch from an API. For now, let's create a placeholder that might be empty
-// or include some very basic examples if needed elsewhere. Or, if no other part relies on mockAnnouncements,
-// this can be simplified.
+// mockClasses will be seeded into classes.db on first DB creation.
+// It can still be used for components that haven't been migrated to API fetching for class lists yet.
+export const mockClasses: SchoolClass[] = [
+  { id: 'class1', name: 'Grade 10A', delegateId: 'user2' },
+  { id: 'class2', name: 'Grade 10B' },
+  { id: 'class3', name: 'Grade 11C', delegateId: 'user3' },
+  { id: 'class4', name: 'Grade 12B' },
+];
 
-// Let's assume mockSchoolEvents is still needed for other parts (Kiosk, Class pages) for now.
-// We'll reconstruct it without relying on the old mockAnnouncements variable directly.
+// mockUsers will be seeded into users.db on first DB creation.
+// Still used directly by ClassForm for availableDelegates and DelegateDashboardPage for initial delegate info.
+// These will need to be updated to fetch from /api/users.
+export const mockUsers: User[] = [
+  { id: 'user1', name: 'Admin User', username: 'admin_user', role: 'admin' },
+  { id: 'user2', name: 'John Delegate', username: 'john_delegate', role: 'delegate' },
+  { id: 'user3', name: 'Jane Delegate', username: 'jane_delegate', role: 'delegate' },
+];
+
+
+// mockSchoolEvents will be seeded into schoolevents.db (for delegate submissions)
+// Admin announcements come from announcements.db
+// Kiosk and PublicClass pages will need to fetch from multiple API endpoints or a combined one.
 const exampleAnnouncementsForKiosk: Announcement[] = [
     {
     id: 'kiosk-ann1',
@@ -54,7 +54,7 @@ const exampleAnnouncementsForKiosk: Announcement[] = [
     date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
     type: 'announcement',
     content: 'Remember to return your library books by Friday.',
-    targetClassIds: ['class1'],
+    targetClassIds: ['class1'], // Example of a targeted announcement that might also appear on Kiosk if logic allows
   }
 ];
 
@@ -66,7 +66,7 @@ export const mockExams: Exam[] = [
     date: new Date(new Date().setDate(new Date().getDate() + 10)).toISOString(),
     type: 'exam',
     subject: 'Mathematics',
-    class: 'Grade 10A',
+    class: 'Grade 10A', // This 'class' field (name) will be used by Delegate submissions
   },
   {
     id: 'exam2',
@@ -93,25 +93,15 @@ export const mockDeadlines: Deadline[] = [
     date: new Date(new Date().setDate(new Date().getDate() + 9)).toISOString(),
     type: 'deadline',
     assignmentName: 'Modern Art Sculpture',
+    // class: undefined, // Example of a general deadline if applicable
   },
 ];
 
+// This composite mockSchoolEvents is used for seeding schoolevents.db (delegate-type events)
+// and potentially by Kiosk/PublicClass pages until they fully fetch from distinct API endpoints.
+// Admin announcements (school-wide or targeted) are now primarily managed via announcements.db and its API.
 export const mockSchoolEvents: SchoolEvent[] = [
-  ...exampleAnnouncementsForKiosk, // Use the new example announcements for parts still using mockSchoolEvents
+  ...exampleAnnouncementsForKiosk, 
   ...mockExams,
   ...mockDeadlines,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-
-export const mockUsers: User[] = [
-  { id: 'user1', name: 'Admin User', username: 'admin_user', role: 'admin' },
-  { id: 'user2', name: 'John Delegate', username: 'john_delegate', role: 'delegate' },
-  { id: 'user3', name: 'Jane Delegate', username: 'jane_delegate', role: 'delegate' },
-];
-
-export const mockClasses: SchoolClass[] = [
-  { id: 'class1', name: 'Grade 10A', delegateId: 'user2' },
-  { id: 'class2', name: 'Grade 10B' },
-  { id: 'class3', name: 'Grade 11C', delegateId: 'user3' },
-  { id: 'class4', name: 'Grade 12B' },
-];

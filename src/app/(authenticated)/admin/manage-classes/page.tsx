@@ -14,10 +14,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockClasses as initialClasses, mockUsers } from "@/lib/placeholder-data";
+import { mockUsers } from "@/lib/placeholder-data"; // Keep for availableDelegates for now
 import type { SchoolClass, User } from "@/types";
-import { Edit3, Book, Trash2 } from "lucide-react"; // Changed Library to Book
-import { useState, useMemo } from "react";
+import { Edit3, Book, Trash2, AlertTriangle } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,20 +30,79 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { useLanguage } from "@/context/LanguageContext";
+
+const sortClasses = (classes: SchoolClass[]) => {
+  return [...classes].sort((a, b) => a.name.localeCompare(b.name));
+};
 
 export default function ManageClassesPage() {
-  const [classes, setClasses] = useState<SchoolClass[]>(initialClasses);
+  const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [editingClass, setEditingClass] = useState<SchoolClass | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage(); // For future i18n of this page
 
+  // For delegate dropdown in ClassForm - this could also be fetched if users are in DB
   const availableDelegates = useMemo(() => mockUsers.filter(u => u.role === 'delegate'), []);
 
-  const handleFormSubmit = (data: SchoolClass) => {
-    if (editingClass) {
-      setClasses(classes.map(cls => cls.id === data.id ? data : cls));
+  const fetchClasses = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/classes');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to fetch classes. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to fetch classes. Status: ${response.status}`);
+      }
+      const data: SchoolClass[] = await response.json();
+      setClasses(sortClasses(data));
+    } catch (err) {
+      console.error(err);
+      setError((err as Error).message);
+      setClasses([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchClasses();
+  }, [fetchClasses]);
+
+  const handleFormSubmit = async (data: SchoolClass) => {
+    const isEditing = !!editingClass;
+    const url = isEditing ? `/api/classes/${data.id}` : '/api/classes';
+    const method = isEditing ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to ${isEditing ? 'update' : 'create'} class. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} class. Status: ${response.status}`);
+      }
+      
+      toast({
+        title: isEditing ? "Class Updated!" : "Class Created!",
+        description: `Class "${data.name}" has been successfully ${isEditing ? 'updated' : 'created'}.`,
+      });
+
       setEditingClass(null);
-    } else {
-      setClasses([data, ...classes]);
+      await fetchClasses(); // Refresh list
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: "Error",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -52,13 +111,29 @@ export default function ManageClassesPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (classId: string) => {
-    setClasses(classes.filter(cls => cls.id !== classId));
-     toast({
-      title: "Class Deleted",
-      description: "The class has been successfully deleted.",
-      variant: "destructive"
-    });
+  const handleDelete = async (classId: string) => {
+    try {
+      const response = await fetch(`/api/classes/${classId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to delete class. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to delete class. Status: ${response.status}`);
+      }
+      toast({
+        title: "Class Deleted",
+        description: "The class has been successfully deleted.",
+        variant: "destructive"
+      });
+      await fetchClasses(); // Refresh list
+    } catch (err) {
+       console.error(err);
+       toast({
+        title: "Error",
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    }
   };
 
   const getDelegateName = (delegateId?: string) => {
@@ -69,12 +144,12 @@ export default function ManageClassesPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8 text-primary">Manage Classes</h1>
+      <h1 className="text-3xl font-bold mb-8 text-primary">{t('manageClassesTitle')}</h1>
 
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
-            <Book className="h-6 w-6 text-accent" /> {/* Changed Library to Book */}
+            <Book className="h-6 w-6 text-accent" />
             {editingClass ? "Edit Class" : "Add New Class"}
           </CardTitle>
            {editingClass && (
@@ -96,9 +171,30 @@ export default function ManageClassesPage() {
       <Separator className="my-8" />
 
       <h2 className="text-2xl font-semibold mb-6">Existing Classes</h2>
-      {classes.length === 0 ? (
+      {isLoading && (
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full rounded-md" />
+          <Skeleton className="h-12 w-full rounded-md" />
+          <Skeleton className="h-12 w-full rounded-md" />
+        </div>
+      )}
+      {error && !isLoading && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle /> Error Loading Classes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-destructive">{error}</p>
+            <Button onClick={fetchClasses} className="mt-4">Retry</Button>
+          </CardContent>
+        </Card>
+      )}
+      {!isLoading && !error && classes.length === 0 && (
         <p className="text-muted-foreground">No classes created yet.</p>
-      ) : (
+      )}
+      {!isLoading && !error && classes.length > 0 && (
         <Card className="shadow-md">
           <ScrollArea className="max-h-[500px]">
             <Table>
