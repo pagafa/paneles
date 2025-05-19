@@ -138,6 +138,17 @@ interface Translations {
   editUserButtonLabel: string; // e.g. Edit User
   deleteUserButtonLabel: string; // e.g. Delete User
   deleteUserConfirmation: string; // e.g. This action cannot be undone. This will permanently delete the user account for "{name}".
+  userNamePlaceholder: string; // e.g. John Doe
+  usernamePlaceholder: string; // e.g. johndoe
+  usernameEditWarning: string; // e.g. Username can be changed, but ensure it remains unique.
+  selectRolePlaceholder: string; // e.g. Select a role
+  newPasswordOptionalLabel: string; // e.g. New Password (Optional)
+  passwordLabel: string; // e.g. Password
+  passwordEditHint: string; // e.g. Leave blank to keep current password.
+  updateUserButton: string; // e.g. Update User
+  createUserButton: string; // e.g. Create User
+  passwordRequiredForNewUser: string; // e.g. Password is required for new users.
+
 
   // ClassForm
   classNameLabel: string; // e.g. Class Name
@@ -275,6 +286,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     editUserButtonLabel: "Edit User",
     deleteUserButtonLabel: "Delete User",
     deleteUserConfirmation: "This action cannot be undone. This will permanently delete the user account for \"{name}\".",
+    userNamePlaceholder: "e.g., John Doe",
+    usernamePlaceholder: "e.g., johndoe",
+    usernameEditWarning: "Username can be changed, but ensure it remains unique.",
+    selectRolePlaceholder: "Select a role",
+    newPasswordOptionalLabel: "New Password (Optional)",
+    passwordLabel: "Password",
+    passwordEditHint: "Leave blank to keep current password.",
+    updateUserButton: "Update User",
+    createUserButton: "Create User",
+    passwordRequiredForNewUser: "Password is required for new users.",
     classNameLabel: "Class Name",
     classNamePlaceholder: "e.g., Grade 10A, Computer Science Club",
     classDelegateLabel: "Delegate",
@@ -408,6 +429,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     editUserButtonLabel: "Editar Usuario",
     deleteUserButtonLabel: "Eliminar Usuario",
     deleteUserConfirmation: "Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario de \"{name}\".",
+    userNamePlaceholder: "p.ej., John Doe",
+    usernamePlaceholder: "p.ej., juandoe",
+    usernameEditWarning: "El nombre de usuario se puede cambiar, pero asegúrate de que siga siendo único.",
+    selectRolePlaceholder: "Selecciona un rol",
+    newPasswordOptionalLabel: "Nueva Contraseña (Opcional)",
+    passwordLabel: "Contraseña",
+    passwordEditHint: "Deja en blanco para mantener la contraseña actual.",
+    updateUserButton: "Actualizar Usuario",
+    createUserButton: "Crear Usuario",
+    passwordRequiredForNewUser: "La contraseña es obligatoria para nuevos usuarios.",
     classNameLabel: "Nombre de la Clase",
     classNamePlaceholder: "p.ej., 10A, Club de Informática",
     classDelegateLabel: "Delegado",
@@ -541,6 +572,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     editUserButtonLabel: "Modifier Utilisateur",
     deleteUserButtonLabel: "Supprimer Utilisateur",
     deleteUserConfirmation: "Cette action est irréversible. Cela supprimera définitivement le compte utilisateur de \"{name}\".",
+    userNamePlaceholder: "ex: Jean Dupont",
+    usernamePlaceholder: "ex: jeandupont",
+    usernameEditWarning: "Le nom d'utilisateur peut être modifié, mais assurez-vous qu'il reste unique.",
+    selectRolePlaceholder: "Sélectionner un rôle",
+    newPasswordOptionalLabel: "Nouveau Mot de Passe (Optionnel)",
+    passwordLabel: "Mot de Passe",
+    passwordEditHint: "Laissez vide pour conserver le mot de passe actuel.",
+    updateUserButton: "Mettre à Jour Utilisateur",
+    createUserButton: "Créer Utilisateur",
+    passwordRequiredForNewUser: "Le mot de passe est requis pour les nouveaux utilisateurs.",
     classNameLabel: "Nom de la Classe",
     classNamePlaceholder: "ex: Seconde A, Club d'Informatique",
     classDelegateLabel: "Délégué",
@@ -674,6 +715,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     editUserButtonLabel: "Editar Usuario",
     deleteUserButtonLabel: "Eliminar Usuario",
     deleteUserConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente a conta de usuario de \"{name}\".",
+    userNamePlaceholder: "p.ex., Xoán Ninguén",
+    usernamePlaceholder: "p.ex., xoan.ninguen",
+    usernameEditWarning: "O nome de usuario pode cambiarse, pero asegúrate de que siga sendo único.",
+    selectRolePlaceholder: "Selecciona un rol",
+    newPasswordOptionalLabel: "Novo Contrasinal (Opcional)",
+    passwordLabel: "Contrasinal",
+    passwordEditHint: "Deixa en branco para manter o contrasinal actual.",
+    updateUserButton: "Actualizar Usuario",
+    createUserButton: "Crear Usuario",
+    passwordRequiredForNewUser: "O contrasinal é obrigatorio para novos usuarios.",
     classNameLabel: "Nome da Clase",
     classNamePlaceholder: "p.ex., 10A, Club de Informática",
     classDelegateLabel: "Delegado",
@@ -688,7 +739,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
   },
 };
 
-export type TranslationKey = keyof Translations[SupportedLanguage]; // Corrected to index Translations with a language
+export type TranslationKey = keyof Translations[SupportedLanguage];
 export type TranslationVariables = { [key: string]: string | number | undefined };
 
 // Helper function type for the 't' function to allow for variables

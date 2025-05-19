@@ -1,3 +1,4 @@
+
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserPlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import type { User, UserRole } from "@/types";
+import { useLanguage } from "@/context/LanguageContext";
+import { useEffect } from "react";
 
 const userFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -40,6 +43,7 @@ interface UserFormProps {
 
 export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: UserFormProps) {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const currentFormSchema = isEditing ? editUserFormSchema : userFormSchema;
   
   const form = useForm<UserFormValues>({
@@ -52,37 +56,54 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
     },
   });
 
+  useEffect(() => {
+    if (initialData) {
+      form.reset({
+        name: initialData.name || "",
+        username: initialData.username || "",
+        role: initialData.role || "delegate",
+        password: "", // Keep password field empty on edit form load
+      });
+    } else {
+      form.reset({
+        name: "",
+        username: "",
+        role: "delegate",
+        password: "",
+      });
+    }
+  }, [initialData, form]);
+
+
   async function onSubmit(values: UserFormValues) {
-    // In a real app, don't send password if not changed during edit
-    // This is simplified for mock
+    const payload: any = { ...values }; // Use 'any' temporarily for password deletion
+
     if (isEditing && !values.password) {
-      delete values.password;
+      delete payload.password;
     } else if (!isEditing && !values.password) {
-        form.setError("password", {type: "manual", message: "Password is required for new users."});
+        form.setError("password", {type: "manual", message: t('passwordRequiredForNewUser')}); // Assuming this key exists
         return;
     }
 
-
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const newUser: User = {
-      id: initialData?.id || `user-${Date.now()}`,
-      name: values.name,
-      username: values.username,
-      role: values.role as UserRole,
+    // No artificial delay: await new Promise(resolve => setTimeout(resolve, 500));
+    const userToSubmit: User & { password?: string } = {
+      id: initialData?.id || `user-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
+      name: payload.name,
+      username: payload.username,
+      role: payload.role as UserRole,
+      ...(payload.password && { password: payload.password }), // Include password only if it's present
     };
     
-    toast({
-      title: isEditing ? "User Updated!" : "User Created!",
-      description: `User "${newUser.name}" has been successfully ${isEditing ? 'updated' : 'created'}.`,
-    });
-
+    // Toast messages are handled by the parent page
     if (onSubmitSuccess) {
-      onSubmitSuccess(newUser);
+      onSubmitSuccess(userToSubmit as User); // Pass without password for client-side user object
     }
+
      if (!isEditing) {
       form.reset({ name: "", username: "", role: "delegate", password: "" });
     } else {
-      form.reset({...form.getValues(), password: ""}); // Reset password field after edit
+      // After editing, reset password field but keep other values if needed, or refetch
+      form.reset({...values, password: ""}); 
     }
   }
 
@@ -94,9 +115,9 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>{t('userNameTableHeader')}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., John Doe" {...field} />
+                <Input placeholder={t('userNamePlaceholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,11 +128,11 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>{t('usernameTableHeader')}</FormLabel>
               <FormControl>
-                <Input type="text" placeholder="e.g., john_d" {...field} disabled={isEditing} />
+                <Input type="text" placeholder={t('usernamePlaceholder')} {...field} />
               </FormControl>
-              {isEditing && <p className="text-xs text-muted-foreground">Username cannot be changed after creation.</p>}
+              {isEditing && <p className="text-xs text-muted-foreground">{t('usernameEditWarning')}</p>}
               <FormMessage />
             </FormItem>
           )}
@@ -121,16 +142,16 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
           name="role"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>User Role</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>{t('userRoleTableHeader')}</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value || "delegate"}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder={t('selectRolePlaceholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="delegate">Delegate</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="delegate">{t('delegateRoleLabel')}</SelectItem>
+                  <SelectItem value="admin">{t('adminRoleLabel')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -142,18 +163,18 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{isEditing ? "New Password (Optional)" : "Password"}</FormLabel>
+              <FormLabel>{isEditing ? t('newPasswordOptionalLabel') : t('passwordLabel')}</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
-              {isEditing && <p className="text-xs text-muted-foreground">Leave blank to keep current password.</p>}
+              {isEditing && <p className="text-xs text-muted-foreground">{t('passwordEditHint')}</p>}
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full sm:w-auto">
           <UserPlus className="mr-2 h-4 w-4" />
-          {isEditing ? "Update User" : "Create User"}
+          {isEditing ? t('updateUserButton') : t('createUserButton')}
         </Button>
       </form>
     </Form>

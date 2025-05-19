@@ -15,7 +15,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const user = await db.findOne({ id: params.id });
     
     if (user) {
-      return NextResponse.json(user);
+      // Exclude password from the response for security
+      const { password, ...userWithoutPassword } = user as User & {password?:string};
+      return NextResponse.json(userWithoutPassword);
     }
     return NextResponse.json({ message: 'User not found' }, { status: 404 });
   } catch (error) {
@@ -32,25 +34,46 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
     }
 
-    const requestBody: Partial<Omit<User, 'id' | 'username'>> & { password?: string } = await request.json();
+    const requestBody: Partial<Omit<User, 'id'>> & { password?: string } = await request.json();
+    const db = await getUsersDb();
+
+    const existingUser = await db.findOne({ id: userId });
+    if (!existingUser) {
+        return NextResponse.json({ message: 'User not found for update' }, { status: 404 });
+    }
+
+    // If username is being changed, check for uniqueness
+    if (requestBody.username && requestBody.username !== existingUser.username) {
+      const userWithNewUsername = await db.findOne({ username: requestBody.username });
+      if (userWithNewUsername) { // No need to check userWithNewUsername.id !== userId because ensureIndex covers new users
+        return NextResponse.json({ message: 'Username already taken by another user' }, { status: 409 });
+      }
+    }
     
     const updatePayload: Partial<User> = {};
     if (requestBody.name !== undefined) updatePayload.name = requestBody.name;
+    if (requestBody.username !== undefined) updatePayload.username = requestBody.username;
     if (requestBody.role !== undefined) updatePayload.role = requestBody.role;
-    // Username cannot be changed.
     // Password update would require hashing here if it was stored hashed.
-
-    if (Object.keys(updatePayload).length === 0) {
-        const dbCheck = await getUsersDb();
-        const existingDoc = await dbCheck.findOne({ id: userId });
-        if(existingDoc) return NextResponse.json(existingDoc);
-        return NextResponse.json({ message: 'No updatable fields provided or user not found' }, { status: 400 });
+    // For this demo, if password is in requestBody, it means user wants to change it.
+    // If password field is not sent in payload (or is empty), it's not updated.
+    if (requestBody.password) {
+      // In a real app, hash requestBody.password here before setting it in updatePayload
+      (updatePayload as User & {password?: string}).password = requestBody.password;
     }
 
-    const db = await getUsersDb();
+
+    if (Object.keys(updatePayload).length === 0) {
+        // No actual fields to update, return existing user data (without password)
+        const { password, ...userWithoutPassword } = existingUser as User & {password?: string};
+        return NextResponse.json(userWithoutPassword);
+    }
+
     const numAffected = await db.update({ id: userId }, { $set: updatePayload });
 
     if (numAffected === 0) {
+      // This case should ideally be caught by the "No actual fields to update" check
+      // or if the user wasn't found (which is checked earlier).
       return NextResponse.json({ message: 'User not found or no changes made' }, { status: 404 });
     }
 
@@ -58,10 +81,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!updatedUser) {
         return NextResponse.json({ message: 'User updated but failed to retrieve' }, { status: 500 });
     }
-    return NextResponse.json(updatedUser);
+    // Exclude password from the response for security
+    const { password, ...userWithoutPassword } = updatedUser as User & {password?: string};
+    return NextResponse.json(userWithoutPassword);
 
   } catch (error) {
     console.error(`Error updating user ${params.id}:`, error);
+    if ((error as Error).message.includes('unique constraint violated for field username')) {
+        return NextResponse.json({ message: 'Error updating user: Username already exists.', error: (error as Error).message }, { status: 409 });
+    }
     return NextResponse.json({ message: 'Error updating user', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -74,9 +102,9 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
     }
 
-    // Prevent deleting the main admin user (e.g., 'admin_user')
     const db = await getUsersDb();
     const userToDelete = await db.findOne({ id: userId });
+
     if (userToDelete && userToDelete.username === 'admin_user') {
       return NextResponse.json({ message: 'Cannot delete the default admin user' }, { status: 403 });
     }
