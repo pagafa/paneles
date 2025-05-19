@@ -28,34 +28,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/context/LanguageContext";
 
 const commonSchema = {
-  title: z.string().min(3, "Title is too short."),
+  title: z.string().min(3, "Title is too short.").default(""), // Added .default("")
   date: z.date({ required_error: "Date is required." }),
-  classId: z.string().min(1, "Class selection is required."),
-  description: z.string().optional(),
+  classId: z.string().min(1, "Class selection is required.").default(""), // Added .default("") for consistency
+  description: z.string().optional().default(""),
 };
 
 const announcementSchema = z.object({
   ...commonSchema,
   type: z.literal("announcement"),
   content: z.string().min(10, "Content is too short.").optional().default(""),
-  subject: z.string().optional(),
-  assignmentName: z.string().optional(),
+  subject: z.string().optional().default(""), // Ensured .default("")
+  assignmentName: z.string().optional().default(""), // Ensured .default("")
 });
 
 const examSchema = z.object({
   ...commonSchema,
   type: z.literal("exam"),
   subject: z.string().min(2, "Subject is too short.").optional().default(""),
-  content: z.string().optional(),
-  assignmentName: z.string().optional(),
+  content: z.string().optional().default(""), // Ensured .default("")
+  assignmentName: z.string().optional().default(""), // Ensured .default("")
 });
 
 const deadlineSchema = z.object({
   ...commonSchema,
   type: z.literal("deadline"),
   assignmentName: z.string().min(3, "Assignment name is too short.").optional().default(""),
-  content: z.string().optional(),
-  subject: z.string().optional(),
+  content: z.string().optional().default(""), // Ensured .default("")
+  subject: z.string().optional().default(""), // Ensured .default("")
 });
 
 const delegateInputFormSchema = z.discriminatedUnion("type", [
@@ -84,21 +84,35 @@ export function DelegateInputForm({
 
   const form = useForm<DelegateInputFormValues>({
     resolver: zodResolver(delegateInputFormSchema),
-    // Default values are now primarily managed by the useEffect below
+    defaultValues: { // Provide explicit default values for all fields
+      type: initialData?.type || activeTab || "announcement",
+      title: "",
+      date: new Date(),
+      classId: (availableClasses && availableClasses.length === 1 && !initialData) ? availableClasses[0].id : "",
+      description: "",
+      content: "",
+      subject: "",
+      assignmentName: "",
+    },
   });
 
   useEffect(() => {
+    let classIdToSet = "";
+    if (!initialData && availableClasses && availableClasses.length === 1) {
+      classIdToSet = availableClasses[0].id;
+    } else if (initialData) {
+      classIdToSet = availableClasses.find(c => c.name === initialData.class)?.id || "";
+    }
+
     if (initialData) {
-      // If editing, and initialData.type is different from current activeTab, update activeTab.
       if (initialData.type !== activeTab) {
         setActiveTab(initialData.type);
       }
-      const classIdForEditing = availableClasses.find(c => c.name === initialData.class)?.id || "";
       form.reset({
         type: initialData.type,
         title: initialData.title || "",
         date: initialData.date ? new Date(initialData.date) : new Date(),
-        classId: classIdForEditing,
+        classId: classIdToSet,
         description: initialData.description || "",
         content: initialData.type === 'announcement' ? (initialData as Announcement).content || "" : "",
         subject: initialData.type === 'exam' ? (initialData as Exam).subject || "" : "",
@@ -106,18 +120,12 @@ export function DelegateInputForm({
       });
     } else {
       // New submission: form state should reflect the activeTab and pre-select class if only one.
-      let classIdToSet = "";
-      if (availableClasses && availableClasses.length === 1) {
-        classIdToSet = availableClasses[0].id;
-      }
-
       form.reset({
-        type: activeTab, // Current active tab determines the type
-        title: "",       // Clear common fields for a new entry on this tab
+        type: activeTab,
+        title: "",
         date: new Date(),
         classId: classIdToSet,
         description: "",
-        // Clear all type-specific fields, the visible one will be empty and ready for input
         content: "",
         subject: "",
         assignmentName: "",
@@ -129,7 +137,7 @@ export function DelegateInputForm({
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
     setActiveTab(newType);
-    // The useEffect above will handle form reset based on activeTab change if !initialData
+    // useEffect above will handle form reset if !initialData
   };
 
 
@@ -175,6 +183,7 @@ export function DelegateInputForm({
         } as Deadline;
         break;
       default:
+        // This should be unreachable if types are correct
         const _exhaustiveCheck: never = values;
         console.error("Invalid form type submitted", _exhaustiveCheck);
         return;
@@ -185,12 +194,18 @@ export function DelegateInputForm({
     }
 
     if (!initialData) {
-      const preservedClassId = form.getValues('classId');
+      const preservedClassId = form.getValues('classId'); // Keep selected class
+      let newClassIdToSet = preservedClassId;
+      // If only one class available, ensure it's pre-selected after reset
+      if (!preservedClassId && availableClasses && availableClasses.length === 1) {
+        newClassIdToSet = availableClasses[0].id;
+      }
+
       form.reset({
-        type: activeTab,
+        type: activeTab, // Keep current tab
         title: "",
         date: new Date(),
-        classId: preservedClassId,
+        classId: newClassIdToSet,
         description: "",
         content: "",
         subject: "",
@@ -396,3 +411,4 @@ export function DelegateInputForm({
   );
 }
 
+    
