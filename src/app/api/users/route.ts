@@ -42,31 +42,23 @@ export async function POST(request: Request) {
     // Check for existing username
     const existingUserByUsername = await db.findOne({ username: userToAdd.username });
     if (existingUserByUsername) {
-      return NextResponse.json({ message: `Username "${userToAdd.username}" already exists` }, { status: 409 });
+      return NextResponse.json({ message: `Error creating user: Username "${userToAdd.username}" is already taken.` }, { status: 409 });
     }
 
     // Check for existing ID (less likely with generated IDs but good practice)
     const existingUserById = await db.findOne({ id: userToAdd.id });
     if (existingUserById) {
-      // This scenario is highly unlikely with generated IDs but included for robustness
-      return NextResponse.json({ message: `User ID "${userToAdd.id}" already exists. Please try again.` }, { status: 409 });
+      return NextResponse.json({ message: `Error creating user: ID "${userToAdd.id}" already exists. Please try again.` }, { status: 409 });
     }
 
     const savedUser = await db.insert(userToAdd);
 
     if (!savedUser || (Array.isArray(savedUser) && savedUser.length === 0)) {
-      // This case should ideally be caught by an error from db.insert if it fails
       console.error('User data was valid, but NeDB insert returned no document or an empty array.');
       return NextResponse.json({ message: 'Failed to save user to database after validation. The database did not return the saved document.' }, { status: 500 });
     }
     
-    // NeDB insert returns the inserted document (or array if multiple were inserted).
-    // We expect a single document here.
     const userToReturn = Array.isArray(savedUser) ? savedUser[0] : savedUser;
-
-    // Exclude password from the response if it were part of userToReturn (it's not here as User type doesn't have it)
-    // const { password, ...userWithoutPassword } = userToReturn as User & {password?:string};
-    // return NextResponse.json(userWithoutPassword, { status: 201 });
     
     return NextResponse.json(userToReturn, { status: 201 });
 
@@ -80,11 +72,9 @@ export async function POST(request: Request) {
     if (errorMessage.includes('unique constraint violated for field id')) {
         return NextResponse.json({ message: `Error creating user: User ID already exists. Detail: ${errorMessage}`, error: errorMessage }, { status: 409 });
     }
-    if (errorMessage.includes('unique constraint violated')) { // General unique constraint
+    if (errorMessage.includes('unique constraint violated')) { 
         return NextResponse.json({ message: `Error creating user: A unique field (ID or Username) already exists. Detail: ${errorMessage}`, error: errorMessage }, { status: 409 });
     }
     return NextResponse.json({ message: `Error creating user: ${errorMessage}`, error: errorMessage }, { status: 500 });
   }
 }
-
-    
