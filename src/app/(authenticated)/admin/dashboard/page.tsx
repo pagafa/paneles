@@ -8,8 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { mockAnnouncements as initialAnnouncements } from "@/lib/placeholder-data";
 import type { Announcement } from "@/types";
 import { format } from "date-fns";
-import { Megaphone, Edit3, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Megaphone, Edit3, Trash2, Settings, Save } from "lucide-react"; // Added Settings, Save icons
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -22,14 +22,23 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input"; // Added Input
+import { Label } from "@/components/ui/label"; // Added Label
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
+import { useSchoolName } from "@/context/SchoolNameContext"; // Added useSchoolName
 
 export default function AdminDashboardPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { schoolName, setSchoolName } = useSchoolName();
+  const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
+
+  useEffect(() => {
+    setEditableSchoolName(schoolName);
+  }, [schoolName]);
 
   const handleFormSubmit = (data: Announcement) => {
     if (editingAnnouncement) {
@@ -54,10 +63,45 @@ export default function AdminDashboardPage() {
     });
   };
 
+  const handleSchoolNameSave = () => {
+    setSchoolName(editableSchoolName.trim());
+    toast({
+      title: t('schoolNameUpdatedToastTitle'),
+      description: t('schoolNameUpdatedToastDescription', { schoolName: editableSchoolName.trim() || "My School" }),
+    });
+  };
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8 text-primary">{t('adminDashboardTitle')}</h1>
       
+      <Card className="mb-8 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl">
+            <Settings className="h-6 w-6 text-accent" />
+            {t('editSchoolNameCardTitle')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="schoolNameInput">{t('schoolNameInputLabel')}</Label>
+              <Input
+                id="schoolNameInput"
+                value={editableSchoolName}
+                onChange={(e) => setEditableSchoolName(e.target.value)}
+                placeholder={t('schoolNameInputPlaceholder')}
+                className="mt-1"
+              />
+            </div>
+            <Button onClick={handleSchoolNameSave}>
+              <Save className="mr-2 h-4 w-4" />
+              {t('saveSchoolNameButton')}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="mb-8 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">

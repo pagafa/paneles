@@ -28,16 +28,15 @@ interface Translations {
   footerAllRightsReserved: string;
 
   // For PublicClassPage
-  classPageTitle: string;
+  classPageTitle: string; // Note: This key might be less used now if titles are generic
   noClassAnnouncementsHint: string;
   noClassExamsHint: string;
   noClassDeadlinesHint: string;
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
-  backToAllAnnouncementsButton: string;
   delegateIdLabel: string; 
-  noEventsForClassHint: string; // This will be the fun message
+  noEventsForClassHint: string; 
   loadingLabel: string;
 
   // For DelegateDashboardPage
@@ -45,21 +44,21 @@ interface Translations {
   noAssignedClassesLabel: string;
   editInformationTitle: string;
   submitNewInformationTitle: string;
-  editingSubmissionDescription: string; // e.g., "Editing: {title}"
+  editingSubmissionDescription: string; 
   cancelEditButton: string;
   delegateFormDescription: string;
   yourRecentSubmissionsTitle: string;
   noSubmissionsYetHint: string;
   alertDialogTitle: string;
-  alertDialogDescription: string; // e.g., "This action cannot be undone. This will permanently delete your submission titled "{title}"."
+  alertDialogDescription: string; 
   cancelButton: string;
   deleteButton: string;
   submissionUpdatedToastTitle: string;
-  submissionUpdatedToastDescription: string; // e.g., "{title} has been updated."
+  submissionUpdatedToastDescription: string; 
   submissionSubmittedToastTitle: string;
-  submissionSubmittedToastDescription: string; // e.g., "{title} has been submitted."
+  submissionSubmittedToastDescription: string; 
   submissionDeletedToastTitle: string;
-  submissionDeletedToastDescription: string; // e.g., "{title} has been successfully deleted."
+  submissionDeletedToastDescription: string; 
 
   // For DelegateInputForm (tabs)
   announcementTabLabel: string;
@@ -67,7 +66,7 @@ interface Translations {
   deadlineTabLabel: string;
   // For DelegateInputForm (fields)
   formTitleLabel: string;
-  formTitlePlaceholder: string; // e.g. Title for {tabName} -> Title for announcement
+  formTitlePlaceholder: string; 
   formDateTimeLabel: string;
   formPickDateTimeButton: string;
   formClassLabel: string;
@@ -84,11 +83,18 @@ interface Translations {
   formSubmitButton: string;
   formUpdateButton: string;
 
+  // School Name Editing
+  editSchoolNameCardTitle: string;
+  schoolNameInputLabel: string;
+  schoolNameInputPlaceholder: string;
+  saveSchoolNameButton: string;
+  schoolNameUpdatedToastTitle: string;
+  schoolNameUpdatedToastDescription: string; // e.g. "School name updated to {schoolName}"
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
   en: {
-    appTitle: "School Announcements",
+    appTitle: "School Hub", // Generic app title / fallback
     loginTitle: "Welcome Back!",
     loginDescription: "Log in to manage announcements and school information.",
     adminDashboardTitle: "Admin Dashboard",
@@ -99,7 +105,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainSubtitle: "Latest school updates at your fingertips.",
     announcementsSectionTitle: "Announcements",
     examsSectionTitle: "Exams",
-    deadlinesSectionTitle: "Assignments", // Changed from "Deadlines"
+    deadlinesSectionTitle: "Assignments",
     noAnnouncementsHint: "No current announcements.",
     noExamsHint: "No upcoming exams scheduled.",
     noDeadlinesHint: "No assignment deadlines approaching.",
@@ -117,9 +123,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
-    backToAllAnnouncementsButton: "Back to All Announcements",
     delegateIdLabel: "Delegate", 
-    noEventsForClassHint: "Looks like this class is on a secret mission! Nothing to show right now.", // Fun message
+    noEventsForClassHint: "Looks like this class is on a secret mission! Nothing to show right now.",
     loadingLabel: "Loading...",
 
     assignedClassesLabel: "Assigned classes",
@@ -161,9 +166,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Any extra details or notes...",
     formSubmitButton: "Submit Information",
     formUpdateButton: "Update Information",
+
+    editSchoolNameCardTitle: "Edit School Name",
+    schoolNameInputLabel: "School Name",
+    schoolNameInputPlaceholder: "Enter the name of your school",
+    saveSchoolNameButton: "Save Name",
+    schoolNameUpdatedToastTitle: "School Name Updated",
+    schoolNameUpdatedToastDescription: "The school name has been updated to \"{schoolName}\".",
   },
   es: {
-    appTitle: "Avisos Escolares",
+    appTitle: "Portal Escolar",
     loginTitle: "¡Bienvenido de nuevo!",
     loginDescription: "Inicia sesión para gestionar avisos e información escolar.",
     adminDashboardTitle: "Panel de Administración",
@@ -174,7 +186,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainSubtitle: "Últimas actualizaciones de la escuela al alcance de tu mano.",
     announcementsSectionTitle: "Anuncios",
     examsSectionTitle: "Exámenes",
-    deadlinesSectionTitle: "Tareas", // Changed
+    deadlinesSectionTitle: "Tareas", 
     noAnnouncementsHint: "No hay anuncios actualmente.",
     noExamsHint: "No hay exámenes programados.",
     noDeadlinesHint: "No hay fechas de entrega próximas.",
@@ -192,9 +204,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
-    backToAllAnnouncementsButton: "Volver a Todos los Anuncios",
     delegateIdLabel: "Delegado/a", 
-    noEventsForClassHint: "¡Parece que esta clase está en una misión secreta! No hay nada que mostrar por ahora.", // Fun message
+    noEventsForClassHint: "¡Parece que esta clase está en una misión secreta! No hay nada que mostrar por ahora.",
     loadingLabel: "Cargando...",
 
     assignedClassesLabel: "Clases asignadas",
@@ -236,9 +247,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Cualquier detalle o nota extra...",
     formSubmitButton: "Enviar Información",
     formUpdateButton: "Actualizar Información",
+
+    editSchoolNameCardTitle: "Editar Nombre de la Escuela",
+    schoolNameInputLabel: "Nombre de la Escuela",
+    schoolNameInputPlaceholder: "Introduce el nombre de tu escuela",
+    saveSchoolNameButton: "Guardar Nombre",
+    schoolNameUpdatedToastTitle: "Nombre de Escuela Actualizado",
+    schoolNameUpdatedToastDescription: "El nombre de la escuela ha sido actualizado a \"{schoolName}\".",
   },
   fr: {
-    appTitle: "Annonces Scolaires",
+    appTitle: "Portail Scolaire",
     loginTitle: "Content de vous revoir!",
     loginDescription: "Connectez-vous pour gérer les annonces et les informations scolaires.",
     adminDashboardTitle: "Tableau de bord Admin",
@@ -249,7 +267,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.",
     announcementsSectionTitle: "Annonces",
     examsSectionTitle: "Examens",
-    deadlinesSectionTitle: "Devoirs", // Changed
+    deadlinesSectionTitle: "Devoirs", 
     noAnnouncementsHint: "Aucune annonce pour le moment.",
     noExamsHint: "Aucun examen prévu.",
     noDeadlinesHint: "Aucune date limite d'affectation approchant.",
@@ -267,9 +285,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
-    backToAllAnnouncementsButton: "Retour à Toutes les Annonces",
     delegateIdLabel: "Délégué(e)", 
-    noEventsForClassHint: "On dirait que cette classe est en mission secrète ! Rien à afficher pour le moment.", // Fun message
+    noEventsForClassHint: "On dirait que cette classe est en mission secrète ! Rien à afficher pour le moment.",
     loadingLabel: "Chargement...",
 
     assignedClassesLabel: "Classes assignées",
@@ -311,9 +328,16 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Tout détail ou note supplémentaire...",
     formSubmitButton: "Soumettre les Informations",
     formUpdateButton: "Mettre à Jour les Informations",
+
+    editSchoolNameCardTitle: "Modifier le Nom de l'École",
+    schoolNameInputLabel: "Nom de l'École",
+    schoolNameInputPlaceholder: "Entrez le nom de votre école",
+    saveSchoolNameButton: "Enregistrer le Nom",
+    schoolNameUpdatedToastTitle: "Nom de l'École Mis à Jour",
+    schoolNameUpdatedToastDescription: "Le nom de l'école a été mis à jour à \"{schoolName}\".",
   },
   gl: {
-    appTitle: "Avisos Escolares",
+    appTitle: "Portal Escolar",
     loginTitle: "Benvido de novo!",
     loginDescription: "Inicia sesión para xestionar avisos e información escolar.",
     adminDashboardTitle: "Panel de Administración",
@@ -323,8 +347,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Mantente Informado",
     kioskMainSubtitle: "Últimas actualizacións da escola ao teu alcance.",
     announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Exames", // Changed
-    deadlinesSectionTitle: "Tarefas", // Changed
+    examsSectionTitle: "Exames", 
+    deadlinesSectionTitle: "Tarefas", 
     noAnnouncementsHint: "Non hai anuncios actualmente.",
     noExamsHint: "Non hai exames programados.",
     noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
@@ -342,9 +366,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
-    backToAllAnnouncementsButton: "Volver a Todos os Anuncios",
     delegateIdLabel: "Delegado/a", 
-    noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.", // Fun message
+    noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.",
     loadingLabel: "Cargando...",
 
     assignedClassesLabel: "Clases asignadas",
@@ -386,6 +409,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     formAdditionalDescriptionPlaceholder: "Calquera detalle ou nota extra...",
     formSubmitButton: "Enviar Información",
     formUpdateButton: "Actualizar Información",
+
+    editSchoolNameCardTitle: "Editar Nome da Escola",
+    schoolNameInputLabel: "Nome da Escola",
+    schoolNameInputPlaceholder: "Introduce o nome da túa escola",
+    saveSchoolNameButton: "Gardar Nome",
+    schoolNameUpdatedToastTitle: "Nome da Escola Actualizado",
+    schoolNameUpdatedToastDescription: "O nome da escola actualizouse a \"{schoolName}\".",
   },
 };
 
@@ -394,5 +424,3 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
-
-
