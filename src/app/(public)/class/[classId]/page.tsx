@@ -132,7 +132,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             <School className="h-10 w-10 text-primary" />
             <div>
               <CardTitle className="text-3xl font-bold text-primary">{classDetails.name}</CardTitle>
-              <CardDescription className="text-primary/80">{t('classPageTitle', { className: classDetails.name })}</CardDescription>
+              {/* <CardDescription className="text-primary/80">{t('classPageTitle', { className: classDetails.name })}</CardDescription> Removed this line */}
             </div>
           </div>
         </CardHeader>
