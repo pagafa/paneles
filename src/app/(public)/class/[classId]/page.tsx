@@ -15,6 +15,10 @@ import { Book, Megaphone, BookOpenCheck, FileText, Info } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 
+const sortEvents = (events: SchoolEvent[]) => {
+  return events.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
 async function getClassDetails(classId: string): Promise<SchoolClass | undefined> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -28,7 +32,7 @@ async function getAllSchoolEvents(): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
       const now = new Date();
-      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= now));
+      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= now)); // mockSchoolEvents is already sorted newest first
     }, 300);
   });
 }
@@ -62,8 +66,8 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       const usersData = await getUsers();
       setUsers(usersData);
 
-      const events = await getAllSchoolEvents(); // Fetch all events
-      setAllSchoolEvents(events);
+      const events = await getAllSchoolEvents(); 
+      setAllSchoolEvents(events); // Already sorted by getAllSchoolEvents if mockSchoolEvents is sorted
       
       setLoading(false);
     }
@@ -100,23 +104,21 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-  // Filter announcements: school-wide OR targeted to this class
-  const announcements = allSchoolEvents.filter(event =>
+  const announcements = sortEvents(allSchoolEvents.filter(event =>
     event.type === 'announcement' &&
     (
-      (!event.targetClassIds || event.targetClassIds.length === 0) || // School-wide
-      (event.targetClassIds && event.targetClassIds.includes(classId))   // Targeted to this class
+      (!event.targetClassIds || event.targetClassIds.length === 0) || 
+      (event.targetClassIds && event.targetClassIds.includes(classId))
     )
-  ) as Announcement[];
+  ) as Announcement[]);
 
-  // Exams and Deadlines are filtered by exact class name match (if event.class is defined)
-  const exams = allSchoolEvents.filter(event => 
+  const exams = sortEvents(allSchoolEvents.filter(event => 
     event.type === 'exam' && event.class === classDetails.name
-  ) as Exam[];
+  ) as Exam[]);
   
-  const deadlines = allSchoolEvents.filter(event => 
+  const deadlines = sortEvents(allSchoolEvents.filter(event => 
     event.type === 'deadline' && event.class === classDetails.name
-  ) as Deadline[];
+  ) as Deadline[]);
 
 
   const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [

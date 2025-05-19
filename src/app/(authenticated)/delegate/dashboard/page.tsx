@@ -24,22 +24,26 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
 
+const sortEvents = (events: SchoolEvent[]) => {
+  return events.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
 export default function DelegateDashboardPage() {
   const { toast } = useToast();
   const { t } = useLanguage(); // Get t function
 
-  // In a real app, fetch classes assigned to this delegate and their submissions
-  const [mySubmissions, setMySubmissions] = useState<SchoolEvent[]>(
-    mockSchoolEvents.filter(event => {
-        // For demo, filter some events to a delegate or show all if no specific delegate user found
-        const delegateUser = mockUsers.find(u => u.username === 'john_delegate');
-        if (delegateUser) {
-            const assignedClassesForDemoDelegate = mockClasses.filter(c => c.delegateId === delegateUser.id).map(c => c.name);
-            return event.class && assignedClassesForDemoDelegate.includes(event.class);
-        }
-        return event.class && mockClasses.find(c => c.name === event.class); // Simplified broader filter
-    }).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  );
+  const [mySubmissions, setMySubmissions] = useState<SchoolEvent[]>(() => {
+    // Initial filtering logic, will be refined by useEffect
+    const delegateUser = mockUsers.find(u => u.username === 'john_delegate');
+    let initialFilteredSubmissions: SchoolEvent[] = [];
+    if (delegateUser) {
+        const assignedClassesForDemoDelegate = mockClasses.filter(c => c.delegateId === delegateUser.id).map(c => c.name);
+        initialFilteredSubmissions = mockSchoolEvents.filter(event => event.class && assignedClassesForDemoDelegate.includes(event.class));
+    } else {
+         initialFilteredSubmissions = mockSchoolEvents.filter(event => event.class && mockClasses.find(c => c.name === event.class));
+    }
+    return sortEvents(initialFilteredSubmissions);
+  });
   
   const [delegateAssignedClasses, setDelegateAssignedClasses] = useState<SchoolClass[]>([]);
   const [editingSubmission, setEditingSubmission] = useState<SchoolEvent | null>(null);
@@ -63,29 +67,28 @@ export default function DelegateDashboardPage() {
       }
       setDelegateAssignedClasses(assigned);
 
-      // Filter submissions based on assigned classes
       if(assigned.length > 0){
         const assignedClassNamesMap = assigned.map(c => c.name);
         setMySubmissions(
-            mockSchoolEvents.filter(event => event.class && assignedClassNamesMap.includes(event.class))
-            .sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+            sortEvents(mockSchoolEvents.filter(event => event.class && assignedClassNamesMap.includes(event.class)))
         );
       } else if (userRole === 'delegate') {
-         setMySubmissions([]); // If delegate has no assigned classes, show no submissions by default
+         setMySubmissions([]); 
       }
-
     }
   }, []);
 
   const handleFormSubmit = (data: SchoolEvent) => {
+    let updatedSubmissions;
     if (editingSubmission) {
-      setMySubmissions(prev => prev.map(s => s.id === editingSubmission.id ? data : s).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+      updatedSubmissions = mySubmissions.map(s => s.id === editingSubmission.id ? data : s);
       toast({ title: t('submissionUpdatedToastTitle'), description: t('submissionUpdatedToastDescription', { title: data.title }) });
       setEditingSubmission(null);
     } else {
-      setMySubmissions(prev => [data, ...prev].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime() ));
+      updatedSubmissions = [data, ...mySubmissions];
       toast({ title: t('submissionSubmittedToastTitle'), description: t('submissionSubmittedToastDescription', { title: data.title }) });
     }
+    setMySubmissions(sortEvents(updatedSubmissions));
   };
 
   const handleEdit = (submission: SchoolEvent) => {
@@ -100,7 +103,7 @@ export default function DelegateDashboardPage() {
 
   const confirmDelete = () => {
     if (submissionToDelete) {
-      setMySubmissions(prev => prev.filter(s => s.id !== submissionToDelete.id));
+      setMySubmissions(prev => prev.filter(s => s.id !== submissionToDelete.id)); // Already sorted, filter maintains order relative to others
       toast({
         title: t('submissionDeletedToastTitle'),
         description: t('submissionDeletedToastDescription', { title: submissionToDelete.title }),

@@ -19,13 +19,16 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useState } from 'react';
 import type { TranslationKey } from '@/lib/i18n';
 
+const sortEvents = (events: SchoolEvent[]) => {
+  return events.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
 
 async function getSchoolEvents(): Promise<SchoolEvent[]> {
   return new Promise((resolve) => {
     setTimeout(() => {
       // Filter out past events, including those from today but earlier time
       const now = new Date();
-      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= now));
+      resolve(mockSchoolEvents.filter(event => new Date(event.date) >= now)); // mockSchoolEvents is already sorted newest first
     }, 500);
   });
 }
@@ -52,20 +55,20 @@ export default function KioskPage() {
         getSchoolEvents(),
         getClassesData()
       ]);
-      setAllEvents(eventsData);
+      setAllEvents(eventsData); // Already sorted by getSchoolEvents if mockSchoolEvents is sorted
       setClasses(classesData);
       setLoading(false);
     }
     fetchData();
   }, []);
 
-  const announcements = allEvents.filter(event => 
+  const announcements = sortEvents(allEvents.filter(event => 
     event.type === 'announcement' && 
     (!event.targetClassIds || event.targetClassIds.length === 0)
-  ) as Announcement[];
+  ) as Announcement[]);
   
-  const exams = allEvents.filter(event => event.type === 'exam') as Exam[];
-  const deadlines = allEvents.filter(event => event.type === 'deadline') as Deadline[];
+  const exams = sortEvents(allEvents.filter(event => event.type === 'exam') as Exam[]);
+  const deadlines = sortEvents(allEvents.filter(event => event.type === 'deadline') as Deadline[]);
 
   const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone empty' },

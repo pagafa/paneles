@@ -28,10 +28,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolName } from "@/context/SchoolNameContext";
 
+const sortAnnouncements = (announcements: Announcement[]) => {
+  return announcements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
 export default function AdminDashboardPage() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(() => sortAnnouncements(initialAnnouncements));
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
-  const [allClasses, setAllClasses] = useState<SchoolClass[]>(mockClasses); // For resolving class names
+  const [allClasses] = useState<SchoolClass[]>(mockClasses); // For resolving class names
   const { toast } = useToast();
   const { t } = useLanguage();
   const { schoolName, setSchoolName } = useSchoolName();
@@ -42,12 +46,14 @@ export default function AdminDashboardPage() {
   }, [schoolName]);
 
   const handleFormSubmit = (data: Announcement) => {
+    let updatedAnnouncementsList;
     if (editingAnnouncement) {
-      setAnnouncements(announcements.map(ann => ann.id === data.id ? data : ann));
+      updatedAnnouncementsList = announcements.map(ann => ann.id === data.id ? data : ann);
       setEditingAnnouncement(null);
     } else {
-      setAnnouncements([data, ...announcements]);
+      updatedAnnouncementsList = [data, ...announcements];
     }
+    setAnnouncements(sortAnnouncements(updatedAnnouncementsList));
   };
 
   const handleEdit = (announcement: Announcement) => {

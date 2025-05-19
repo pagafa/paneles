@@ -25,7 +25,7 @@ export const mockAnnouncements: Announcement[] = [
     content: 'There will be a special meeting for all students of Grade 10A regarding the upcoming science fair.',
     targetClassIds: ['class1'] // Assuming 'class1' is Grade 10A
   },
-];
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 export const mockExams: Exam[] = [
   {
@@ -68,7 +68,7 @@ export const mockSchoolEvents: SchoolEvent[] = [
   ...mockAnnouncements,
   ...mockExams,
   ...mockDeadlines,
-].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 
 export const mockUsers: User[] = [
