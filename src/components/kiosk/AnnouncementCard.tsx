@@ -6,20 +6,22 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
-import { Edit3, Trash2 } from 'lucide-react';
+import { Megaphone, BookOpenCheck, FileText, Edit3, Trash2 } from 'lucide-react';
 
 interface AnnouncementCardProps {
   item: SchoolEvent;
   onEdit?: (item: SchoolEvent) => void;
-  onDeleteRequest?: (item: SchoolEvent) => void; 
+  onDeleteRequest?: (item: SchoolEvent) => void;
   showDelegateActions?: boolean;
+  showTypeIcon?: boolean; // New prop
 }
 
-export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateActions = false }: AnnouncementCardProps) {
+export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateActions = false, showTypeIcon = false }: AnnouncementCardProps) {
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
 
   useEffect(() => {
     try {
+      // Display date in HH:mm format (24-hour)
       setFormattedDate(format(new Date(item.date), 'PPP HH:mm'));
     } catch (error) {
       console.error("Error formatting date:", item.date, error);
@@ -27,10 +29,18 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
     }
   }, [item.date]);
 
+  const TypeSpecificIcon =
+    item.type === 'announcement' ? Megaphone :
+    item.type === 'exam' ? BookOpenCheck :
+    item.type === 'deadline' ? FileText : null;
+
   return (
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
       <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
-        <div>
+        <div className="flex items-center gap-2"> {/* Ensure icon and title are grouped and aligned */}
+          {showTypeIcon && TypeSpecificIcon && (
+            <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0" aria-label={item.type} />
+          )}
           <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
         </div>
         {showDelegateActions && onEdit && onDeleteRequest && (

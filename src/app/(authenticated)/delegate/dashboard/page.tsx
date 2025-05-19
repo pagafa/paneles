@@ -174,6 +174,7 @@ export default function DelegateDashboardPage() {
                 key={item.id} 
                 item={item} 
                 showDelegateActions={true}
+                showTypeIcon={true} // Pass new prop here
                 onEdit={() => handleEdit(item)}
                 onDeleteRequest={() => handleDeleteRequest(item)}
               />
