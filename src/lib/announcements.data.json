@@ -1,0 +1,29 @@
+
+[
+  {
+    "id": "ann1",
+    "title": "School Reopens Monday!",
+    "date": "2025-05-25T21:19:46.916Z",
+    "type": "announcement",
+    "content": "Welcome back everyone! School reopens this Monday. Please check the updated schedule on the notice board.",
+    "targetClassIds": []
+  },
+  {
+    "id": "ann2",
+    "title": "Annual Sports Day Next Week",
+    "date": "2025-05-29T21:19:46.916Z",
+    "type": "announcement",
+    "content": "Get ready for the Annual Sports Day! Events will be held throughout next week. Sign up for your favorite sports.",
+    "targetClassIds": []
+  },
+  {
+    "id": "ann3",
+    "title": "Special Meeting for Grade 10A",
+    "date": "2025-05-26T21:19:46.916Z",
+    "type": "announcement",
+    "content": "There will be a special meeting for all students of Grade 10A regarding the upcoming science fair.",
+    "targetClassIds": [
+      "class1"
+    ]
+  }
+]

@@ -28,7 +28,7 @@ interface Translations {
   footerAllRightsReserved: string;
 
   // For PublicClassPage
-  classPageTitle: string; // Note: This key might be less used now if titles are generic
+  classPageTitle: string; 
   noClassAnnouncementsHint: string;
   noClassExamsHint: string;
   noClassDeadlinesHint: string;
@@ -89,12 +89,37 @@ interface Translations {
   schoolNameInputPlaceholder: string;
   saveSchoolNameButton: string;
   schoolNameUpdatedToastTitle: string;
-  schoolNameUpdatedToastDescription: string; // e.g. "School name updated to {schoolName}"
+  schoolNameUpdatedToastDescription: string; 
+
+  // Admin Dashboard Announcement Management
+  editAnnouncementTitle: string;
+  postNewAnnouncementTitle: string;
+  editingAnnouncementDescription: string; // e.g. "Editing: {title}"
+  currentAnnouncementsTitle: string;
+  noAnnouncementsPostedHint: string;
+  schoolWideTarget: string;
+  classesTargetLabel: string; // e.g. "Classes"
+  targetLabel: string; // e.g. "Target"
+  editButtonLabel: string;
+  deleteButtonLabel: string;
+  deleteAnnouncementConfirmation: string; // e.g. "This will permanently delete the announcement titled "{title}"."
+  announcementUpdatedToastTitle: string;
+  announcementPostedToastTitle: string;
+  announcementActionSuccessToastDescription: string; // e.g. "{title} has been successfully {action}."
+  updated: string; // "updated"
+  posted: string; // "posted"
+  announcementDeletedToastTitle: string;
+  announcementDeletedToastDescription: string;
+  errorDialogTitle: string; // Generic error title for dialogs/toasts
+  errorFetchingAnnouncements: string; // e.g. "Error fetching announcements: {message}"
+  errorLoadingAnnouncementsTitle: string; // e.g. "Error Loading Announcements"
+  retryButtonLabel: string;
+
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
   en: {
-    appTitle: "School Hub", // Generic app title / fallback
+    appTitle: "School Hub", 
     loginTitle: "Welcome Back!",
     loginDescription: "Log in to manage announcements and school information.",
     adminDashboardTitle: "Admin Dashboard",
@@ -173,6 +198,29 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveSchoolNameButton: "Save Name",
     schoolNameUpdatedToastTitle: "School Name Updated",
     schoolNameUpdatedToastDescription: "The school name has been updated to \"{schoolName}\".",
+
+    editAnnouncementTitle: "Edit Announcement",
+    postNewAnnouncementTitle: "Post New School-Wide Announcement",
+    editingAnnouncementDescription: "You are editing: \"{title}\"",
+    currentAnnouncementsTitle: "Current Announcements",
+    noAnnouncementsPostedHint: "No announcements posted yet.",
+    schoolWideTarget: "School-wide",
+    classesTargetLabel: "Classes",
+    targetLabel: "Target",
+    editButtonLabel: "Edit",
+    deleteButtonLabel: "Delete",
+    deleteAnnouncementConfirmation: "This action cannot be undone. This will permanently delete the announcement titled \"{title}\".",
+    announcementUpdatedToastTitle: "Announcement Updated!",
+    announcementPostedToastTitle: "Announcement Posted!",
+    announcementActionSuccessToastDescription: "\"{title}\" has been successfully {action}.",
+    updated: "updated",
+    posted: "posted",
+    announcementDeletedToastTitle: "Announcement Deleted",
+    announcementDeletedToastDescription: "The announcement has been successfully deleted.",
+    errorDialogTitle: "Error",
+    errorFetchingAnnouncements: "Error fetching announcements: {message}",
+    errorLoadingAnnouncementsTitle: "Error Loading Announcements",
+    retryButtonLabel: "Retry",
   },
   es: {
     appTitle: "Portal Escolar",
@@ -254,6 +302,29 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveSchoolNameButton: "Guardar Nombre",
     schoolNameUpdatedToastTitle: "Nombre de Escuela Actualizado",
     schoolNameUpdatedToastDescription: "El nombre de la escuela ha sido actualizado a \"{schoolName}\".",
+
+    editAnnouncementTitle: "Editar Anuncio",
+    postNewAnnouncementTitle: "Publicar Nuevo Anuncio Escolar",
+    editingAnnouncementDescription: "Estás editando: \"{title}\"",
+    currentAnnouncementsTitle: "Anuncios Actuales",
+    noAnnouncementsPostedHint: "No hay anuncios publicados todavía.",
+    schoolWideTarget: "Toda la escuela",
+    classesTargetLabel: "Clases",
+    targetLabel: "Dirigido a",
+    editButtonLabel: "Editar",
+    deleteButtonLabel: "Eliminar",
+    deleteAnnouncementConfirmation: "Esta acción no se puede deshacer. Esto eliminará permanentemente el anuncio titulado \"{title}\".",
+    announcementUpdatedToastTitle: "¡Anuncio Actualizado!",
+    announcementPostedToastTitle: "¡Anuncio Publicado!",
+    announcementActionSuccessToastDescription: "\"{title}\" ha sido {action} correctamente.",
+    updated: "actualizado",
+    posted: "publicado",
+    announcementDeletedToastTitle: "Anuncio Eliminado",
+    announcementDeletedToastDescription: "El anuncio ha sido eliminado correctamente.",
+    errorDialogTitle: "Error",
+    errorFetchingAnnouncements: "Error al cargar los anuncios: {message}",
+    errorLoadingAnnouncementsTitle: "Error al Cargar Anuncios",
+    retryButtonLabel: "Reintentar",
   },
   fr: {
     appTitle: "Portail Scolaire",
@@ -335,6 +406,29 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveSchoolNameButton: "Enregistrer le Nom",
     schoolNameUpdatedToastTitle: "Nom de l'École Mis à Jour",
     schoolNameUpdatedToastDescription: "Le nom de l'école a été mis à jour à \"{schoolName}\".",
+
+    editAnnouncementTitle: "Modifier l'Annonce",
+    postNewAnnouncementTitle: "Publier une Nouvelle Annonce Scolaire",
+    editingAnnouncementDescription: "Vous modifiez : \"{title}\"",
+    currentAnnouncementsTitle: "Annonces Actuelles",
+    noAnnouncementsPostedHint: "Aucune annonce publiée pour l'instant.",
+    schoolWideTarget: "Toute l'école",
+    classesTargetLabel: "Classes",
+    targetLabel: "Cible",
+    editButtonLabel: "Modifier",
+    deleteButtonLabel: "Supprimer",
+    deleteAnnouncementConfirmation: "Cette action est irréversible. Cela supprimera définitivement l'annonce intitulée \"{title}\".",
+    announcementUpdatedToastTitle: "Annonce Mise à Jour !",
+    announcementPostedToastTitle: "Annonce Publiée !",
+    announcementActionSuccessToastDescription: "\"{title}\" a été {action} avec succès.",
+    updated: "mis à jour",
+    posted: "publié",
+    announcementDeletedToastTitle: "Annonce Supprimée",
+    announcementDeletedToastDescription: "L'annonce a été supprimée avec succès.",
+    errorDialogTitle: "Erreur",
+    errorFetchingAnnouncements: "Erreur lors de la récupération des annonces: {message}",
+    errorLoadingAnnouncementsTitle: "Erreur de Chargement des Annonces",
+    retryButtonLabel: "Réessayer",
   },
   gl: {
     appTitle: "Portal Escolar",
@@ -416,6 +510,29 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveSchoolNameButton: "Gardar Nome",
     schoolNameUpdatedToastTitle: "Nome da Escola Actualizado",
     schoolNameUpdatedToastDescription: "O nome da escola actualizouse a \"{schoolName}\".",
+    
+    editAnnouncementTitle: "Editar Anuncio",
+    postNewAnnouncementTitle: "Publicar Novo Anuncio Escolar",
+    editingAnnouncementDescription: "Estás a editar: \"{title}\"",
+    currentAnnouncementsTitle: "Anuncios Actuais",
+    noAnnouncementsPostedHint: "Aínda non hai anuncios publicados.",
+    schoolWideTarget: "Toda a escola",
+    classesTargetLabel: "Clases",
+    targetLabel: "Dirixido a",
+    editButtonLabel: "Editar",
+    deleteButtonLabel: "Eliminar",
+    deleteAnnouncementConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente o anuncio titulado \"{title}\".",
+    announcementUpdatedToastTitle: "Anuncio Actualizado!",
+    announcementPostedToastTitle: "Anuncio Publicado!",
+    announcementActionSuccessToastDescription: "\"{title}\" foi {action} correctamente.",
+    updated: "actualizado",
+    posted: "publicado",
+    announcementDeletedToastTitle: "Anuncio Eliminado",
+    announcementDeletedToastDescription: "O anuncio eliminouse correctamente.",
+    errorDialogTitle: "Erro",
+    errorFetchingAnnouncements: "Erro ao obter os anuncios: {message}",
+    errorLoadingAnnouncementsTitle: "Erro ao Cargar os Anuncios",
+    retryButtonLabel: "Reintentar",
   },
 };
 

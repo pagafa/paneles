@@ -1,5 +1,9 @@
+
 import type { SchoolEvent, User, SchoolClass, Announcement, Exam, Deadline } from '@/types';
 
+// mockAnnouncements is now managed by announcements.data.json and API routes.
+// Leaving this commented out for reference or if easy restoration is needed.
+/*
 export const mockAnnouncements: Announcement[] = [
   {
     id: 'ann1',
@@ -26,6 +30,34 @@ export const mockAnnouncements: Announcement[] = [
     targetClassIds: ['class1'] // Assuming 'class1' is Grade 10A
   },
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+*/
+
+// For mockSchoolEvents, we need to ensure it still has some announcements if other parts of the app use it directly.
+// Ideally, those parts would also fetch from an API. For now, let's create a placeholder that might be empty
+// or include some very basic examples if needed elsewhere. Or, if no other part relies on mockAnnouncements,
+// this can be simplified.
+
+// Let's assume mockSchoolEvents is still needed for other parts (Kiosk, Class pages) for now.
+// We'll reconstruct it without relying on the old mockAnnouncements variable directly.
+const exampleAnnouncementsForKiosk: Announcement[] = [
+    {
+    id: 'kiosk-ann1',
+    title: 'Welcome to Our School Portal!',
+    date: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
+    type: 'announcement',
+    content: 'Find all your school news and updates here.',
+    targetClassIds: [], 
+  },
+   {
+    id: 'kiosk-ann2',
+    title: 'Library Books Due',
+    date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
+    type: 'announcement',
+    content: 'Remember to return your library books by Friday.',
+    targetClassIds: ['class1'],
+  }
+];
+
 
 export const mockExams: Exam[] = [
   {
@@ -65,7 +97,7 @@ export const mockDeadlines: Deadline[] = [
 ];
 
 export const mockSchoolEvents: SchoolEvent[] = [
-  ...mockAnnouncements,
+  ...exampleAnnouncementsForKiosk, // Use the new example announcements for parts still using mockSchoolEvents
   ...mockExams,
   ...mockDeadlines,
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

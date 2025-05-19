@@ -5,11 +5,11 @@ import { AdminAnnouncementForm } from "@/components/forms/AdminAnnouncementForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { mockAnnouncements as initialAnnouncements, mockClasses } from "@/lib/placeholder-data";
+import { mockClasses } from "@/lib/placeholder-data"; // Keep for availableClasses prop
 import type { Announcement, SchoolClass } from "@/types";
 import { format } from "date-fns";
-import { Megaphone, Edit3, Trash2, Settings, Save } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -27,33 +27,89 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolName } from "@/context/SchoolNameContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const sortAnnouncements = (announcements: Announcement[]) => {
-  return announcements.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return [...announcements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
 export default function AdminDashboardPage() {
-  const [announcements, setAnnouncements] = useState<Announcement[]>(() => sortAnnouncements(initialAnnouncements));
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
-  const [allClasses] = useState<SchoolClass[]>(mockClasses); // For resolving class names
+  const [allClasses] = useState<SchoolClass[]>(mockClasses); 
   const { toast } = useToast();
   const { t } = useLanguage();
   const { schoolName, setSchoolName } = useSchoolName();
   const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAnnouncements = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/announcements');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch announcements: ${response.statusText}`);
+      }
+      const data: Announcement[] = await response.json();
+      setAnnouncements(sortAnnouncements(data));
+    } catch (err) {
+      console.error(err);
+      setError(t('errorFetchingAnnouncements', { message: (err as Error).message }) || 'Failed to load announcements. Please try again.');
+      setAnnouncements([]); // Clear announcements on error
+    } finally {
+      setIsLoading(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, [fetchAnnouncements]);
 
   useEffect(() => {
     setEditableSchoolName(schoolName);
   }, [schoolName]);
 
-  const handleFormSubmit = (data: Announcement) => {
-    let updatedAnnouncementsList;
-    if (editingAnnouncement) {
-      updatedAnnouncementsList = announcements.map(ann => ann.id === data.id ? data : ann);
+  const handleFormSubmit = async (data: Announcement) => {
+    const isEditing = !!editingAnnouncement;
+    const url = isEditing ? `/api/announcements/${data.id}` : '/api/announcements';
+    const method = isEditing ? 'PUT' : 'POST';
+
+    try {
+      const response = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'post'} announcement`);
+      }
+      
+      toast({
+        title: isEditing ? t('announcementUpdatedToastTitle') : t('announcementPostedToastTitle'),
+        description: t('announcementActionSuccessToastDescription', { title: data.title, action: isEditing ? t('updated') : t('posted')})
+      });
+
       setEditingAnnouncement(null);
-    } else {
-      updatedAnnouncementsList = [data, ...announcements];
+      await fetchAnnouncements(); // Refresh list
+       // Reset form if it was a new submission
+      if (!isEditing && typeof window !== 'undefined') {
+        // This is a bit of a hack; ideally the form itself handles its reset after a successful submit action
+        // For now, we rely on key change for AdminAnnouncementForm or explicit reset inside it.
+        // The form component already resets itself if initialData.id is not present.
+      }
+
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: t('errorDialogTitle'),
+        description: (err as Error).message,
+        variant: "destructive",
+      });
     }
-    setAnnouncements(sortAnnouncements(updatedAnnouncementsList));
   };
 
   const handleEdit = (announcement: Announcement) => {
@@ -61,13 +117,29 @@ export default function AdminDashboardPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (announcementId: string) => {
-    setAnnouncements(announcements.filter(ann => ann.id !== announcementId));
-    toast({
-      title: "Announcement Deleted",
-      description: "The announcement has been successfully deleted.",
-      variant: "destructive"
-    });
+  const handleDelete = async (announcementId: string) => {
+    try {
+      const response = await fetch(`/api/announcements/${announcementId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete announcement');
+      }
+      toast({
+        title: t('announcementDeletedToastTitle'),
+        description: t('announcementDeletedToastDescription'),
+        variant: "destructive"
+      });
+      await fetchAnnouncements(); // Refresh list
+    } catch (err) {
+       console.error(err);
+       toast({
+        title: t('errorDialogTitle'),
+        description: (err as Error).message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSchoolNameSave = () => {
@@ -80,13 +152,13 @@ export default function AdminDashboardPage() {
 
   const getTargetDisplay = (targetClassIds?: string[]): string => {
     if (!targetClassIds || targetClassIds.length === 0) {
-      return "School-wide";
+      return t('schoolWideTarget');
     }
     const targetedClassNames = targetClassIds.map(id => {
       const cls = allClasses.find(c => c.id === id);
       return cls ? cls.name : id;
     }).join(', ');
-    return `Classes: ${targetedClassNames}`;
+    return `${t('classesTargetLabel')}: ${targetedClassNames}`;
   };
 
   return (
@@ -124,11 +196,11 @@ export default function AdminDashboardPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Megaphone className="h-6 w-6 text-accent" />
-            {editingAnnouncement ? "Edit Announcement" : "Post New School-Wide Announcement"}
+            {editingAnnouncement ? t('editAnnouncementTitle') : t('postNewAnnouncementTitle')}
           </CardTitle>
           {editingAnnouncement && (
             <CardDescription>
-              You are editing: "{editingAnnouncement.title}". <Button variant="link" size="sm" onClick={() => setEditingAnnouncement(null)}>Cancel Edit</Button>
+              {t('editingAnnouncementDescription', { title: editingAnnouncement.title })} <Button variant="link" size="sm" onClick={() => setEditingAnnouncement(null)}>{t('cancelEditButton')}</Button>
             </CardDescription>
           )}
         </CardHeader>
@@ -144,10 +216,31 @@ export default function AdminDashboardPage() {
 
       <Separator className="my-8" />
 
-      <h2 className="text-2xl font-semibold mb-6">Current Announcements</h2>
-      {announcements.length === 0 ? (
-        <p className="text-muted-foreground">No announcements posted yet.</p>
-      ) : (
+      <h2 className="text-2xl font-semibold mb-6">{t('currentAnnouncementsTitle')}</h2>
+      {isLoading && (
+        <div className="space-y-4">
+          <Skeleton className="h-24 w-full rounded-md" />
+          <Skeleton className="h-24 w-full rounded-md" />
+          <Skeleton className="h-24 w-full rounded-md" />
+        </div>
+      )}
+      {error && !isLoading && (
+        <Card className="border-destructive bg-destructive/10">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle /> {t('errorLoadingAnnouncementsTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-destructive">{error}</p>
+            <Button onClick={fetchAnnouncements} className="mt-4">{t('retryButtonLabel')}</Button>
+          </CardContent>
+        </Card>
+      )}
+      {!isLoading && !error && announcements.length === 0 && (
+        <p className="text-muted-foreground">{t('noAnnouncementsPostedHint')}</p>
+      )}
+      {!isLoading && !error && announcements.length > 0 && (
         <ScrollArea className="h-[400px] rounded-md border p-4 bg-card">
           <div className="space-y-4">
             {announcements.map((ann) => (
@@ -159,26 +252,26 @@ export default function AdminDashboardPage() {
                       <CardDescription>{format(new Date(ann.date), "PPP HH:mm")}</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label="Edit">
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon" aria-label="Delete">
+                          <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('alertDialogTitle')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the announcement titled "{ann.title}".
+                              {t('deleteAnnouncementConfirmation', { title: ann.title})}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(ann.id)}>
-                              Delete
+                              {t('deleteButton')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -188,7 +281,7 @@ export default function AdminDashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-foreground/90">{ann.content}</p>
-                  <p className="text-xs text-muted-foreground mt-2">Target: {getTargetDisplay(ann.targetClassIds)}</p>
+                  <p className="text-xs text-muted-foreground mt-2">{t('targetLabel')}: {getTargetDisplay(ann.targetClassIds)}</p>
                 </CardContent>
               </Card>
             ))}
