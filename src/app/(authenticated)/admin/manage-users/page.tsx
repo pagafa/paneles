@@ -53,8 +53,12 @@ export default function ManageUsersPage() {
     try {
       const response = await fetch('/api/users');
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: `Failed to fetch users. Status: ${response.status}` }));
-        throw new Error(errorData.message || `Failed to fetch users. Status: ${response.status}`);
+        let errorMessage = `Failed to fetch users. Status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) { /* Ignore if response is not JSON */ }
+        throw new Error(errorMessage);
       }
       const data: User[] = await response.json();
       setUsers(sortUsers(data));
@@ -65,7 +69,7 @@ export default function ManageUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchUsers();
@@ -76,10 +80,8 @@ export default function ManageUsersPage() {
     const url = isEditing ? `/api/users/${data.id}` : '/api/users';
     const method = isEditing ? 'PUT' : 'POST';
     
-    // Password handling - for demo, not sending password if not changed.
-    // In a real app, this is more complex with hashing.
     const payload = { ...data };
-    if (isEditing && ! (data as any).password) { // Assuming password might be in form data but empty
+    if (isEditing && !(data as any).password) { 
       delete (payload as any).password;
     }
 
@@ -92,17 +94,21 @@ export default function ManageUsersPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: `Failed to ${isEditing ? 'update' : 'create'} user. Status: ${response.status}` }));
-        throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} user. Status: ${response.status}`);
+        let errorMessage = `Failed to ${isEditing ? t('updated').toLowerCase() : t('posted').toLowerCase()} user. Status: ${response.status}`;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) { /* Ignore if response is not JSON */ }
+        throw new Error(errorMessage);
       }
       
       toast({
         title: isEditing ? t('userUpdatedToastTitle', { name: data.name }) : t('userCreatedToastTitle', { name: data.name }),
-        description: t('userActionSuccessToastDescription', { name: data.name, action: isEditing ? t('updated') : t('created') }),
+        description: t('userActionSuccessToastDescription', { name: data.name, action: isEditing ? t('updated') : t('posted') }),
       });
 
       setEditingUser(null);
-      await fetchUsers(); // Refresh list
+      await fetchUsers(); 
     } catch (err) {
       console.error(err);
       toast({
@@ -131,15 +137,19 @@ export default function ManageUsersPage() {
     try {
       const response = await fetch(`/api/users/${userId}`, { method: 'DELETE' });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: `Failed to delete user. Status: ${response.status}` }));
-        throw new Error(errorData.message || `Failed to delete user. Status: ${response.status}`);
+        let errorMessage = `Failed to delete user. Status: ${response.status}`;
+        try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+        } catch (e) { /* Ignore if response is not JSON */ }
+        throw new Error(errorMessage);
       }
       toast({
         title: t('userDeletedToastTitle', { name: userToDelete?.name || 'User' }),
         description: t('userDeletedToastDescription'),
         variant: "destructive"
       });
-      await fetchUsers(); // Refresh list
+      await fetchUsers(); 
     } catch (err) {
        console.error(err);
        toast({
@@ -260,3 +270,5 @@ export default function ManageUsersPage() {
     </div>
   );
 }
+
+    

@@ -10,6 +10,8 @@ export async function GET() {
   try {
     const db = await getUsersDb();
     const users = await db.find({}).sort({ name: 1 });
+    // Exclude password if it were part of the User type and stored in DB
+    // For this app, User type does not have password, so no need to exclude here.
     return NextResponse.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -25,11 +27,7 @@ export async function POST(request: Request) {
     if (!newUserData.name || !newUserData.username || !newUserData.role) {
       return NextResponse.json({ message: 'Missing required fields (name, username, role)' }, { status: 400 });
     }
-    // In a real app, hash the password before saving. For this demo, we'll store it as is (not recommended for production).
-    // if (!newUserData.password) {
-    //   return NextResponse.json({ message: 'Password is required for new users' }, { status: 400 });
-    // }
-
+    // Password is handled by the form for new users, but not stored in User model in DB
 
     const db = await getUsersDb();
     
@@ -38,25 +36,55 @@ export async function POST(request: Request) {
       name: newUserData.name,
       username: newUserData.username,
       role: newUserData.role,
-      // password: hashedPassword, // Store hashed password
+      // Password is not part of the User type stored in the database
     };
 
     // Check for existing username
-    const existingUser = await db.findOne({ username: userToAdd.username });
-    if (existingUser) {
-      return NextResponse.json({ message: 'Username already exists' }, { status: 409 });
+    const existingUserByUsername = await db.findOne({ username: userToAdd.username });
+    if (existingUserByUsername) {
+      return NextResponse.json({ message: `Username "${userToAdd.username}" already exists` }, { status: 409 });
+    }
+
+    // Check for existing ID (less likely with generated IDs but good practice)
+    const existingUserById = await db.findOne({ id: userToAdd.id });
+    if (existingUserById) {
+      // This scenario is highly unlikely with generated IDs but included for robustness
+      return NextResponse.json({ message: `User ID "${userToAdd.id}" already exists. Please try again.` }, { status: 409 });
     }
 
     const savedUser = await db.insert(userToAdd);
-    return NextResponse.json(savedUser, { status: 201 });
+
+    if (!savedUser || (Array.isArray(savedUser) && savedUser.length === 0)) {
+      // This case should ideally be caught by an error from db.insert if it fails
+      console.error('User data was valid, but NeDB insert returned no document or an empty array.');
+      return NextResponse.json({ message: 'Failed to save user to database after validation. The database did not return the saved document.' }, { status: 500 });
+    }
+    
+    // NeDB insert returns the inserted document (or array if multiple were inserted).
+    // We expect a single document here.
+    const userToReturn = Array.isArray(savedUser) ? savedUser[0] : savedUser;
+
+    // Exclude password from the response if it were part of userToReturn (it's not here as User type doesn't have it)
+    // const { password, ...userWithoutPassword } = userToReturn as User & {password?:string};
+    // return NextResponse.json(userWithoutPassword, { status: 201 });
+    
+    return NextResponse.json(userToReturn, { status: 201 });
+
   } catch (error) {
-    console.error('Error creating user:', error);
-    if ((error as Error).message.includes('unique constraint violated for field username')) { // More specific error for NeDB
-        return NextResponse.json({ message: 'Error creating user: Username already exists.', error: (error as Error).message }, { status: 409 });
+    console.error('Error creating user in API:', error);
+    const errorMessage = (error as Error).message;
+
+    if (errorMessage.includes('unique constraint violated for field username')) {
+        return NextResponse.json({ message: `Error creating user: Username already exists. Detail: ${errorMessage}`, error: errorMessage }, { status: 409 });
     }
-    if ((error as Error).message.includes('unique constraint violated')) { // General unique constraint
-        return NextResponse.json({ message: 'Error creating user: ID or Username already exists.', error: (error as Error).message }, { status: 409 });
+    if (errorMessage.includes('unique constraint violated for field id')) {
+        return NextResponse.json({ message: `Error creating user: User ID already exists. Detail: ${errorMessage}`, error: errorMessage }, { status: 409 });
     }
-    return NextResponse.json({ message: 'Error creating user', error: (error as Error).message }, { status: 500 });
+    if (errorMessage.includes('unique constraint violated')) { // General unique constraint
+        return NextResponse.json({ message: `Error creating user: A unique field (ID or Username) already exists. Detail: ${errorMessage}`, error: errorMessage }, { status: 409 });
+    }
+    return NextResponse.json({ message: `Error creating user: ${errorMessage}`, error: errorMessage }, { status: 500 });
   }
 }
+
+    
