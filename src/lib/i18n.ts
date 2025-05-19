@@ -44,7 +44,7 @@ interface Translations {
   backToAllAnnouncementsButton: string;
   delegateIdLabel: string;
   noEventsForClassHint: string; 
-  loadingLabel: string; // Nova chave para o texto de "Cargando..."
+  loadingLabel: string; 
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -59,8 +59,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Stay Informed",
     kioskMainSubtitle: "Latest school updates at your fingertips.",
     announcementsSectionTitle: "Announcements",
-    examsSectionTitle: "Upcoming Exams",
-    deadlinesSectionTitle: "Assignment Deadlines",
+    examsSectionTitle: "Exams", // Changed
+    deadlinesSectionTitle: "Assignments", // Changed
     noAnnouncementsHint: "No current announcements.",
     noExamsHint: "No upcoming exams scheduled.",
     noDeadlinesHint: "No assignment deadlines approaching.",
@@ -72,9 +72,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "All rights reserved.",
 
     classPageTitle: "Events for {className}",
-    announcementsForClassSectionTitle: "Announcements for {className}", // Mantida por se se usa noutro sitio
-    examsForClassSectionTitle: "Exams for {className}", // Mantida
-    deadlinesForClassSectionTitle: "Deadlines for {className}", // Mantida
+    announcementsForClassSectionTitle: "Announcements for {className}", 
+    examsForClassSectionTitle: "Exams for {className}", 
+    deadlinesForClassSectionTitle: "Deadlines for {className}", 
     noClassAnnouncementsHint: "No current announcements for this class.",
     noClassExamsHint: "No upcoming exams scheduled for this class.",
     noClassDeadlinesHint: "No assignment deadlines approaching for this class.",
@@ -97,8 +97,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Mantente Informado",
     kioskMainSubtitle: "Últimas actualizaciones de la escuela al alcance de tu mano.",
     announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Próximos Exámenes",
-    deadlinesSectionTitle: "Fechas de Entrega",
+    examsSectionTitle: "Exámenes", // Changed
+    deadlinesSectionTitle: "Tareas", // Changed
     noAnnouncementsHint: "No hay anuncios actualmente.",
     noExamsHint: "No hay exámenes programados.",
     noDeadlinesHint: "No hay fechas de entrega próximas.",
@@ -135,8 +135,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Restez Informé", 
     kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.", 
     announcementsSectionTitle: "Annonces", 
-    examsSectionTitle: "Examens à Venir", 
-    deadlinesSectionTitle: "Dates Limites", 
+    examsSectionTitle: "Examens", // Changed
+    deadlinesSectionTitle: "Devoirs", // Changed
     noAnnouncementsHint: "Aucune annonce pour le moment.", 
     noExamsHint: "Aucun examen prévu.", 
     noDeadlinesHint: "Aucune date limite d'affectation approchant.", 
@@ -173,8 +173,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     kioskMainTitle: "Mantente Informado",
     kioskMainSubtitle: "Últimas actualizacións da escola ao teu alcance.",
     announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Próximos Exames",
-    deadlinesSectionTitle: "Datas de Entrega de Tarefas",
+    examsSectionTitle: "Exames", // Cambiado
+    deadlinesSectionTitle: "Tarefas", // Cambiado
     noAnnouncementsHint: "Non hai anuncios actualmente.",
     noExamsHint: "Non hai exames programados.",
     noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
@@ -186,9 +186,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     footerAllRightsReserved: "Todos os dereitos reservados.",
 
     classPageTitle: "Eventos para {className}",
-    announcementsForClassSectionTitle: "Anuncios para {className}", // Mantida por se se usa noutro sitio
-    examsForClassSectionTitle: "Exames para {className}", // Mantida
-    deadlinesForClassSectionTitle: "Prazos para {className}", // Mantida
+    announcementsForClassSectionTitle: "Anuncios para {className}",
+    examsForClassSectionTitle: "Exames para {className}", 
+    deadlinesForClassSectionTitle: "Prazos para {className}", 
     noClassAnnouncementsHint: "Non hai anuncios actuais para esta clase.",
     noClassExamsHint: "Non hai exames programados para esta clase.",
     noClassDeadlinesHint: "Non hai prazos de entrega de tarefas próximos para esta clase.",
