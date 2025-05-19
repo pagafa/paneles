@@ -1,6 +1,5 @@
-{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
-{"id":"class1","name":"Grade 10A","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697549820}}
-{"id":"class2","name":"Grade 10B","_id":"TJ0bbWUXqB9qPVCN","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697549820}}
 {"id":"class3","name":"Grade 11C","delegateId":"user3","_id":"QLuwjLKaV45C5e7j","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697549820}}
+{"id":"class2","name":"Grade 10B","_id":"TJ0bbWUXqB9qPVCN","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697549820}}
 {"id":"class4","name":"Grade 12B","_id":"koTsEyFBIYvtsLlA","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697549820}}
 {"id":"class1","name":"1º ESO","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697561711}}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
