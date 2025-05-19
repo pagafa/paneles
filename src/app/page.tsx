@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/context/LanguageContext'; // Import useLanguage
 import { useEffect, useState } from 'react';
+import type { TranslationKey } from '@/lib/i18n';
 
 
 // Simulate fetching data (can remain as is, or be moved to useEffect if it becomes client-side specific)
@@ -60,7 +61,7 @@ export default function KioskPage() {
   const exams = allEvents.filter(event => event.type === 'exam') as Exam[];
   const deadlines = allEvents.filter(event => event.type === 'deadline') as Deadline[];
 
-  const sections: { titleKey: keyof import('@/lib/i18n').translations; events: SchoolEvent[]; icon: React.ElementType, emptyHintKey: keyof import('@/lib/i18n').translations, emptyImageHint: string }[] = [
+  const sections: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyHintKey: TranslationKey, emptyImageHint: string }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyHintKey: 'noAnnouncementsHint', emptyImageHint: 'megaphone empty' },
     { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyHintKey: 'noExamsHint', emptyImageHint: 'exam calendar' },
     { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyHintKey: 'noDeadlinesHint', emptyImageHint: 'deadline list' },
@@ -69,7 +70,7 @@ export default function KioskPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
-        <p>{t('kioskMainTitle', 'Loading...')}</p> {/* Example usage of t during loading */}
+        <p>{t('kioskMainTitle')}</p> 
       </div>
     );
   }
@@ -97,7 +98,7 @@ export default function KioskPage() {
                   </DropdownMenuItem>
                 ))
               ) : (
-                <DropdownMenuItem disabled>{t('noClassesHint', 'No classes available')}</DropdownMenuItem> // Assuming noClassesHint exists or add it
+                <DropdownMenuItem disabled>{t('noClassesHint')}</DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>

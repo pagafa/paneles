@@ -3,12 +3,12 @@
 
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { translations, defaultLanguage, supportedLanguages, type SupportedLanguage, type TranslationKey } from '@/lib/i18n';
+import { translations, defaultLanguage, supportedLanguages, type SupportedLanguage, type TranslationKey, type TranslationVariables } from '@/lib/i18n';
 
 interface LanguageContextType {
   language: SupportedLanguage;
   setLanguage: (lang: SupportedLanguage) => void;
-  t: (key: TranslationKey, fallback?: string) => string;
+  t: (key: TranslationKey, variables?: TranslationVariables) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -37,10 +37,20 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const t = useCallback((key: TranslationKey, fallback?: string): string => {
+  const t = useCallback((key: TranslationKey, variables?: TranslationVariables): string => {
     const langTranslations = translations[language] || translations[defaultLanguage];
     const defaultLangTranslations = translations[defaultLanguage];
-    return langTranslations[key] || defaultLangTranslations[key] || fallback || String(key);
+    let translatedString = langTranslations[key] || defaultLangTranslations[key] || String(key); // Fallback to the key itself
+
+    if (variables && typeof variables === 'object' && Object.keys(variables).length > 0) {
+      Object.keys(variables).forEach((variableKey) => {
+        // Escape curly braces for literal matching and ensure variableKey is a simple string
+        const escapedVariableKey = variableKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`\\{${escapedVariableKey}\\}`, 'g');
+        translatedString = translatedString.replace(regex, String(variables[variableKey]));
+      });
+    }
+    return translatedString;
   }, [language]);
 
   return (
