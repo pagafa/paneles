@@ -17,12 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import type { Announcement } from "@/types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
 const announcementFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
@@ -49,7 +50,6 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
   });
 
   async function onSubmit(values: AnnouncementFormValues) {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     const newAnnouncement: Announcement = {
       id: initialData?.id || `ann-${Date.now()}`,
@@ -65,7 +65,7 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
     if (onSubmitSuccess) {
       onSubmitSuccess(newAnnouncement);
     }
-    if (!initialData?.id) { // Reset form only if it's a new announcement
+    if (!initialData?.id) { 
       form.reset({ title: "", content: "", date: new Date() });
     }
   }
@@ -103,76 +103,96 @@ export function AdminAnnouncementForm({ onSubmitSuccess, initialData }: AdminAnn
           control={form.control}
           name="date"
           render={({ field }) => {
-            const [timeInput, setTimeInput] = useState(() =>
-              field.value ? format(field.value, "HH:mm") : "00:00"
-            );
-
-            useEffect(() => {
-              if (field.value) {
-                setTimeInput(format(field.value, "HH:mm"));
-              }
-            }, [field.value]);
+            const currentHour = field.value ? field.value.getHours() : new Date().getHours();
+            const currentMinute = field.value ? field.value.getMinutes() : new Date().getMinutes();
 
             const handleDateSelect = (selectedDate?: Date) => {
               if (!selectedDate) return;
-              const [hours, minutes] = timeInput.split(":").map(Number);
               const newDate = new Date(selectedDate);
-              newDate.setHours(hours);
-              newDate.setMinutes(minutes);
+              newDate.setHours(currentHour);
+              newDate.setMinutes(currentMinute);
+              newDate.setSeconds(0);
+              newDate.setMilliseconds(0);
               field.onChange(newDate);
             };
 
-            const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-              const newTime = e.target.value;
-              setTimeInput(newTime);
-              const [hours, minutes] = newTime.split(":").map(Number);
-              const currentDate = field.value ? new Date(field.value) : new Date();
-              currentDate.setHours(hours);
-              currentDate.setMinutes(minutes);
-              field.onChange(currentDate);
+            const handleHourChange = (hourString: string) => {
+              const hour = parseInt(hourString, 10);
+              const newDate = new Date(field.value || new Date());
+              newDate.setHours(hour);
+              field.onChange(newDate);
+            };
+
+            const handleMinuteChange = (minuteString: string) => {
+              const minute = parseInt(minuteString, 10);
+              const newDate = new Date(field.value || new Date());
+              newDate.setMinutes(minute);
+              field.onChange(newDate);
             };
 
             return (
               <FormItem className="flex flex-col">
                 <FormLabel>Announcement Date and Time</FormLabel>
-                <div className="flex items-center gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "flex-grow pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, "PPP p")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={handleDateSelect}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormControl>
-                    <Input
-                      type="time"
-                      value={timeInput}
-                      onChange={handleTimeChange}
-                      className="w-[120px]"
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? (
+                          format(field.value, "PPP HH:mm")
+                        ) : (
+                          <span>Pick a date and time</span>
+                        )}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={handleDateSelect}
+                      initialFocus
                     />
-                  </FormControl>
-                </div>
+                    <div className="p-2 border-t border-border">
+                      <p className="text-sm font-medium mb-2 text-center">Select time</p>
+                      <div className="flex gap-2 justify-center">
+                        <Select
+                          value={String(currentHour).padStart(2, '0')}
+                          onValueChange={handleHourChange}
+                        >
+                          <SelectTrigger className="w-[70px]">
+                            <SelectValue placeholder="HH" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(hour => (
+                              <SelectItem key={hour} value={hour}>{hour}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <span className="text-xl font-bold">:</span>
+                        <Select
+                          value={String(currentMinute).padStart(2, '0')}
+                          onValueChange={handleMinuteChange}
+                        >
+                          <SelectTrigger className="w-[70px]">
+                            <SelectValue placeholder="MM" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
+                              <SelectItem key={minute} value={minute}>{minute}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <FormMessage />
               </FormItem>
             );

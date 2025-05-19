@@ -25,7 +25,7 @@ import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/t
 import { mockClasses } from "@/lib/placeholder-data"; 
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
+import { useLanguage } from "@/context/LanguageContext"; 
 
 const commonSchema = {
   title: z.string().min(3, "Title is too short."),
@@ -129,9 +129,8 @@ export function DelegateInputForm({
     setActiveTab(newType); 
     if (!initialData) {
         form.setValue("type", newType, { shouldValidate: true });
-         // Reset fields specifically when tab changes for a NEW entry
         form.reset({
-            ...form.getValues(), // keep common fields like title, date, classId if already entered
+            ...form.getValues(), 
             type: newType,
             content: "", 
             subject: "",
@@ -183,7 +182,6 @@ export function DelegateInputForm({
         } as Deadline;
         break;
       default:
-        // This should not happen with Zod discriminated union
         const _exhaustiveCheck: never = values; 
         console.error("Invalid form type submitted", _exhaustiveCheck);
         return;
@@ -243,61 +241,83 @@ export function DelegateInputForm({
               control={form.control}
               name="date"
               render={({ field }) => {
-                const [timeInput, setTimeInput] = useState(() =>
-                  field.value ? format(field.value, "HH:mm") : "00:00"
-                );
-
-                useEffect(() => {
-                  if (field.value) {
-                    setTimeInput(format(field.value, "HH:mm"));
-                  }
-                }, [field.value]);
+                const currentHour = field.value ? field.value.getHours() : new Date().getHours();
+                const currentMinute = field.value ? field.value.getMinutes() : new Date().getMinutes();
 
                 const handleDateSelect = (selectedDate?: Date) => {
                   if (!selectedDate) return;
-                  const [hours, minutes] = timeInput.split(":").map(Number);
                   const newDate = new Date(selectedDate);
-                  newDate.setHours(hours);
-                  newDate.setMinutes(minutes);
+                  newDate.setHours(currentHour);
+                  newDate.setMinutes(currentMinute);
+                  newDate.setSeconds(0);
+                  newDate.setMilliseconds(0);
+                  field.onChange(newDate);
+                };
+    
+                const handleHourChange = (hourString: string) => {
+                  const hour = parseInt(hourString, 10);
+                  const newDate = new Date(field.value || new Date());
+                  newDate.setHours(hour);
+                  field.onChange(newDate);
+                };
+    
+                const handleMinuteChange = (minuteString: string) => {
+                  const minute = parseInt(minuteString, 10);
+                  const newDate = new Date(field.value || new Date());
+                  newDate.setMinutes(minute);
                   field.onChange(newDate);
                 };
 
-                const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                  const newTime = e.target.value;
-                  setTimeInput(newTime);
-                  const [hours, minutes] = newTime.split(":").map(Number);
-                  const currentDate = field.value ? new Date(field.value) : new Date();
-                  currentDate.setHours(hours);
-                  currentDate.setMinutes(minutes);
-                  field.onChange(currentDate);
-                };
-                
                 return (
                   <FormItem className="flex flex-col">
                     <FormLabel>{t('formDateTimeLabel')}</FormLabel>
-                    <div className="flex items-center gap-2">
-                      <Popover>
+                     <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
-                            <Button variant={"outline"} className={cn("flex-grow pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                              {field.value ? format(field.value, "PPP p") : <span>{t('formPickDateTimeButton')}</span>}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <Button 
+                                variant={"outline"} 
+                                className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {field.value ? format(field.value, "PPP HH:mm") : <span>{t('formPickDateTimeButton')}</span>}
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar mode="single" selected={field.value} onSelect={handleDateSelect} initialFocus />
+                           <div className="p-2 border-t border-border">
+                            <p className="text-sm font-medium mb-2 text-center">Select time</p>
+                            <div className="flex gap-2 justify-center">
+                                <Select
+                                    value={String(currentHour).padStart(2, '0')}
+                                    onValueChange={handleHourChange}
+                                >
+                                    <SelectTrigger className="w-[70px]">
+                                        <SelectValue placeholder="HH"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                    {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map(hour => (
+                                        <SelectItem key={hour} value={hour}>{hour}</SelectItem>
+                                    ))}
+                                    </SelectContent>
+                                </Select>
+                                <span className="text-xl font-bold">:</span>
+                                <Select
+                                    value={String(currentMinute).padStart(2, '0')}
+                                    onValueChange={handleMinuteChange}
+                                >
+                                    <SelectTrigger className="w-[70px]">
+                                        <SelectValue placeholder="MM"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                    {Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0')).map(minute => (
+                                        <SelectItem key={minute} value={minute}>{minute}</SelectItem>
+                                    ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                           </div>
                         </PopoverContent>
                       </Popover>
-                      <FormControl>
-                        <Input
-                          type="time"
-                          value={timeInput}
-                          onChange={handleTimeChange}
-                          className="w-[120px]"
-                        />
-                      </FormControl>
-                    </div>
                     <FormMessage />
                   </FormItem>
                 );
@@ -382,4 +402,3 @@ export function DelegateInputForm({
     </Tabs>
   );
 }
-

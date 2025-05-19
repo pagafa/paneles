@@ -1,3 +1,4 @@
+
 "use client";
 
 import { AdminAnnouncementForm } from "@/components/forms/AdminAnnouncementForm";
@@ -92,7 +93,7 @@ export default function AdminDashboardPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-lg">{ann.title}</CardTitle>
-                      <CardDescription>{format(new Date(ann.date), "PPP p")}</CardDescription>
+                      <CardDescription>{format(new Date(ann.date), "PPP HH:mm")}</CardDescription>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label="Edit">

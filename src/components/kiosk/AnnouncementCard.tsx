@@ -7,13 +7,11 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useState, useEffect } from 'react';
 import { Edit3, Trash2 } from 'lucide-react';
-// AlertDialog components are not directly used here if onDeleteRequest triggers parent dialog
-// If AlertDialog is self-contained, import them. For this iteration, parent handles dialog.
 
 interface AnnouncementCardProps {
   item: SchoolEvent;
   onEdit?: (item: SchoolEvent) => void;
-  onDeleteRequest?: (item: SchoolEvent) => void; // Renamed to clarify it requests deletion (e.g. shows dialog)
+  onDeleteRequest?: (item: SchoolEvent) => void; 
   showDelegateActions?: boolean;
 }
 
@@ -21,9 +19,8 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
 
   useEffect(() => {
-    // Ensure date is only formatted on the client after mount
     try {
-      setFormattedDate(format(new Date(item.date), 'PPP p'));
+      setFormattedDate(format(new Date(item.date), 'PPP HH:mm'));
     } catch (error) {
       console.error("Error formatting date:", item.date, error);
       setFormattedDate("Invalid Date");
