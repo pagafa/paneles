@@ -3,11 +3,11 @@
 import { DelegateInputForm } from "@/components/forms/DelegateInputForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { mockClasses, mockSchoolEvents } from "@/lib/placeholder-data";
+import { mockClasses, mockSchoolEvents, mockUsers } from "@/lib/placeholder-data";
 import type { SchoolClass, SchoolEvent } from "@/types";
 import { format } from "date-fns";
 import { ListChecks, UserCheck } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AnnouncementCard } from "@/components/kiosk/AnnouncementCard"; // Re-use for display consistency
 
 export default function DelegateDashboardPage() {
@@ -16,11 +16,29 @@ export default function DelegateDashboardPage() {
     mockSchoolEvents.filter(event => event.class && mockClasses.find(c => c.name === event.class)) // Simplified filter
   );
   
-  // Simulate delegate's assigned classes. In a real app, this comes from auth/user data.
-  // Assuming delegate with id 'user2' (John Delegate) is logged in, and assigned to 'Grade 10A'
-  const delegateAssignedClasses = useMemo(() => {
-    const delegateId = typeof window !== 'undefined' && localStorage.getItem('userRole') === 'delegate' ? 'user2' : null; // MOCK
-    return mockClasses.filter(c => c.delegateId === delegateId || !delegateId); // If no delegateId, show all for demo
+  const [delegateAssignedClasses, setDelegateAssignedClasses] = useState<SchoolClass[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUserId = localStorage.getItem('userId');
+      const userRole = localStorage.getItem('userRole');
+
+      if (userRole === 'delegate' && storedUserId) {
+        const assigned = mockClasses.filter(c => c.delegateId === storedUserId);
+        setDelegateAssignedClasses(assigned);
+      } else if (!storedUserId && userRole === 'delegate') {
+        // Fallback for generic delegate_user if no specific ID (e.g. from old login)
+         const genericDelegateUser = mockUsers.find(u => u.username === 'delegate_user');
+         if (genericDelegateUser) {
+            setDelegateAssignedClasses(mockClasses.filter(c => c.delegateId === genericDelegateUser.id));
+         } else {
+            setDelegateAssignedClasses(mockClasses); // Show all as a broad fallback if 'delegate_user' isn't found
+         }
+      }
+       else {
+        setDelegateAssignedClasses(mockClasses); // Show all for demo if not delegate or no ID
+      }
+    }
   }, []);
 
 
@@ -35,7 +53,7 @@ export default function DelegateDashboardPage() {
         <Card className="w-full md:w-auto bg-accent/20 border-accent">
           <CardHeader className="p-4">
             <CardTitle className="text-md text-accent-foreground">
-              You are managing information for: {delegateAssignedClasses.map(c => c.name).join(', ') || 'N/A'}
+              You are managing information for: {delegateAssignedClasses.length > 0 ? delegateAssignedClasses.map(c => c.name).join(', ') : 'N/A'}
             </CardTitle>
           </CardHeader>
         </Card>

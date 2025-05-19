@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { mockUsers as initialUsers } from "@/lib/placeholder-data";
 import type { User } from "@/types";
-import { Edit3, Trash2, Users, Badge } from "lucide-react";
+import { Edit3, Trash2, Users } from "lucide-react"; // Removed Badge icon as it's not used for a direct title icon
 import { useState } from "react";
 import {
   AlertDialog,
@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge as ShadBadge } from "@/components/ui/badge"; // Renamed to avoid conflict with lucide-react Badge
+import { Badge as ShadBadge } from "@/components/ui/badge"; 
 import { useToast } from "@/hooks/use-toast";
 
 
@@ -52,9 +52,8 @@ export default function ManageUsersPage() {
   };
 
   const handleDelete = (userId: string) => {
-    // Prevent deleting the last admin or a hardcoded important user for demo
     const userToDelete = users.find(u => u.id === userId);
-    if (userToDelete?.email === 'admin@school.com') {
+    if (userToDelete?.username === 'admin_user') { // Check against username
       toast({
         title: "Action Prohibited",
         description: "This demo admin user cannot be deleted.",
@@ -108,7 +107,7 @@ export default function ManageUsersPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
+                  <TableHead>Username</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -117,7 +116,7 @@ export default function ManageUsersPage() {
                 {users.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.username}</TableCell>
                     <TableCell>
                       <ShadBadge variant={user.role === 'admin' ? 'default' : 'secondary'}>
                         {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
@@ -129,7 +128,7 @@ export default function ManageUsersPage() {
                       </Button>
                        <AlertDialog>
                         <AlertDialogTrigger asChild>
-                           <Button variant="destructive" size="icon" aria-label="Delete User" disabled={user.email === 'admin@school.com'}> {/* Prevent deleting main admin */}
+                           <Button variant="destructive" size="icon" aria-label="Delete User" disabled={user.username === 'admin_user'}> {/* Prevent deleting main admin by username */}
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>

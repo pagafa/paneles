@@ -83,20 +83,18 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
         <FormField
           control={form.control}
           name="delegateId"
-          render={({ field }) => ( // field.value is either "" or a delegate_id string
+          render={({ field }) => ( 
             <FormItem>
               <FormLabel>Delegate (Optional)</FormLabel>
               <Select
                 onValueChange={(valueFromSelect) => {
                   if (valueFromSelect === UNASSIGNED_DELEGATE_SELECT_VALUE) {
-                    field.onChange(""); // Update form state to "" for "None"
+                    field.onChange(""); 
                   } else {
-                    field.onChange(valueFromSelect); // Update form state to actual delegate_id
+                    field.onChange(valueFromSelect); 
                   }
                 }}
                 value={field.value === "" ? UNASSIGNED_DELEGATE_SELECT_VALUE : field.value}
-                // If form state is "", the Select component's current value is our special "None" value.
-                // Otherwise, it's the delegate_id.
               >
                 <FormControl>
                   <SelectTrigger>
@@ -107,7 +105,7 @@ export function ClassForm({ onSubmitSuccess, initialData, availableDelegates = m
                   <SelectItem value={UNASSIGNED_DELEGATE_SELECT_VALUE}>None</SelectItem>
                   {availableDelegates.map(delegate => (
                     <SelectItem key={delegate.id} value={delegate.id}>
-                      {delegate.name} ({delegate.email})
+                      {delegate.name} ({delegate.username})
                     </SelectItem>
                   ))}
                 </SelectContent>

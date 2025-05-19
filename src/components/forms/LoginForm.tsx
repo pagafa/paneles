@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
 const loginFormSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email." }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
 });
 
@@ -36,7 +36,7 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      email: "",
+      username: "",
       password: "",
     },
   });
@@ -48,14 +48,20 @@ export function LoginForm() {
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Mock authentication logic
-    if (values.email === "admin@school.com" && values.password === "password") {
+    if (values.username === "admin_user" && values.password === "password") {
       localStorage.setItem("userRole", "admin"); 
       router.push("/admin/dashboard");
-    } else if (values.email === "delegate@school.com" && values.password === "password") {
+    } else if (values.username === "delegate_user" && values.password === "password") { // Assuming a delegate_user for demo
       localStorage.setItem("userRole", "delegate"); 
       router.push("/delegate/dashboard");
-    } else {
-      setError("Invalid email or password.");
+    } else if (mockUsers.find(u => u.username === values.username && values.password === "password" && u.role === 'delegate')) { // Check mock delegates
+      const user = mockUsers.find(u => u.username === values.username)!;
+      localStorage.setItem("userRole", user.role);
+      localStorage.setItem("userId", user.id); // Store userId for delegate dashboard if needed
+      router.push("/delegate/dashboard");
+    }
+    else {
+      setError("Invalid username or password.");
     }
     setIsLoading(false);
   }
@@ -79,12 +85,12 @@ export function LoginForm() {
             )}
             <FormField
               control={form.control}
-              name="email"
+              name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
+                    <Input type="text" placeholder="e.g., admin_user" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -109,8 +115,8 @@ export function LoginForm() {
           </form>
         </Form>
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          Demo Admin: admin@school.com / password <br/>
-          Demo Delegate: delegate@school.com / password
+          Demo Admin: admin_user / password <br/>
+          Demo Delegate: john_delegate / password
         </p>
       </CardContent>
     </Card>

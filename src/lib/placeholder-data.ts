@@ -62,9 +62,9 @@ export const mockSchoolEvents: SchoolEvent[] = [
 
 
 export const mockUsers: User[] = [
-  { id: 'user1', name: 'Admin User', email: 'admin@school.com', role: 'admin' },
-  { id: 'user2', name: 'John Delegate', email: 'john.delegate@school.com', role: 'delegate' },
-  { id: 'user3', name: 'Jane Delegate', email: 'jane.delegate@school.com', role: 'delegate' },
+  { id: 'user1', name: 'Admin User', username: 'admin_user', role: 'admin' },
+  { id: 'user2', name: 'John Delegate', username: 'john_delegate', role: 'delegate' },
+  { id: 'user3', name: 'Jane Delegate', username: 'jane_delegate', role: 'delegate' },
 ];
 
 export const mockClasses: SchoolClass[] = [

@@ -20,7 +20,7 @@ import type { User, UserRole } from "@/types";
 
 const userFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Please enter a valid email." }),
+  username: z.string().min(3, { message: "Username must be at least 3 characters." }),
   role: z.enum(["admin", "delegate"], { required_error: "User role is required." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional(), // Optional for edit, required for create
 });
@@ -46,7 +46,7 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
     resolver: zodResolver(currentFormSchema),
     defaultValues: {
       name: initialData?.name || "",
-      email: initialData?.email || "",
+      username: initialData?.username || "",
       role: initialData?.role || "delegate",
       password: "", // Password field is always empty initially for security
     },
@@ -67,7 +67,7 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
     const newUser: User = {
       id: initialData?.id || `user-${Date.now()}`,
       name: values.name,
-      email: values.email,
+      username: values.username,
       role: values.role as UserRole,
     };
     
@@ -80,7 +80,7 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
       onSubmitSuccess(newUser);
     }
      if (!isEditing) {
-      form.reset({ name: "", email: "", role: "delegate", password: "" });
+      form.reset({ name: "", username: "", role: "delegate", password: "" });
     } else {
       form.reset({...form.getValues(), password: ""}); // Reset password field after edit
     }
@@ -104,14 +104,14 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
         />
         <FormField
           control={form.control}
-          name="email"
+          name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email Address</FormLabel>
+              <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., john.doe@school.com" {...field} disabled={isEditing} />
+                <Input type="text" placeholder="e.g., john_d" {...field} disabled={isEditing} />
               </FormControl>
-              {isEditing && <p className="text-xs text-muted-foreground">Email cannot be changed after creation.</p>}
+              {isEditing && <p className="text-xs text-muted-foreground">Username cannot be changed after creation.</p>}
               <FormMessage />
             </FormItem>
           )}

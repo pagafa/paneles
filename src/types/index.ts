@@ -34,7 +34,7 @@ export type UserRole = 'admin' | 'delegate' | 'guest';
 export interface User {
   id: string;
   name: string;
-  email: string;
+  username: string; // Changed from email to username
   role: UserRole;
 }
 
