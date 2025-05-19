@@ -21,8 +21,24 @@ interface Translations {
   noDeadlinesHint: string;
   checkBackLaterHint: string;
   viewClassesButtonLabel: string;
+  noClassesHint: string; // Added from KioskPage
   loginButtonLabel: string;
   footerAllRightsReserved: string;
+
+  // For PublicClassPage
+  classPageTitle: string; 
+  announcementsForClassSectionTitle: string; 
+  examsForClassSectionTitle: string; 
+  deadlinesForClassSectionTitle: string; 
+  noClassAnnouncementsHint: string; 
+  noClassExamsHint: string; 
+  noClassDeadlinesHint: string; 
+  classNotFoundTitle: string; 
+  classNotFoundMessage: string; 
+  backToHomeButton: string; 
+  backToAllAnnouncementsButton: string;
+  delegateIdLabel: string;
+  noEventsForClassHint: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -44,8 +60,23 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noDeadlinesHint: "No assignment deadlines approaching.",
     checkBackLaterHint: "Please check back later for updates.",
     viewClassesButtonLabel: "View Classes",
+    noClassesHint: "No classes available",
     loginButtonLabel: "Login",
     footerAllRightsReserved: "All rights reserved.",
+
+    classPageTitle: "Events for {className}",
+    announcementsForClassSectionTitle: "Announcements for {className}",
+    examsForClassSectionTitle: "Exams for {className}",
+    deadlinesForClassSectionTitle: "Deadlines for {className}",
+    noClassAnnouncementsHint: "No current announcements for this class.",
+    noClassExamsHint: "No upcoming exams scheduled for this class.",
+    noClassDeadlinesHint: "No assignment deadlines approaching for this class.",
+    classNotFoundTitle: "Class Not Found",
+    classNotFoundMessage: "The class you are looking for does not exist or is not available.",
+    backToHomeButton: "Back to Home",
+    backToAllAnnouncementsButton: "Back to All Announcements",
+    delegateIdLabel: "Delegate ID",
+    noEventsForClassHint: "No events posted for this class yet.",
   },
   es: {
     appTitle: "Avisos Escolares",
@@ -65,8 +96,23 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noDeadlinesHint: "No hay fechas de entrega próximas.",
     checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
     viewClassesButtonLabel: "Ver Clases",
+    noClassesHint: "No hay clases disponibles",
     loginButtonLabel: "Iniciar Sesión",
     footerAllRightsReserved: "Todos los derechos reservados.",
+
+    classPageTitle: "Eventos para {className}",
+    announcementsForClassSectionTitle: "Anuncios para {className}",
+    examsForClassSectionTitle: "Exámenes para {className}",
+    deadlinesForClassSectionTitle: "Fechas de Entrega para {className}",
+    noClassAnnouncementsHint: "No hay anuncios actuales para esta clase.",
+    noClassExamsHint: "No hay exámenes programados para esta clase.",
+    noClassDeadlinesHint: "No hay fechas de entrega próximas para esta clase.",
+    classNotFoundTitle: "Clase no encontrada",
+    classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
+    backToHomeButton: "Volver al Inicio",
+    backToAllAnnouncementsButton: "Volver a Todos los Anuncios",
+    delegateIdLabel: "ID del Delegado",
+    noEventsForClassHint: "No hay eventos publicados para esta clase todavía.",
   },
   fr: { 
     appTitle: "Annonces Scolaires",
@@ -76,18 +122,33 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gérer les Classes",
     manageUsersTitle: "Gérer les Utilisateurs",
     delegateDashboardTitle: "Tableau de bord Délégué",
-    kioskMainTitle: "Restez Informé", // Placeholder
-    kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.", // Placeholder
-    announcementsSectionTitle: "Annonces", // Placeholder
-    examsSectionTitle: "Examens à Venir", // Placeholder
-    deadlinesSectionTitle: "Dates Limites", // Placeholder
-    noAnnouncementsHint: "Aucune annonce pour le moment.", // Placeholder
-    noExamsHint: "Aucun examen prévu.", // Placeholder
-    noDeadlinesHint: "Aucune date limite d'affectation approchant.", // Placeholder
-    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", // Placeholder
-    viewClassesButtonLabel: "Voir les Classes", // Placeholder
-    loginButtonLabel: "Connexion", // Placeholder
-    footerAllRightsReserved: "Tous droits réservés.", // Placeholder
+    kioskMainTitle: "Restez Informé", 
+    kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.", 
+    announcementsSectionTitle: "Annonces", 
+    examsSectionTitle: "Examens à Venir", 
+    deadlinesSectionTitle: "Dates Limites", 
+    noAnnouncementsHint: "Aucune annonce pour le moment.", 
+    noExamsHint: "Aucun examen prévu.", 
+    noDeadlinesHint: "Aucune date limite d'affectation approchant.", 
+    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", 
+    viewClassesButtonLabel: "Voir les Classes", 
+    noClassesHint: "Aucune classe disponible",
+    loginButtonLabel: "Connexion", 
+    footerAllRightsReserved: "Tous droits réservés.", 
+
+    classPageTitle: "Événements pour {className}",
+    announcementsForClassSectionTitle: "Annonces pour {className}",
+    examsForClassSectionTitle: "Examens pour {className}",
+    deadlinesForClassSectionTitle: "Dates Limites pour {className}",
+    noClassAnnouncementsHint: "Aucune annonce actuelle pour cette classe.",
+    noClassExamsHint: "Aucun examen prévu pour cette classe.",
+    noClassDeadlinesHint: "Aucune date limite d'affectation approchant pour cette classe.",
+    classNotFoundTitle: "Classe non trouvée",
+    classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
+    backToHomeButton: "Retour à l'accueil",
+    backToAllAnnouncementsButton: "Retour à Toutes les Annonces",
+    delegateIdLabel: "ID du Délégué",
+    noEventsForClassHint: "Aucun événement publié pour cette classe pour le moment.",
   },
   gl: { 
     appTitle: "Avisos Escolares",
@@ -107,9 +168,28 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
     checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
     viewClassesButtonLabel: "Ver Clases",
+    noClassesHint: "Non hai clases dispoñibles",
     loginButtonLabel: "Iniciar Sesión",
     footerAllRightsReserved: "Todos os dereitos reservados.",
+
+    classPageTitle: "Eventos para {className}",
+    announcementsForClassSectionTitle: "Anuncios para {className}",
+    examsForClassSectionTitle: "Exames para {className}",
+    deadlinesForClassSectionTitle: "Prazos para {className}",
+    noClassAnnouncementsHint: "Non hai anuncios actuais para esta clase.",
+    noClassExamsHint: "Non hai exames programados para esta clase.",
+    noClassDeadlinesHint: "Non hai prazos de entrega de tarefas próximos para esta clase.",
+    classNotFoundTitle: "Clase Non Atopada",
+    classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
+    backToHomeButton: "Volver ao Inicio",
+    backToAllAnnouncementsButton: "Volver a Todos os Anuncios",
+    delegateIdLabel: "ID do Delegado",
+    noEventsForClassHint: "Aínda non hai eventos publicados para esta clase.",
   },
 };
 
 export type TranslationKey = keyof Translations;
+export type TranslationVariables = { [key: string]: string | number };
+
+// Helper function type for the 't' function to allow for variables
+export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
