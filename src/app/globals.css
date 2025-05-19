@@ -4,52 +4,6 @@
 
 @layer base {
   :root {
-    --background: 210 29% 97%; /* Light Gray #F0F4F8 */
-    --foreground: 210 25% 20%; /* Darker gray for text */
-
-    --card: 210 29% 99%; /* Slightly lighter than background */
-    --card-foreground: 210 25% 20%;
-
-    --popover: 210 29% 99%;
-    --popover-foreground: 210 25% 20%;
-
-    --primary: 207 82% 67%; /* Soft Blue #64B5F6 */
-    --primary-foreground: 210 40% 98%; /* White-ish for text on primary */
-
-    --secondary: 210 20% 90%; /* Lighter gray for secondary elements */
-    --secondary-foreground: 210 10% 30%;
-
-    --muted: 210 20% 90%;
-    --muted-foreground: 210 10% 45%;
-
-    --accent: 260 46% 63%; /* Muted Purple #9575CD */
-    --accent-foreground: 210 40% 98%; /* White-ish for text on accent */
-
-    --destructive: 0 75% 55%; /* Adjusted for better visibility */
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 210 20% 88%;
-    --input: 210 20% 92%;
-    --ring: 207 82% 67%; /* Use primary for ring */
-
-    /* Sidebar specific colors based on new theme */
-    --sidebar-background: 210 20% 92%; /* Slightly darker than main background */
-    --sidebar-foreground: 210 25% 25%;
-    --sidebar-primary: 207 82% 67%; /* Same as primary */
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 207 82% 75%; /* Lighter shade of primary for accents */
-    --sidebar-accent-foreground: 210 25% 15%;
-    --sidebar-border: 210 20% 80%;
-    --sidebar-ring: 207 82% 67%;
-
-    --chart-1: 207 82% 67%;
-    --chart-2: 260 46% 63%;
-    --chart-3: 30 80% 65%;
-    --chart-4: 160 60% 45%;
-    --chart-5: 340 75% 55%;
-  }
-
-  .dark {
     --background: 220 18% 12%;
     --foreground: 220 15% 88%;
 
@@ -78,7 +32,7 @@
     --input: 220 15% 18%;
     --ring: 210 65% 60%;
 
-    /* Dark Sidebar specific colors */
+    /* Sidebar specific colors (using dark theme values) */
     --sidebar-background: 220 18% 10%;
     --sidebar-foreground: 220 15% 85%;
     --sidebar-primary: 210 65% 60%;
@@ -94,6 +48,8 @@
     --chart-4: 150 45% 50%;
     --chart-5: 330 60% 60%;
   }
+
+  /* The .dark block is no longer needed as these are now the root variables */
 }
 
 @layer base {
