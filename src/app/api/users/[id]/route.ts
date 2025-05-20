@@ -56,10 +56,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (requestBody.username !== undefined) updatePayload.username = requestBody.username;
     if (requestBody.role !== undefined) updatePayload.role = requestBody.role;
     if (requestBody.password) {
+      // Note: In a real app, you'd hash this password before saving.
+      // For this demo, we store it as is, but User type doesn't include it.
       (updatePayload as User & {password?: string}).password = requestBody.password;
     }
 
     if (Object.keys(updatePayload).length === 0) {
+        // No actual fields to update were provided besides potentially an empty password
         const { password, ...userWithoutPassword } = existingUser as User & {password?: string};
         return NextResponse.json(userWithoutPassword);
     }
@@ -67,11 +70,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const numAffected = await db.update({ id: userId }, { $set: updatePayload });
 
     if (numAffected === 0) {
+      // This could happen if the user was deleted between the findOne and update, or if the payload resulted in no change (though our Object.keys check above should prevent this)
       return NextResponse.json({ message: 'User not found or no changes made' }, { status: 404 });
     }
 
     const updatedUser = await db.findOne({ id: userId });
     if (!updatedUser) {
+        // Should not happen if numAffected > 0, but as a safeguard
         return NextResponse.json({ message: 'User updated but failed to retrieve' }, { status: 500 });
     }
     const { password, ...userWithoutPassword } = updatedUser as User & {password?: string};
@@ -80,11 +85,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   } catch (error) {
     console.error(`Error updating user ${params.id}:`, error);
     const errorMessage = (error as Error).message;
+    // NeDB specific error for unique constraint violation
     if (errorMessage.includes('unique constraint violated for field username')) {
-        return NextResponse.json({ message: 'Error updating user: Username already exists.', error: errorMessage }, { status: 409 });
+        // This error comes from NeDB if its unique index on 'username' is violated.
+        // Our pre-check should ideally catch this, but this handles the DB-level enforcement.
+        return NextResponse.json({ message: `Error updating user: Username "${(error as any)?.payloadToUpdate?.username || 'provided'}" already exists (DB constraint).`, error: errorMessage }, { status: 409 });
     }
-     if (errorMessage.includes('unique constraint violated')) { // General unique constraint check
-        return NextResponse.json({ message: 'Error updating user: A unique field (ID or Username) constraint was violated.', error: errorMessage }, { status: 409 });
+     if (errorMessage.includes('unique constraint violated')) { // General unique constraint check from NeDB
+        return NextResponse.json({ message: 'Error updating user: A unique field (ID or Username) constraint was violated at the database level.', error: errorMessage }, { status: 409 });
     }
     return NextResponse.json({ message: `Error updating user: ${errorMessage}`, error: errorMessage }, { status: 500 });
   }
@@ -99,9 +107,10 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     const db = await getUsersDb();
+    // Prevent deletion of a specific user, e.g., a default admin
     const userToDelete = await db.findOne({ id: userId });
 
-    if (userToDelete && userToDelete.username === 'admin_user') {
+    if (userToDelete && userToDelete.username === 'admin_mv') { // Or use a more robust check if needed
       return NextResponse.json({ message: 'Cannot delete the default admin user' }, { status: 403 });
     }
     

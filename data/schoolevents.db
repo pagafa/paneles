@@ -1,6 +1,6 @@
-{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
-{"id":"exam2","title":"Science Final Exam","date":"2025-06-02T23:33:05.091Z","type":"exam","subject":"Science","classId":"class4","_id":"zycWJfhAm2Byo3DF","createdAt":{"$$date":1747697587247},"updatedAt":{"$$date":1747697587247}}
 {"id":"exam1","title":"Mathematics Mid-Term Exam","date":"2025-05-29T23:33:05.091Z","type":"exam","subject":"Mathematics","classId":"class1","submittedByDelegateId":"user2","_id":"QtAphaRl4Ww4bEje","createdAt":{"$$date":1747697587247},"updatedAt":{"$$date":1747697587247}}
 {"id":"dead2","title":"Art Project Deadline","date":"2025-05-28T23:33:05.091Z","type":"deadline","assignmentName":"Modern Art Sculpture","_id":"Y9Vprjj5Wwgwo00U","createdAt":{"$$date":1747697587248},"updatedAt":{"$$date":1747697587248}}
 {"id":"dead1","title":"History Essay Submission","date":"2025-05-24T23:33:05.091Z","type":"deadline","assignmentName":"World War II Essay","classId":"class3","submittedByDelegateId":"user3","_id":"uj1B5I3cHPLwRFp6","createdAt":{"$$date":1747697587248},"updatedAt":{"$$date":1747697587248}}
 {"id":"delegate-ann1","title":"Class 10A Meeting","date":"2025-05-22T23:33:05.091Z","type":"announcement","content":"Short meeting for all Grade 10A students after school on Wednesday in Room 5.","classId":"class1","submittedByDelegateId":"user2","_id":"v2ygR8WtIiz9YQfH","createdAt":{"$$date":1747697587248},"updatedAt":{"$$date":1747697587248}}
+{"id":"exam2","title":"Science Final Exam","date":"2025-06-02T23:33:05.091Z","type":"exam","subject":"Science","classId":"class4","_id":"zycWJfhAm2Byo3DF","createdAt":{"$$date":1747697587247},"updatedAt":{"$$date":1747697587247}}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
