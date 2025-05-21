@@ -15,9 +15,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const user = await db.findOne({ id: params.id });
     
     if (user) {
-      // Exclude password from the response for security
-      const { password, ...userWithoutPassword } = user as User & {password?:string};
-      return NextResponse.json(userWithoutPassword);
+      // Exclude password from the response for security if it were part of User type
+      // const { password, ...userWithoutPassword } = user as User & {password?:string};
+      // return NextResponse.json(userWithoutPassword);
+      return NextResponse.json(user); // User type doesn't have password
     }
     return NextResponse.json({ message: 'User not found' }, { status: 404 });
   } catch (error) {
@@ -34,6 +35,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
     }
 
+    // The requestBody might contain a password if sent from the form, but we will ignore it.
     const requestBody: Partial<Omit<User, 'id'>> & { password?: string } = await request.json();
     const db = await getUsersDb();
 
@@ -45,42 +47,38 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     // If username is being changed, check for uniqueness against other users
     if (requestBody.username && requestBody.username !== existingUser.username) {
       const userWithNewUsername = await db.findOne({ username: requestBody.username });
-      // If a user is found with the new username, AND that user is NOT the user we are currently editing, then it's a conflict.
       if (userWithNewUsername && userWithNewUsername.id !== userId) {
-        return NextResponse.json({ message: `Error updating user: Username "${requestBody.username}" is already taken by another user.` }, { status: 409 });
+        return NextResponse.json({ message: `Error updating user: Username "${requestBody.username}" is already taken by another user. Please choose a different username.` }, { status: 409 });
       }
     }
     
-    const updatePayload: Partial<User> & { password?: string } = {};
+    const updatePayload: Partial<User> = {};
     if (requestBody.name !== undefined) updatePayload.name = requestBody.name;
     if (requestBody.username !== undefined) updatePayload.username = requestBody.username;
     if (requestBody.role !== undefined) updatePayload.role = requestBody.role;
     
-    // Only include password in the update if it's explicitly provided and not an empty string
-    if (requestBody.password && requestBody.password.trim() !== "") {
-      // Note: In a real app, you'd hash this password before saving.
-      updatePayload.password = requestBody.password;
-    }
+    // Explicitly DO NOT include password in the updatePayload,
+    // as login logic is hardcoded to "password".
+    // Any password sent from the client during edit will be ignored for storage.
 
     if (Object.keys(updatePayload).length === 0) {
-        // No actual fields to update were provided
-        const { password, ...userWithoutPassword } = existingUser as User & {password?: string};
+        // No actual fields to update were provided (excluding password which we ignore)
+        const { password, ...userWithoutPassword } = existingUser as User & {password?: string}; // NeDB might have stored it
         return NextResponse.json(userWithoutPassword);
     }
 
     const numAffected = await db.update({ id: userId }, { $set: updatePayload });
 
     if (numAffected === 0) {
-      // This could happen if the user was deleted between the findOne and update
       return NextResponse.json({ message: 'User not found or no changes made' }, { status: 404 });
     }
 
     const updatedUserFromDb = await db.findOne({ id: userId });
     if (!updatedUserFromDb) {
-        // Should not happen if numAffected > 0, but as a safeguard
         return NextResponse.json({ message: 'User updated but failed to retrieve' }, { status: 500 });
     }
-    const { password, ...userWithoutPassword } = updatedUserFromDb as User & {password?: string};
+    // Even if NeDB stored a password previously, we don't return it as per User type.
+    const { password, ...userWithoutPassword } = updatedUserFromDb as User & {password?: string}; 
     return NextResponse.json(userWithoutPassword);
 
   } catch (error) {
@@ -88,11 +86,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const errorMessage = (error as Error).message;
     
     if (errorMessage.includes('unique constraint violated for field username')) {
-        const attemptedUsername = (error as any)?.payloadToUpdate?.username || requestBody.username || 'provided';
-        return NextResponse.json({ message: `Error updating user: Username "${attemptedUsername}" already exists. Please choose a different username. (DB constraint)`, error: errorMessage }, { status: 409 });
+        const attemptedUsername = requestBody.username || 'provided';
+        return NextResponse.json({ message: `Error updating user: Username "${attemptedUsername}" already exists. Please choose a different username. (DB constraint: ${errorMessage})` }, { status: 409 });
     }
-     if (errorMessage.includes('unique constraint violated')) { 
-        return NextResponse.json({ message: 'Error updating user: A unique field (ID or Username) constraint was violated at the database level.', error: errorMessage }, { status: 409 });
+     if (errorMessage.includes('unique constraint violated for field id')) { 
+        return NextResponse.json({ message: `Error updating user: User ID constraint violated. (DB constraint: ${errorMessage})` }, { status: 409 });
     }
     return NextResponse.json({ message: `Error updating user: ${errorMessage}`, error: errorMessage }, { status: 500 });
   }
@@ -125,5 +123,4 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Error deleting user', error: (error as Error).message }, { status: 500 });
   }
 }
-
     

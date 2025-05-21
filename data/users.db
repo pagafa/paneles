@@ -1,7 +1,7 @@
 {"id":"user3","name":"Jane Delegate","username":"jane_delegate","role":"delegate","_id":"1AC44WAZboN5RtxN","createdAt":{"$$date":1747697270603},"updatedAt":{"$$date":1747697270603}}
 {"id":"user2","name":"John Delegate","username":"john_delegate","role":"delegate","_id":"PnktLIvZFMm1N3mX","createdAt":{"$$date":1747697270603},"updatedAt":{"$$date":1747697270603}}
-{"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747699631936},"password":"SoyPablo"}
+{"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747853613286},"password":"soypablo"}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
-{"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747853314267},"password":"soypablo"}
-{"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747853613286},"password":"soypablo"}
+{"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747853856689},"password":"soypablo"}
+{"id":"user-1747853931914-rx9s4","name":"Pepe","username":"pepe","role":"delegate","_id":"qcjDo7WSzGIah6wK","createdAt":{"$$date":1747853931529},"updatedAt":{"$$date":1747853931529}}
