@@ -9,17 +9,17 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Fetch classes data (remains the same)
+// Fetch classes data
 async function getClassesData(): Promise<SchoolClass[]> {
   try {
     const response = await fetch('/api/classes');
     if (!response.ok) {
-      console.error("Failed to fetch classes for kiosk dropdown", response.status, await response.text().catch(() => ""));
+      console.error("Failed to fetch classes for kiosk", response.status, await response.text().catch(() => ""));
       return [];
     }
     return (await response.json()).sort((a:SchoolClass, b:SchoolClass) => a.name.localeCompare(b.name));
   } catch (error) {
-    console.error('Error fetching classes for Kiosk dropdown:', error);
+    console.error('Error fetching classes for Kiosk:', error);
     return [];
   }
 }
@@ -86,14 +86,12 @@ export default function KioskPage() {
       if (classesData.length > 0) {
         classesData.forEach(cls => {
           let count = 0;
-          // Count admin announcements targeted to this class
+          // Count admin announcements targeted to this class OR school-wide
           allAdminAnnouncementsData.forEach(ann => {
-            if (ann.targetClassIds && ann.targetClassIds.includes(cls.id)) {
-              count++;
-            }
-            // Also count school-wide admin announcements for every class for simplicity in this view
-            if (!ann.targetClassIds || ann.targetClassIds.length === 0) {
+            if (!ann.targetClassIds || ann.targetClassIds.length === 0) { // School-wide
                 count++;
+            } else if (ann.targetClassIds.includes(cls.id)) { // Targeted to this class
+              count++;
             }
           });
           // Count school events (exams, deadlines, delegate announcements) for this class
@@ -122,8 +120,6 @@ export default function KioskPage() {
 
   if (isLoadingClasses && isLoadingClassCounts) { 
     return (
-      // The KioskPage is now a direct child of RootLayout's <main>
-      // The PublicLayout provides padding, so no need for full screen centering here directly
       <div className="w-full max-w-4xl mx-auto py-8">
         <Skeleton className="h-10 w-48 mb-4" />
         <Skeleton className="h-64 w-full" />
@@ -132,9 +128,7 @@ export default function KioskPage() {
   }
 
   return (
-    // KioskPage content no longer needs to define its own nav, as GlobalHeader handles it
-    // The outer div of PublicLayout handles padding and centering.
-    <section className="w-full max-w-4xl">
+    <section className="w-full max-w-4xl mx-auto"> {/* Added mx-auto here */}
       <div className="flex items-center mb-6">
         <Activity className="h-8 w-8 text-primary mr-3" />
         <h2 className="text-3xl font-semibold text-primary/90">{t('activityByClassSectionTitle')}</h2>
@@ -148,7 +142,7 @@ export default function KioskPage() {
       ) : classes.length > 0 ? (
         <Card className="shadow-md">
           <CardContent className="pt-6">
-            {Object.values(classMessageCounts).some(count => count > 0) || (classes.length > 0 && Object.keys(classMessageCounts).length > 0) ? (
+            {Object.keys(classMessageCounts).length > 0 ? (
               <ul className="space-y-3">
                 {classes.map((cls) => (
                   <li key={cls.id} className="flex justify-between items-center p-3 rounded-md hover:bg-muted/50 transition-colors border border-border">
@@ -174,3 +168,4 @@ export default function KioskPage() {
     </section>
   );
 }
+
