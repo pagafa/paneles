@@ -12,13 +12,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, LogIn } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import type { SchoolClass } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePathname } from 'next/navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+
+// This should match the --sidebar-width CSS variable in globals.css or sidebar.tsx
+const SIDEBAR_WIDTH_DESKTOP_EXPANDED_REM = 16;
 
 async function getClassesData(): Promise<SchoolClass[]> {
   try {
@@ -33,8 +36,6 @@ async function getClassesData(): Promise<SchoolClass[]> {
     return [];
   }
 }
-
-const SIDEBAR_WIDTH_REM = 16; // Standard sidebar width
 
 export function GlobalHeader() {
   const { t } = useLanguage();
@@ -57,31 +58,20 @@ export function GlobalHeader() {
     fetchData();
   }, []);
 
-  // Define base padding, these can be adjusted if needed
-  const basePaddingX = "px-4"; // For mobile and public pages
-  const smBasePaddingX = "sm:px-6";
-  const lgBasePaddingX = "lg:px-8";
+  // Base horizontal padding for content within the header for public pages or mobile
+  const baseContentPaddingX = "px-4 sm:px-6 lg:px-8";
 
-  // Define padding for authenticated desktop view
-  // Assuming 1rem is roughly equivalent to px-4 for base calculations
-  const authDesktopPaddingL = `pl-[${SIDEBAR_WIDTH_REM + 1}rem]`; // Sidebar width + ~1rem base padding
-  const authDesktopPaddingR = "pr-4";
-  const smAuthDesktopPaddingL = `sm:pl-[${SIDEBAR_WIDTH_REM + 1.5}rem]`; // Sidebar width + ~1.5rem (sm:px-6)
-  const smAuthDesktopPaddingR = "sm:pr-6";
-  const lgAuthDesktopPaddingL = `lg:pl-[${SIDEBAR_WIDTH_REM + 2}rem]`; // Sidebar width + ~2rem (lg:px-8)
-  const lgAuthDesktopPaddingR = "lg:pr-8";
-
-
-  const containerClasses = cn(
-    "container mx-auto h-16 flex justify-between items-center",
+  // Classes for the main content div inside the header
+  const headerInternalDivClasses = cn(
+    "h-16 flex justify-between items-center w-full", // Always full-width and flex properties
     isDesktopAuthLayout
-      ? `${authDesktopPaddingL} ${authDesktopPaddingR} ${smAuthDesktopPaddingL} ${smAuthDesktopPaddingR} ${lgAuthDesktopPaddingL} ${lgAuthDesktopPaddingR}`
-      : `${basePaddingX} ${smBasePaddingX} ${lgBasePaddingX}`
+      ? `pl-[${SIDEBAR_WIDTH_DESKTOP_EXPANDED_REM}rem] pr-4 sm:pr-6 lg:pr-8` // Padding for desktop authenticated view
+      : baseContentPaddingX // Standard padding for public/mobile
   );
 
   return (
     <header className="sticky top-0 z-[60] w-full bg-background/90 backdrop-blur-sm shadow-md">
-      <div className={containerClasses}>
+      <div className={headerInternalDivClasses}>
         <div className="flex-shrink-0">
           <AppLogo />
         </div>
