@@ -33,8 +33,8 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased flex flex-col min-h-screen`}>
         <SchoolNameProvider>
           <LanguageProvider>
-            <GlobalHeader /> {/* Add GlobalHeader here */}
-            <main className="flex-grow"> {/* Add flex-grow to main content area */}
+            <GlobalHeader /> {/* GlobalHeader is sticky and h-16 (4rem) */}
+            <main className="flex-grow pt-16"> {/* Added pt-16 to offset GlobalHeader */}
               {children}
             </main>
             <Toaster />

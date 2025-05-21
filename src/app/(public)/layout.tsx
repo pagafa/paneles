@@ -6,9 +6,11 @@ export default function PublicLayout({
   children: React.ReactNode;
 }) {
   return (
-    // Adjust top padding to account for the new GlobalHeader (approx h-16)
-    // The main content area will be wrapped by <main className="flex-grow"> in RootLayout
-    <div className="flex flex-col items-center justify-start bg-gradient-to-br from-background to-secondary/20 p-4 pt-8 md:pt-10">
+    // w-full and flex-grow ensure this layout takes available space from <main>
+    // items-center will center children like KioskPage's section (which has max-width)
+    // p-4 provides padding around the content area
+    // min-h-full ensures it tries to take at least the full height of its container
+    <div className="w-full flex-grow flex flex-col items-center bg-gradient-to-br from-background to-secondary/20 p-4">
       {children}
     </div>
   );
