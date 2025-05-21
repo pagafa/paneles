@@ -10,12 +10,9 @@ export async function GET() {
   try {
     const db = await getClassesDb();
     const classes = await db.find({}).sort({ name: 1 }); // Sort by name ascending
-    // Do NOT return passwords here
-    const classesWithoutPasswords = classes.map(cls => {
-      const { password, ...rest } = cls;
-      return rest;
-    });
-    return NextResponse.json(classesWithoutPasswords);
+    // For the admin panel's Manage Classes page, we need the password field
+    // to determine if the key icon should be shown.
+    return NextResponse.json(classes);
   } catch (error) {
     console.error('Error fetching classes:', error);
     return NextResponse.json({ message: 'Error fetching classes', error: (error as Error).message }, { status: 500 });
@@ -42,7 +39,8 @@ export async function POST(request: Request) {
     };
 
     const savedClass = await db.insert(classToAdd);
-    const { password, ...classToReturn } = savedClass; // Don't return password
+    // For the response after creation, we don't need to return the password.
+    const { password, ...classToReturn } = savedClass; 
     return NextResponse.json(classToReturn, { status: 201 });
   } catch (error) {
     console.error('Error creating class:', error);
@@ -52,3 +50,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Error creating class', error: (error as Error).message }, { status: 500 });
   }
 }
+
