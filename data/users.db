@@ -4,3 +4,4 @@
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
 {"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747853314267},"password":"soypablo"}
+{"id":"user-1747698496519-swt1y","name":"Pablo","username":"pablo","role":"admin","_id":"Wop2bOQiO1yANvIh","createdAt":{"$$date":1747698495032},"updatedAt":{"$$date":1747853613286},"password":"soypablo"}

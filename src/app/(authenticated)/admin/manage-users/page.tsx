@@ -68,24 +68,24 @@ export default function ManageUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [t]); // t was unused, removed
+  }, []); 
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleFormSubmit = async (data: UserFormSubmitValues) => { // Changed type to UserFormSubmitValues
+  const handleFormSubmit = async (data: UserFormSubmitValues) => { 
     const isEditing = !!editingUser;
     const url = isEditing && editingUser ? `/api/users/${editingUser.id}` : '/api/users';
     const method = isEditing ? 'PUT' : 'POST';
     
-    // Clone data to avoid mutating the original form data object
+    
     const payload: UserFormSubmitValues = { ...data };
 
     if (isEditing) {
-      payload.id = editingUser!.id; // Ensure ID is part of the payload for editing
+      payload.id = editingUser!.id; 
       if (!payload.password || payload.password.trim() === "") { 
-        delete payload.password; // Don't send password if empty during edit
+        delete payload.password; 
       }
     }
 
@@ -130,8 +130,7 @@ export default function ManageUsersPage() {
 
   const handleDelete = async (userId: string) => {
     const userToDelete = users.find(u => u.id === userId);
-    // The username check should be against a more reliable source or config if 'admin_mv' is truly special
-    // For now, this check refers to the seeded admin user's username
+    
     if (userToDelete?.username === 'admin_mv') { 
       toast({
         title: t('actionProhibitedToastTitle'),
@@ -276,3 +275,5 @@ export default function ManageUsersPage() {
     </div>
   );
 }
+
+    
