@@ -12,16 +12,13 @@ interface Translations {
   manageClassesTitle: string;
   manageUsersTitle: string;
   delegateDashboardTitle: string;
-  // kioskMainTitle: string; // Removed
-  // kioskMainSubtitle: string; // Removed
-  // Section titles like announcementsSectionTitle, examsSectionTitle, deadlinesSectionTitle are kept for the class-specific page
-  checkBackLaterHint: string; // Kept for class page, might be useful elsewhere
+  announcementsSectionTitle: string; 
+  examsSectionTitle: string; 
+  deadlinesSectionTitle: string; 
+  checkBackLaterHint: string; 
   viewClassesButtonLabel: string;
   noClassesHint: string;
   loginButtonLabel: string;
-  // footerAllRightsReserved: string; // Removed
-
-  // For PublicClassPage
   classPageTitle: string; 
   classNotFoundTitle: string;
   classNotFoundMessage: string;
@@ -29,11 +26,6 @@ interface Translations {
   delegateIdLabel: string; 
   noEventsForClassHint: string; 
   loadingLabel: string;
-  announcementsSectionTitle: string; 
-  examsSectionTitle: string; 
-  deadlinesSectionTitle: string; 
-
-  // For DelegateDashboardPage
   assignedClassesLabel: string;
   noAssignedClassesLabel: string;
   editInformationTitle: string;
@@ -55,9 +47,6 @@ interface Translations {
   submissionDeletedToastDescription: string; 
   errorLoadingSubmissionsTitle: string;
   noAssignedClassesToSubmitHint: string;
-
-
-  // For DelegateInputForm (tabs & fields)
   announcementTabLabel: string;
   examTabLabel: string;
   deadlineTabLabel: string;
@@ -79,16 +68,12 @@ interface Translations {
   formAdditionalDescriptionPlaceholder: string;
   formSubmitButton: string;
   formUpdateButton: string;
-
-  // School Name Editing (Admin Dashboard)
   editSchoolNameCardTitle: string;
   schoolNameInputLabel: string;
   schoolNameInputPlaceholder: string;
   saveSchoolNameButton: string;
   schoolNameUpdatedToastTitle: string;
   schoolNameUpdatedToastDescription: string; 
-
-  // Admin Dashboard Announcement Management
   editAnnouncementTitle: string;
   postNewAnnouncementTitle: string;
   editingAnnouncementDescription: string; 
@@ -111,8 +96,6 @@ interface Translations {
   errorFetchingAnnouncements: string; 
   errorLoadingAnnouncementsTitle: string; 
   retryButtonLabel: string;
-
-  // Manage Users Page
   userUpdatedToastTitle: string; 
   userCreatedToastTitle: string; 
   userActionSuccessToastDescription: string; 
@@ -145,9 +128,6 @@ interface Translations {
   updateUserButton: string; 
   createUserButton: string; 
   passwordRequiredForNewUser: string; 
-
-
-  // ClassForm
   classNameLabel: string; 
   classNamePlaceholder: string; 
   classDelegateLabel: string; 
@@ -159,20 +139,19 @@ interface Translations {
   updateClassButton: string; 
   createClassButton: string; 
   errorFetchingDelegates: string; 
-
-  // Admin Dashboard Global Language Settings
   globalLanguageSettingsCardTitle: string;
   globalLanguageSelectLabel: string;
   selectLanguagePlaceholder: string;
   saveGlobalLanguageButton: string;
   globalLanguageUpdatedToastTitle: string;
   globalLanguageUpdatedToastDescription: string;
-
-  // Kiosk Page - Activity by Class (This section remains)
   activityByClassSectionTitle: string;
   messagesCountLabel: string; 
   noClassActivityHint: string; 
   noClassesAvailableForActivity: string; 
+  noEventsGeneralHint: string;
+  dashboardMenuItemLabel: string; // New key
+  logoutButtonLabel: string; // New key for logout button
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -321,6 +300,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     messagesCountLabel: "{count} messages",
     noClassActivityHint: "No recent activity in any class.",
     noClassesAvailableForActivity: "No classes configured to show activity.",
+    noEventsGeneralHint: "No announcements, exams, or deadlines to display at the moment.",
+    dashboardMenuItemLabel: "Dashboard",
+    logoutButtonLabel: "Log out",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -467,6 +449,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     messagesCountLabel: "{count} mensajes",
     noClassActivityHint: "No hay actividad reciente en ninguna clase.",
     noClassesAvailableForActivity: "No hay clases configuradas para mostrar actividad.",
+    noEventsGeneralHint: "No hay anuncios, exámenes o plazos para mostrar en este momento.",
+    dashboardMenuItemLabel: "Panel",
+    logoutButtonLabel: "Cerrar Sesión",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -613,6 +598,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     messagesCountLabel: "{count} messages",
     noClassActivityHint: "Aucune activité récente dans aucune classe.",
     noClassesAvailableForActivity: "Aucune classe configurée pour afficher l'activité.",
+    noEventsGeneralHint: "Aucune annonce, aucun examen ou aucun délai à afficher pour le moment.",
+    dashboardMenuItemLabel: "Tableau de bord",
+    logoutButtonLabel: "Déconnexion",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -759,6 +747,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     messagesCountLabel: "{count} mensaxes",
     noClassActivityHint: "Non hai actividade recente en ningunha aula.",
     noClassesAvailableForActivity: "Non hai aulas configuradas para mostrar actividade.",
+    noEventsGeneralHint: "Non hai anuncios, exames ou prazos para amosar neste momento.",
+    dashboardMenuItemLabel: "Panel",
+    logoutButtonLabel: "Pechar Sesión",
   },
 };
 
@@ -767,5 +758,3 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
-
-    

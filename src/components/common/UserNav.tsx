@@ -6,20 +6,21 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react"; // Added LayoutDashboard
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@/types";
-// mockUsers is no longer needed here as we fetch from API
+import Link from "next/link"; // Added Link
+import { useLanguage } from "@/context/LanguageContext"; // Added useLanguage
 
 export function UserNav() {
   const router = useRouter();
+  const { t } = useLanguage(); // Get translation function
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,38 +37,32 @@ export function UserNav() {
               setUser(userData);
             } else {
               console.error("Failed to fetch user data:", response.status);
-              // Potentially logout if user data can't be fetched (e.g., token expired in real auth)
-              // For this app, we'll just set user to null
               setUser(null);
-              // Optional: Clear localStorage if user is not found or unauthorized
-              // localStorage.removeItem("userRole");
-              // localStorage.removeItem("userId");
-              // router.push("/login");
             }
           } catch (error) {
             console.error("Error fetching user data:", error);
             setUser(null);
           }
         } else {
-          setUser(null); // No userId in localStorage
+          setUser(null); 
         }
       }
       setIsLoading(false);
     };
 
     fetchCurrentUser();
-  }, [router]); // Added router to dependency array if it's used for redirection on error
+  }, []); 
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
     }
+    setUser(null); // Clear user state on logout
     router.push("/login");
   };
 
   if (isLoading) {
-    // Optional: Render a skeleton or loading indicator
     return (
       <Button variant="ghost" className="relative h-10 w-10 rounded-full">
         <Avatar className="h-10 w-10">
@@ -78,11 +73,9 @@ export function UserNav() {
   }
 
   if (!user) {
-    // This case should ideally not happen if AuthLayout correctly redirects unauthenticated users.
-    // However, if it does, we can offer a login button or null.
     return (
         <Button onClick={() => router.push('/login')} variant="outline" size="sm">
-            Login
+            {t('loginButtonLabel')}
         </Button>
     );
   }
@@ -95,6 +88,8 @@ export function UserNav() {
       .join("")
       .toUpperCase();
   };
+
+  const dashboardHref = user.role === 'admin' ? '/admin/dashboard' : '/delegate/dashboard';
 
   return (
     <DropdownMenu>
@@ -116,9 +111,16 @@ export function UserNav() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={dashboardHref}>
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span>{t('dashboardMenuItemLabel')}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
+          <span>{t('logoutButtonLabel')}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
