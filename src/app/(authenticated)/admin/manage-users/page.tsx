@@ -1,7 +1,7 @@
 
 "use client";
 
-import { UserForm } from "@/components/forms/UserForm";
+import { UserForm, type UserFormSubmitValues } from "@/components/forms/UserForm"; // Import UserFormSubmitValues
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// initialUsers no longer used directly for users state
 import type { User } from "@/types";
 import { Edit3, Trash2, Users, AlertTriangle } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -69,20 +68,25 @@ export default function ManageUsersPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }, [t]); // t was unused, removed
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handleFormSubmit = async (data: User) => {
+  const handleFormSubmit = async (data: UserFormSubmitValues) => { // Changed type to UserFormSubmitValues
     const isEditing = !!editingUser;
-    const url = isEditing ? `/api/users/${data.id}` : '/api/users';
+    const url = isEditing && editingUser ? `/api/users/${editingUser.id}` : '/api/users';
     const method = isEditing ? 'PUT' : 'POST';
     
-    const payload = { ...data };
-    if (isEditing && !(data as any).password) { 
-      delete (payload as any).password;
+    // Clone data to avoid mutating the original form data object
+    const payload: UserFormSubmitValues = { ...data };
+
+    if (isEditing) {
+      payload.id = editingUser!.id; // Ensure ID is part of the payload for editing
+      if (!payload.password || payload.password.trim() === "") { 
+        delete payload.password; // Don't send password if empty during edit
+      }
     }
 
 
@@ -126,7 +130,9 @@ export default function ManageUsersPage() {
 
   const handleDelete = async (userId: string) => {
     const userToDelete = users.find(u => u.id === userId);
-    if (userToDelete?.username === 'admin_user') { 
+    // The username check should be against a more reliable source or config if 'admin_mv' is truly special
+    // For now, this check refers to the seeded admin user's username
+    if (userToDelete?.username === 'admin_mv') { 
       toast({
         title: t('actionProhibitedToastTitle'),
         description: t('cannotDeleteDefaultAdminToastDescription'),
@@ -240,7 +246,7 @@ export default function ManageUsersPage() {
                       </Button>
                        <AlertDialog>
                         <AlertDialogTrigger asChild>
-                           <Button variant="destructive" size="icon" aria-label={t('deleteUserButtonLabel')} disabled={user.username === 'admin_user'}>
+                           <Button variant="destructive" size="icon" aria-label={t('deleteUserButtonLabel')} disabled={user.username === 'admin_mv'}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
@@ -270,5 +276,3 @@ export default function ManageUsersPage() {
     </div>
   );
 }
-
-    

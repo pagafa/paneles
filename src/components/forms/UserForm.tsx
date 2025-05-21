@@ -16,33 +16,34 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserPlus } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import type { User, UserRole } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { useEffect } from "react";
+
+// Define a type for form submission that includes the optional password
+export type UserFormSubmitValues = Omit<User, 'id'> & { id?: string; password?: string };
 
 const userFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   username: z.string().min(3, { message: "Username must be at least 3 characters." }),
   role: z.enum(["admin", "delegate"], { required_error: "User role is required." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional(), // Optional for edit, required for create
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional().or(z.literal('')), // Allow empty string for optional password
 });
 
-// Modify schema for editing to make password optional
+// Modify schema for editing to make password explicitly optional and allow empty string
 const editUserFormSchema = userFormSchema.extend({
-  password: userFormSchema.shape.password.optional(),
+  password: z.string().min(6, { message: "Password must be at least 6 characters." }).optional().or(z.literal('')),
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
 interface UserFormProps {
-  onSubmitSuccess?: (data: User) => void;
+  onSubmitSuccess?: (data: UserFormSubmitValues) => void; // Changed type here
   initialData?: Partial<UserFormValues & { id?: string }>;
   isEditing?: boolean;
 }
 
 export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: UserFormProps) {
-  const { toast } = useToast();
   const { t } = useLanguage();
   const currentFormSchema = isEditing ? editUserFormSchema : userFormSchema;
   
@@ -62,7 +63,7 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
         name: initialData.name || "",
         username: initialData.username || "",
         role: initialData.role || "delegate",
-        password: "", // Keep password field empty on edit form load
+        password: "", 
       });
     } else {
       form.reset({
@@ -72,37 +73,31 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
         password: "",
       });
     }
-  }, [initialData, form]);
+  }, [initialData, form, isEditing]);
 
 
   async function onSubmit(values: UserFormValues) {
-    const payload: any = { ...values }; // Use 'any' temporarily for password deletion
-
-    if (isEditing && !values.password) {
-      delete payload.password;
-    } else if (!isEditing && !values.password) {
-        form.setError("password", {type: "manual", message: t('passwordRequiredForNewUser')}); // Assuming this key exists
-        return;
-    }
-
-    // No artificial delay: await new Promise(resolve => setTimeout(resolve, 500));
-    const userToSubmit: User & { password?: string } = {
+    const payload: UserFormSubmitValues = {
       id: initialData?.id || `user-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
-      name: payload.name,
-      username: payload.username,
-      role: payload.role as UserRole,
-      ...(payload.password && { password: payload.password }), // Include password only if it's present
+      name: values.name,
+      username: values.username,
+      role: values.role as UserRole,
     };
+
+    if (values.password && values.password.trim() !== "") {
+      payload.password = values.password;
+    } else if (!isEditing && (!values.password || values.password.trim() === "")) {
+      form.setError("password", {type: "manual", message: t('passwordRequiredForNewUser')});
+      return;
+    }
     
-    // Toast messages are handled by the parent page
     if (onSubmitSuccess) {
-      onSubmitSuccess(userToSubmit as User); // Pass without password for client-side user object
+      onSubmitSuccess(payload); // Pass the payload with optional password
     }
 
      if (!isEditing) {
       form.reset({ name: "", username: "", role: "delegate", password: "" });
     } else {
-      // After editing, reset password field but keep other values if needed, or refetch
       form.reset({...values, password: ""}); 
     }
   }
@@ -132,7 +127,6 @@ export function UserForm({ onSubmitSuccess, initialData, isEditing = false }: Us
               <FormControl>
                 <Input type="text" placeholder={t('usernamePlaceholder')} {...field} />
               </FormControl>
-              {isEditing && <p className="text-xs text-muted-foreground">{t('usernameEditWarning')}</p>}
               <FormMessage />
             </FormItem>
           )}
