@@ -5,7 +5,7 @@ import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from '@/types';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
-import { Megaphone, BookOpenCheck, FileText, LogIn, ChevronDown } from 'lucide-react';
+import { Megaphone, BookOpenCheck, FileText, LogIn, ChevronDown, Activity } from 'lucide-react'; // Added Activity
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,6 +14,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Added Card components
+import { Badge } from '@/components/ui/badge'; // Added Badge
 import { useLanguage } from '@/context/LanguageContext'; 
 import { useEffect, useState, useCallback } from 'react';
 import type { TranslationKey } from '@/lib/i18n';
@@ -76,7 +78,6 @@ async function getKioskDeadlines(): Promise<Deadline[]> {
   }
 }
 
-
 async function getClassesData(): Promise<SchoolClass[]> {
   try {
     const response = await fetch('/api/classes');
@@ -84,9 +85,39 @@ async function getClassesData(): Promise<SchoolClass[]> {
       console.error("Failed to fetch classes for kiosk dropdown", response.status, await response.text().catch(() => ""));
       return [];
     }
-    return await response.json();
+    return (await response.json()).sort((a:SchoolClass, b:SchoolClass) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error('Error fetching classes for Kiosk dropdown:', error);
+    return [];
+  }
+}
+
+// New function to get ALL admin announcements (for counts)
+async function getAllAdminAnnouncements(): Promise<Announcement[]> {
+  try {
+    const response = await fetch('/api/announcements');
+    if (!response.ok) {
+      console.error("Failed to fetch all admin announcements for counts", response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching all admin announcements for counts:', error);
+    return [];
+  }
+}
+
+// New function to get ALL school events (delegate submissions for counts)
+async function getAllSchoolEventsData(): Promise<SchoolEvent[]> {
+  try {
+    const response = await fetch('/api/schoolevents'); // No type filter
+    if (!response.ok) {
+      console.error("Failed to fetch all school events for counts", response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching all school events for counts:', error);
     return [];
   }
 }
@@ -104,44 +135,84 @@ export default function KioskPage() {
   const [isLoadingExams, setIsLoadingExams] = useState(true);
   const [isLoadingDeadlines, setIsLoadingDeadlines] = useState(true);
 
-  const loading = isLoadingAnnouncements || isLoadingClasses || isLoadingExams || isLoadingDeadlines; 
+  // State for the new section
+  const [classMessageCounts, setClassMessageCounts] = useState<{ [classId: string]: number }>({});
+  const [isLoadingClassCounts, setIsLoadingClassCounts] = useState(true);
+
 
   const fetchData = useCallback(async () => {
     setIsLoadingAnnouncements(true);
     setIsLoadingClasses(true);
     setIsLoadingExams(true);
     setIsLoadingDeadlines(true);
+    setIsLoadingClassCounts(true);
 
     try {
-      const announcementsData = await getSchoolWideAnnouncements();
-      setAnnouncements(sortEvents(announcementsData));
-    } catch (e) { console.error("Error fetching announcements data for Kiosk", e); setAnnouncements([]);} 
-    finally { setIsLoadingAnnouncements(false); }
+      const [
+        schoolWideAnnsData,
+        classesData,
+        kioskExamsData,
+        kioskDeadlinesData,
+        allAdminAnnouncementsData,
+        allSchoolEventsForCountsData,
+      ] = await Promise.all([
+        getSchoolWideAnnouncements(),
+        getClassesData(),
+        getKioskExams(),
+        getKioskDeadlines(),
+        getAllAdminAnnouncements(),
+        getAllSchoolEventsData(),
+      ]);
 
-    try {
-      const classesData = await getClassesData();
-      setClasses(classesData);
-    } catch (e) { console.error("Error fetching classes data for Kiosk", e); setClasses([]);}
-    finally { setIsLoadingClasses(false); }
+      setAnnouncements(sortEvents(schoolWideAnnsData));
+      setIsLoadingAnnouncements(false);
+
+      setClasses(classesData); // Already sorted by getClassesData
+      setIsLoadingClasses(false);
     
-    try {
-      const examsData = await getKioskExams();
-      setExams(sortEvents(examsData));
-    } catch (e) { console.error("Error fetching exams data for Kiosk", e); setExams([]);}
-    finally { setIsLoadingExams(false); }
+      setExams(sortEvents(kioskExamsData));
+      setIsLoadingExams(false);
     
-    try {
-      const deadlinesData = await getKioskDeadlines();
-      setDeadlines(sortEvents(deadlinesData));
-    } catch (e) { console.error("Error fetching deadlines data for Kiosk", e); setDeadlines([]);}
-    finally { setIsLoadingDeadlines(false); }
+      setDeadlines(sortEvents(kioskDeadlinesData));
+      setIsLoadingDeadlines(false);
 
-  }, []);
+      // Calculate class message counts
+      const counts: { [classId: string]: number } = {};
+      if (classesData.length > 0) {
+        classesData.forEach(cls => {
+          let count = 0;
+          // Count admin announcements targeted to this class
+          allAdminAnnouncementsData.forEach(ann => {
+            if (ann.targetClassIds && ann.targetClassIds.includes(cls.id)) {
+              count++;
+            }
+          });
+          // Count delegate events (exams, deadlines, delegate-submitted announcements) for this class
+          allSchoolEventsForCountsData.forEach(event => {
+            // Ensure event.type is checked if delegate announcements are stored differently or if other types should be excluded
+            if (event.classId === cls.id) {
+              count++;
+            }
+          });
+          counts[cls.id] = count;
+        });
+      }
+      setClassMessageCounts(counts);
+      setIsLoadingClassCounts(false);
+
+    } catch (e) { 
+      console.error("Error fetching data for KioskPage", e); 
+      setIsLoadingAnnouncements(false);
+      setIsLoadingClasses(false);
+      setIsLoadingExams(false);
+      setIsLoadingDeadlines(false);
+      setIsLoadingClassCounts(false);
+    }
+  }, [t]); // Added t just in case it's used in error logging or future error messages
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
 
   const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string, isLoading: boolean }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone empty', isLoading: isLoadingAnnouncements },
@@ -149,11 +220,16 @@ export default function KioskPage() {
     { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list', isLoading: isLoadingDeadlines },
   ];
 
-  const visibleSections = sectionsConfig.filter(section => section.events.length > 0 || section.isLoading);
-  const noEventsForAllSections = !loading && announcements.length === 0 && exams.length === 0 && deadlines.length === 0;
+  const visibleCarouselSections = sectionsConfig.filter(section => section.isLoading || section.events.length > 0);
+  
+  // Updated condition for "no events" message to include class counts loading state and data
+  const noContentToDisplay = 
+    !isLoadingAnnouncements && !isLoadingClasses && !isLoadingExams && !isLoadingDeadlines && !isLoadingClassCounts &&
+    announcements.length === 0 && exams.length === 0 && deadlines.length === 0 &&
+    (classes.length === 0 || Object.values(classMessageCounts).every(count => count === 0));
 
 
-  if (loading && visibleSections.length === 0) { 
+  if (isLoadingClasses && isLoadingAnnouncements && isLoadingExams && isLoadingDeadlines && isLoadingClassCounts && visibleCarouselSections.length === 0 && classes.length === 0) { 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-background to-secondary/30 p-4">
         <p>{t('loadingLabel')}</p> 
@@ -208,8 +284,45 @@ export default function KioskPage() {
         </header>
 
         <main className="w-full flex-grow flex flex-col items-center space-y-12">
-          {visibleSections.length > 0 ? (
-            visibleSections.map((section, index) => (
+          {/* Activity by Class Section */}
+          <section className="w-full max-w-4xl">
+            <div className="flex items-center mb-6">
+              <Activity className="h-8 w-8 text-primary mr-3" />
+              <h2 className="text-3xl font-semibold text-primary/90">{t('activityByClassSectionTitle')}</h2>
+            </div>
+            {isLoadingClassCounts || isLoadingClasses ? (
+              <Card><CardContent className="pt-6"><div className="space-y-3">
+                <Skeleton className="h-8 w-3/4 rounded-md" />
+                <Skeleton className="h-8 w-2/3 rounded-md" />
+                <Skeleton className="h-8 w-1/2 rounded-md" />
+              </div></CardContent></Card>
+            ) : classes.length > 0 ? (
+              <Card className="shadow-md">
+                <CardContent className="pt-6">
+                  {Object.keys(classMessageCounts).length > 0 || classes.some(cls => classMessageCounts[cls.id] > 0) ? (
+                    <ul className="space-y-3">
+                      {classes.map((cls) => (
+                        <li key={cls.id} className="flex justify-between items-center p-2 rounded-md hover:bg-muted/50 transition-colors">
+                          <span className="font-medium text-foreground/90">{cls.name}</span>
+                          <Badge variant={(classMessageCounts[cls.id] || 0) > 0 ? "default" : "secondary"} className="text-sm">
+                            {t('messagesCountLabel', { count: classMessageCounts[cls.id] || 0 })}
+                          </Badge>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                     <p className="text-center text-muted-foreground py-4">{t('noClassActivityHint')}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">{t('noClassesAvailableForActivity')}</p>
+            )}
+          </section>
+
+          {visibleCarouselSections.length > 0 && <Separator className="my-12" />}
+          
+          {visibleCarouselSections.map((section, index) => (
               section.isLoading || section.events.length > 0 ? (
                 <section key={section.titleKey} className="w-full max-w-4xl">
                   <div className="flex items-center mb-6">
@@ -223,17 +336,19 @@ export default function KioskPage() {
                   ) : section.events.length > 0 ? (
                     <KioskCarousel items={section.events} />
                   ) : (
+                     // This specific "no events for this section" message is now less likely to show due to visibleCarouselSections filter
                      <p className="text-center text-muted-foreground text-lg">{t('noEventsGeneralHint')}</p>
                   )}
-                  {index < visibleSections.filter(s => s.isLoading || s.events.length > 0).length - 1 && <Separator className="my-12" />}
+                  {index < visibleCarouselSections.filter(s => s.isLoading || s.events.length > 0).length - 1 && <Separator className="my-12" />}
                 </section>
               ) : null
             ))
-          ) : (
-            !loading && noEventsForAllSections &&
+          }
+
+          {noContentToDisplay && (
             <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
               <Image 
-                src="https://placehold.co/300x200.png"
+                src="https://placehold.co/200x133.png"
                 alt={t('noEventsGeneralHint')} 
                 width={200}
                 height={133}
@@ -255,3 +370,4 @@ export default function KioskPage() {
     </div>
   );
 }
+

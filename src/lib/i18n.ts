@@ -17,9 +17,9 @@ interface Translations {
   announcementsSectionTitle: string;
   examsSectionTitle: string;
   deadlinesSectionTitle: string;
-  noAnnouncementsHint: string;
-  noExamsHint: string;
-  noDeadlinesHint: string;
+  noAnnouncementsHint: string; // Placeholder for carousel if needed, but main message is noEventsGeneralHint
+  noExamsHint: string; // Placeholder for carousel if needed
+  noDeadlinesHint: string; // Placeholder for carousel if needed
   noEventsGeneralHint: string;
   checkBackLaterHint: string;
   viewClassesButtonLabel: string;
@@ -169,12 +169,18 @@ interface Translations {
   selectLanguagePlaceholder: string;
   saveGlobalLanguageButton: string;
   globalLanguageUpdatedToastTitle: string;
-  globalLanguageUpdatedToastDescription: string; // e.g. Global application language updated to {languageName}
+  globalLanguageUpdatedToastDescription: string;
+
+  // Kiosk Page - Activity by Class
+  activityByClassSectionTitle: string;
+  messagesCountLabel: string; // e.g., "{count} messages"
+  noClassActivityHint: string; // e.g., "No recent activity in any class."
+  noClassesAvailableForActivity: string; // e.g., "No classes configured to show activity."
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
   en: {
-    appTitle: "School Hub", 
+    appTitle: "IES Monte da Vila", 
     loginTitle: "Welcome Back!",
     loginDescription: "Log in to manage announcements and school information.",
     adminDashboardTitle: "Admin Dashboard",
@@ -195,7 +201,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesHint: "No classes available",
     loginButtonLabel: "Login",
     footerAllRightsReserved: "All rights reserved.",
-    classPageTitle: "Events for {className}",
+    classPageTitle: "Events for {className}", // This might be unused now if titles are generic
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
@@ -321,9 +327,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveGlobalLanguageButton: "Save Global Language",
     globalLanguageUpdatedToastTitle: "Global Language Updated",
     globalLanguageUpdatedToastDescription: "The global application language has been set to {languageName}.",
+    activityByClassSectionTitle: "Activity by Class",
+    messagesCountLabel: "{count} messages",
+    noClassActivityHint: "No recent activity in any class.",
+    noClassesAvailableForActivity: "No classes configured to show activity.",
   },
   es: {
-    appTitle: "Portal Escolar",
+    appTitle: "IES Monte da Vila",
     loginTitle: "¡Bienvenido de nuevo!",
     loginDescription: "Inicia sesión para gestionar avisos e información escolar.",
     adminDashboardTitle: "Panel de Administración",
@@ -443,8 +453,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     editUserButtonLabel: "Editar Usuario",
     deleteUserButtonLabel: "Eliminar Usuario",
     deleteUserConfirmation: "Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario de \"{name}\".",
-    userNamePlaceholder: "p.ej., John Doe",
-    usernamePlaceholder: "p.ej., juandoe",
+    userNamePlaceholder: "p.ej., Juan Pérez",
+    usernamePlaceholder: "p.ej., juan.perez",
     usernameEditWarning: "El nombre de usuario se puede cambiar, pero asegúrate de que siga siendo único.",
     selectRolePlaceholder: "Selecciona un rol",
     newPasswordOptionalLabel: "Nueva Contraseña (Opcional)",
@@ -454,7 +464,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     createUserButton: "Crear Usuario",
     passwordRequiredForNewUser: "La contraseña es obligatoria para nuevos usuarios.",
     classNameLabel: "Nombre de la Clase",
-    classNamePlaceholder: "p.ej., 10A, Club de Informática",
+    classNamePlaceholder: "p.ej., 1º ESO A, Club de Informática",
     classDelegateLabel: "Delegado",
     optionalLabel: "Opcional",
     loadingDelegatesPlaceholder: "Cargando delegados...",
@@ -470,9 +480,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveGlobalLanguageButton: "Guardar Idioma Global",
     globalLanguageUpdatedToastTitle: "Idioma Global Actualizado",
     globalLanguageUpdatedToastDescription: "El idioma global de la aplicación se ha establecido a {languageName}.",
+    activityByClassSectionTitle: "Actividad por Clase",
+    messagesCountLabel: "{count} mensajes",
+    noClassActivityHint: "No hay actividad reciente en ninguna clase.",
+    noClassesAvailableForActivity: "No hay clases configuradas para mostrar actividad.",
   },
   fr: {
-    appTitle: "Portail Scolaire",
+    appTitle: "IES Monte da Vila",
     loginTitle: "Content de vous revoir!",
     loginDescription: "Connectez-vous pour gérer les annonces et les informations scolaires.",
     adminDashboardTitle: "Tableau de bord Admin",
@@ -619,9 +633,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveGlobalLanguageButton: "Enregistrer la Langue Globale",
     globalLanguageUpdatedToastTitle: "Langue Globale Mise à Jour",
     globalLanguageUpdatedToastDescription: "La langue globale de l'application a été définie sur {languageName}.",
+    activityByClassSectionTitle: "Activité par Classe",
+    messagesCountLabel: "{count} messages",
+    noClassActivityHint: "Aucune activité récente dans aucune classe.",
+    noClassesAvailableForActivity: "Aucune classe configurée pour afficher l'activité.",
   },
   gl: {
-    appTitle: "Portal Escolar",
+    appTitle: "IES Monte da Vila",
     loginTitle: "Benvido de novo!",
     loginDescription: "Inicia sesión para xestionar avisos e información escolar.",
     adminDashboardTitle: "Panel de Administración",
@@ -752,7 +770,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     createUserButton: "Crear Usuario",
     passwordRequiredForNewUser: "O contrasinal é obrigatorio para novos usuarios.",
     classNameLabel: "Nome da Clase",
-    classNamePlaceholder: "p.ex., 10A, Club de Informática",
+    classNamePlaceholder: "p.ex., 1º ESO A, Club de Informática",
     classDelegateLabel: "Delegado",
     optionalLabel: "Opcional",
     loadingDelegatesPlaceholder: "Cargando delegados...",
@@ -768,6 +786,10 @@ export const translations: Record<SupportedLanguage, Translations> = {
     saveGlobalLanguageButton: "Gardar Idioma Global",
     globalLanguageUpdatedToastTitle: "Idioma Global Actualizado",
     globalLanguageUpdatedToastDescription: "O idioma global da aplicación estableceuse a {languageName}.",
+    activityByClassSectionTitle: "Actividade por Aula",
+    messagesCountLabel: "{count} mensaxes",
+    noClassActivityHint: "Non hai actividade recente en ningunha aula.",
+    noClassesAvailableForActivity: "Non hai aulas configuradas para mostrar actividade.",
   },
 };
 
@@ -776,3 +798,4 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
+
