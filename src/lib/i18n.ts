@@ -12,20 +12,14 @@ interface Translations {
   manageClassesTitle: string;
   manageUsersTitle: string;
   delegateDashboardTitle: string;
-  kioskMainTitle: string;
-  kioskMainSubtitle: string;
-  announcementsSectionTitle: string;
-  examsSectionTitle: string;
-  deadlinesSectionTitle: string;
-  noAnnouncementsHint: string; // Placeholder for carousel if needed, but main message is noEventsGeneralHint
-  noExamsHint: string; // Placeholder for carousel if needed
-  noDeadlinesHint: string; // Placeholder for carousel if needed
-  noEventsGeneralHint: string;
-  checkBackLaterHint: string;
+  // kioskMainTitle: string; // Removed
+  // kioskMainSubtitle: string; // Removed
+  // Section titles like announcementsSectionTitle, examsSectionTitle, deadlinesSectionTitle are kept for the class-specific page
+  checkBackLaterHint: string; // Kept for class page, might be useful elsewhere
   viewClassesButtonLabel: string;
   noClassesHint: string;
   loginButtonLabel: string;
-  footerAllRightsReserved: string;
+  // footerAllRightsReserved: string; // Removed
 
   // For PublicClassPage
   classPageTitle: string; 
@@ -35,6 +29,9 @@ interface Translations {
   delegateIdLabel: string; 
   noEventsForClassHint: string; 
   loadingLabel: string;
+  announcementsSectionTitle: string; 
+  examsSectionTitle: string; 
+  deadlinesSectionTitle: string; 
 
   // For DelegateDashboardPage
   assignedClassesLabel: string;
@@ -171,11 +168,11 @@ interface Translations {
   globalLanguageUpdatedToastTitle: string;
   globalLanguageUpdatedToastDescription: string;
 
-  // Kiosk Page - Activity by Class
+  // Kiosk Page - Activity by Class (This section remains)
   activityByClassSectionTitle: string;
-  messagesCountLabel: string; // e.g., "{count} messages"
-  noClassActivityHint: string; // e.g., "No recent activity in any class."
-  noClassesAvailableForActivity: string; // e.g., "No classes configured to show activity."
+  messagesCountLabel: string; 
+  noClassActivityHint: string; 
+  noClassesAvailableForActivity: string; 
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -187,21 +184,14 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Manage Classes",
     manageUsersTitle: "Manage Users",
     delegateDashboardTitle: "Delegate Dashboard",
-    kioskMainTitle: "Stay Informed",
-    kioskMainSubtitle: "Latest school updates at your fingertips.",
-    announcementsSectionTitle: "Announcements",
-    examsSectionTitle: "Exams",
-    deadlinesSectionTitle: "Assignments",
-    noAnnouncementsHint: "No current announcements.",
-    noExamsHint: "No upcoming exams scheduled.",
-    noDeadlinesHint: "No assignment deadlines approaching.",
-    noEventsGeneralHint: "No events posted at the moment.",
-    checkBackLaterHint: "Please check back later for updates.",
+    announcementsSectionTitle: "Announcements", 
+    examsSectionTitle: "Exams", 
+    deadlinesSectionTitle: "Assignments", 
+    checkBackLaterHint: "Please check back later for updates.", 
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
     loginButtonLabel: "Login",
-    footerAllRightsReserved: "All rights reserved.",
-    classPageTitle: "Events for {className}", // This might be unused now if titles are generic
+    classPageTitle: "Events for {className}", 
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
@@ -340,20 +330,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gestionar Clases",
     manageUsersTitle: "Gestionar Usuarios",
     delegateDashboardTitle: "Panel de Delegado",
-    kioskMainTitle: "Mantente Informado",
-    kioskMainSubtitle: "Últimas actualizaciones de la escuela al alcance de tu mano.",
-    announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Exámenes",
+    announcementsSectionTitle: "Anuncios", 
+    examsSectionTitle: "Exámenes", 
     deadlinesSectionTitle: "Tareas", 
-    noAnnouncementsHint: "No hay anuncios actualmente.",
-    noExamsHint: "No hay exámenes programados.",
-    noDeadlinesHint: "No hay fechas de entrega próximas.",
-    noEventsGeneralHint: "No hay eventos publicados por el momento.",
-    checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
+    checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.", 
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
     loginButtonLabel: "Iniciar Sesión",
-    footerAllRightsReserved: "Todos los derechos reservados.",
     classPageTitle: "Eventos para {className}",
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
@@ -493,20 +476,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gérer les Classes",
     manageUsersTitle: "Gérer les Utilisateurs",
     delegateDashboardTitle: "Tableau de bord Délégué",
-    kioskMainTitle: "Restez Informé",
-    kioskMainSubtitle: "Dernières mises à jour de l'école à portée de main.",
-    announcementsSectionTitle: "Annonces",
-    examsSectionTitle: "Examens",
-    deadlinesSectionTitle: "Devoirs", 
-    noAnnouncementsHint: "Aucune annonce pour le moment.",
-    noExamsHint: "Aucun examen prévu.",
-    noDeadlinesHint: "Aucune date limite d'affectation approchant.",
-    noEventsGeneralHint: "Aucun événement publié pour le moment.",
-    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.",
+    announcementsSectionTitle: "Annonces", 
+    examsSectionTitle: "Examens", 
+    deadlinesSectionTitle: "Devoirs",  
+    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", 
     viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
     loginButtonLabel: "Connexion",
-    footerAllRightsReserved: "Tous droits réservés.",
     classPageTitle: "Événements pour {className}",
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
@@ -646,20 +622,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Xestionar Clases",
     manageUsersTitle: "Xestionar Usuarios",
     delegateDashboardTitle: "Panel de Delegado",
-    kioskMainTitle: "Mantente Informado",
-    kioskMainSubtitle: "Últimas actualizacións da escola ao teu alcance.",
-    announcementsSectionTitle: "Anuncios",
-    examsSectionTitle: "Exames", 
-    deadlinesSectionTitle: "Tarefas", 
-    noAnnouncementsHint: "Non hai anuncios actualmente.",
-    noExamsHint: "Non hai exames programados.",
-    noDeadlinesHint: "Non hai datas de entrega de tarefas próximas.",
-    noEventsGeneralHint: "Non hai eventos publicados polo momento.",
-    checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
+    announcementsSectionTitle: "Anuncios", 
+    examsSectionTitle: "Exames",  
+    deadlinesSectionTitle: "Tarefas",  
+    checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.", 
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
     loginButtonLabel: "Iniciar Sesión",
-    footerAllRightsReserved: "Todos os dereitos reservados.",
     classPageTitle: "Eventos para {className}",
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
@@ -799,3 +768,4 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
 
+    
