@@ -4,10 +4,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation"; 
 import {
-  Users,
-  Book,
+  Book, // Changed from Library
   UserCheck,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 // AppLogo and UserNav are now in GlobalHeader
 import {
@@ -37,7 +37,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/admin/dashboard", labelKey: "adminDashboardTitle", icon: ShieldCheck, roles: ["admin"] },
-  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Book, roles: ["admin"] },
+  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Book, roles: ["admin"] }, // Changed icon
   { href: "/admin/manage-users", labelKey: "manageUsersTitle", icon: Users, roles: ["admin"] },
   { href: "/delegate/dashboard", labelKey: "delegateDashboardTitle", icon: UserCheck, roles: ["delegate"] },
 ];
@@ -63,7 +63,7 @@ function SiteSidebar() {
   }
   
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon" className="border-r pt-16"> {/* Added pt-16 here */}
       <SidebarHeader className="flex items-center justify-between p-2">
         <div className={`duration-200 ${state === 'collapsed' ? 'opacity-0 -ml-8' : 'opacity-100'}`}>
           {/* AppLogo is in GlobalHeader */}
@@ -127,7 +127,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <SidebarInset>
           {/* This header is specific to the authenticated layout for the mobile sidebar trigger */}
           {/* It sits *below* the GlobalHeader */}
-          <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:justify-end">
+          <header className="sticky top-16 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:justify-end"> {/* Changed top-0 to top-16 */}
             <div className="md:hidden">
               <SidebarTrigger/>
             </div>
