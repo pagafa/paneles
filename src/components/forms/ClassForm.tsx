@@ -32,7 +32,7 @@ type ClassFormValues = z.infer<typeof classFormSchema>;
 
 interface ClassFormProps {
   onSubmitSuccess?: (data: SchoolClass) => void;
-  initialData?: Partial<ClassFormValues & { id?: string }>;
+  initialData?: Partial<ClassFormValues & { id?: string, language?: string }>;
 }
 
 const UNASSIGNED_DELEGATE_SELECT_VALUE = "__NONE_OPTION__";
@@ -47,7 +47,7 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       name: initialData?.name || "",
-      delegateId: initialData?.delegateId || "", 
+      delegateId: initialData?.delegateId || "",
       password: initialData?.password || "",
     },
   });
@@ -55,8 +55,9 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
   const fetchDelegates = useCallback(async () => {
     setIsLoadingDelegates(true);
     try {
-      const response = await fetch('/api/users?role=delegate'); 
+      const response = await fetch('/api/users?role=delegate');
       if (!response.ok) {
+        // Try fetching all users if role-specific fetch fails
         const fallbackResponse = await fetch('/api/users');
         if (!fallbackResponse.ok) {
           const errorData = await fallbackResponse.json().catch(() => ({ message: `Failed to fetch delegates. Status: ${fallbackResponse.status}` }));
@@ -66,11 +67,12 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
         setAvailableDelegates(allUsers.filter(u => u.role === 'delegate'));
       } else {
         const delegates: User[] = await response.json();
-        setAvailableDelegates(delegates.filter(u => u.role === 'delegate')); 
+        // Filter again here just in case the API didn't filter perfectly or returned other roles
+        setAvailableDelegates(delegates.filter(u => u.role === 'delegate'));
       }
     } catch (error) {
       console.error("Error fetching delegates for ClassForm:", error);
-      setAvailableDelegates([]); 
+      setAvailableDelegates([]); // Ensure it's an empty array on error
       toast({ title: t('errorDialogTitle'), description: t('errorFetchingDelegates', { message: (error as Error).message }), variant: 'destructive' });
     } finally {
       setIsLoadingDelegates(false);
@@ -81,7 +83,7 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
     fetchDelegates();
   }, [fetchDelegates]);
 
-  useEffect(() => { 
+  useEffect(() => {
     if (initialData) {
       form.reset({
         name: initialData.name || "",
@@ -95,17 +97,18 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
 
 
   async function onSubmit(values: ClassFormValues) {
-    const newClass: SchoolClass = {
+    const classToSubmit: SchoolClass = {
       id: initialData?.id || `class-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
       name: values.name,
       delegateId: values.delegateId === UNASSIGNED_DELEGATE_SELECT_VALUE ? undefined : values.delegateId,
       password: values.password && values.password.trim() !== "" ? values.password.trim() : undefined,
+      language: initialData?.language // Preserve language if editing, or undefined if new
     };
-    
+
     if (onSubmitSuccess) {
-      onSubmitSuccess(newClass);
+      onSubmitSuccess(classToSubmit);
     }
-     if (!initialData?.id) { 
+     if (!initialData?.id) { // Only reset for new class creation
       form.reset({ name: "", delegateId: "", password: "" });
     }
   }
@@ -129,14 +132,14 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
         <FormField
           control={form.control}
           name="delegateId"
-          render={({ field }) => ( 
+          render={({ field }) => (
             <FormItem>
               <FormLabel>{t('classDelegateLabel')} ({t('optionalLabel')})</FormLabel>
               <Select
                 onValueChange={(valueFromSelect) => {
-                    field.onChange(valueFromSelect); 
+                    field.onChange(valueFromSelect === UNASSIGNED_DELEGATE_SELECT_VALUE ? "" : valueFromSelect);
                 }}
-                value={field.value || UNASSIGNED_DELEGATE_SELECT_VALUE} 
+                value={field.value || UNASSIGNED_DELEGATE_SELECT_VALUE}
                 disabled={isLoadingDelegates}
               >
                 <FormControl>
@@ -163,9 +166,11 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{"Contrasinal da Clase (Opcional)"}</FormLabel> {/* TODO: Add to i18n */}
+              <FormLabel>{t('classPasswordLabel')}</FormLabel>
               <FormControl>
-                <Input type="password" placeholder={"Deixar en branco para non ter contrasinal"} {...field} /> {/* TODO: Add to i18n */}
+                <div> {/* Explicit single child wrapper for Slot */}
+                  <Input type="password" placeholder={t('classPasswordPlaceholder')} {...field} />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
