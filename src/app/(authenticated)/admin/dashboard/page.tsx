@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { Announcement, SchoolClass, SupportedLanguage } from "@/types";
 import { format } from "date-fns";
-import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe } from "lucide-react";
+import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw } from "lucide-react"; // Added DatabaseZap, RefreshCw
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +29,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolName } from "@/context/SchoolNameContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supportedLanguages, defaultLanguage } from "@/lib/i18n";
+import { useRouter } from "next/navigation"; // Added useRouter
 
 const sortAnnouncements = (announcements: Announcement[]) => {
   return [...announcements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -44,12 +45,14 @@ export default function AdminDashboardPage() {
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const [errorAnnouncements, setErrorAnnouncements] = useState<string | null>(null);
   const [errorClasses, setErrorClasses] = useState<string | null>(null);
+  const [isLoadingReset, setIsLoadingReset] = useState(false); // Added for reset button
   
   const { toast } = useToast();
   const { language: currentSessionLanguage, setLanguage: setSessionLanguage, t } = useLanguage();
   const { schoolName, setSchoolName: setGlobalSchoolName } = useSchoolName();
   const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
   const [selectedGlobalLanguage, setSelectedGlobalLanguage] = useState<SupportedLanguage>(defaultLanguage);
+  const router = useRouter(); // Added router
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -203,6 +206,42 @@ export default function AdminDashboardPage() {
     });
   };
 
+  const handleResetDatabaseConfirm = async () => {
+    setIsLoadingReset(true);
+    try {
+      const response = await fetch('/api/admin/reset-database', {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to reset database. Status: ${response.status}` }));
+        throw new Error(errorData.message || `Failed to reset database. Status: ${response.status}`);
+      }
+      const result = await response.json();
+      toast({
+        title: t('dbResetSuccessTitle'),
+        description: t('dbResetSuccessDescription'),
+      });
+      // Clear user session and redirect to login
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('userId');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('appLanguage'); // Clear language too
+        localStorage.removeItem('adminGlobalAppLanguage');
+        localStorage.removeItem('appSchoolName');
+      }
+      router.push('/login');
+    } catch (err) {
+      console.error('Error resetting database:', err);
+      toast({
+        title: t('errorDialogTitle'),
+        description: (err as Error).message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingReset(false);
+    }
+  };
+
 
   const getTargetDisplay = (targetClassIds?: string[]): string => {
     if (!targetClassIds || targetClassIds.length === 0) {
@@ -216,10 +255,10 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-8 text-primary">{t('adminDashboardTitle')}</h1>
+    <div className="container mx-auto py-8 space-y-8">
+      <h1 className="text-3xl font-bold text-primary">{t('adminDashboardTitle')}</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl">
@@ -239,7 +278,7 @@ export default function AdminDashboardPage() {
                   className="mt-1"
                 />
               </div>
-              <Button onClick={handleSchoolNameSave}>
+              <Button onClick={handleSchoolNameSave} disabled={isLoadingReset}>
                 <Save className="mr-2 h-4 w-4" />
                 {t('saveSchoolNameButton')}
               </Button>
@@ -261,6 +300,7 @@ export default function AdminDashboardPage() {
                 <Select 
                   value={selectedGlobalLanguage} 
                   onValueChange={(value) => setSelectedGlobalLanguage(value as SupportedLanguage)}
+                  disabled={isLoadingReset}
                 >
                   <SelectTrigger id="globalLanguageSelect" className="mt-1">
                     <SelectValue placeholder={t('selectLanguagePlaceholder')} />
@@ -274,7 +314,7 @@ export default function AdminDashboardPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleGlobalLanguageSave}>
+              <Button onClick={handleGlobalLanguageSave} disabled={isLoadingReset}>
                 <Save className="mr-2 h-4 w-4" />
                 {t('saveGlobalLanguageButton')}
               </Button>
@@ -292,7 +332,7 @@ export default function AdminDashboardPage() {
           </CardTitle>
           {editingAnnouncement && (
             <CardDescription>
-              {t('editingAnnouncementDescription', { title: editingAnnouncement.title })} <Button variant="link" size="sm" onClick={() => setEditingAnnouncement(null)}>{t('cancelEditButton')}</Button>
+              {t('editingAnnouncementDescription', { title: editingAnnouncement.title })} <Button variant="link" size="sm" onClick={() => setEditingAnnouncement(null)} disabled={isLoadingReset}>{t('cancelEditButton')}</Button>
             </CardDescription>
           )}
         </CardHeader>
@@ -331,7 +371,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-destructive">{errorAnnouncements}</p>
-            <Button onClick={fetchAnnouncements} className="mt-4">{t('retryButtonLabel')}</Button>
+            <Button onClick={fetchAnnouncements} className="mt-4" disabled={isLoadingReset}>{t('retryButtonLabel')}</Button>
           </CardContent>
         </Card>
       )}
@@ -350,12 +390,12 @@ export default function AdminDashboardPage() {
                       <CardDescription>{format(new Date(ann.date), "PPP HH:mm")}</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')}>
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')} disabled={isLoadingReset}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')}>
+                          <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')} disabled={isLoadingReset}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
@@ -386,6 +426,52 @@ export default function AdminDashboardPage() {
           </div>
         </ScrollArea>
       )}
+
+      <Separator className="my-8" />
+
+      <Card className="border-destructive shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-xl text-destructive">
+            <DatabaseZap className="h-6 w-6" />
+            {t('dbResetCardTitle')}
+          </CardTitle>
+          <CardDescription className="text-destructive/90">
+            {t('dbResetWarningDescription')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full sm:w-auto" disabled={isLoadingReset}>
+                {isLoadingReset ? (
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                )}
+                {isLoadingReset ? t('dbResettingButton') : t('dbResetButtonLabel')}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('dbResetConfirmTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('dbResetConfirmDescription')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleResetDatabaseConfirm}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  {t('dbResetConfirmButton')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

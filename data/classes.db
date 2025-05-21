@@ -4,3 +4,4 @@
 {"id":"class-1747860994913-q029q","name":"Sala Profesores","_id":"sktbccLvNPrrAIhY","createdAt":{"$$date":1747860994625},"updatedAt":{"$$date":1747861873913},"password":"clave"}
 {"id":"class1","name":"1º ESO","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747861445189},"password":"una"}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"id":"class1","name":"1º ESO","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747862658647},"password":"eso"}

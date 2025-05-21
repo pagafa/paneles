@@ -19,7 +19,6 @@ interface Translations {
   viewClassesButtonLabel: string;
   noClassesHint: string;
   loginButtonLabel: string;
-  // classPageTitle: string; // Removed as subtitle is gone
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
@@ -153,7 +152,6 @@ interface Translations {
   dashboardMenuItemLabel: string; 
   logoutButtonLabel: string; 
 
-  // New keys for class password
   classPasswordLabel: string;
   classPasswordPlaceholder: string;
   classPasswordPromptTitle: string;
@@ -163,6 +161,17 @@ interface Translations {
   classPasswordIncorrectError: string;
   classPasswordVerificationError: string;
   classIsPasswordProtected: string;
+
+  // Database Reset Translations
+  dbResetCardTitle: string;
+  dbResetWarningDescription: string;
+  dbResetButtonLabel: string;
+  dbResettingButton: string;
+  dbResetConfirmTitle: string;
+  dbResetConfirmDescription: string;
+  dbResetConfirmButton: string;
+  dbResetSuccessTitle: string;
+  dbResetSuccessDescription: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -181,7 +190,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
     loginButtonLabel: "Login",
-    // classPageTitle: "Events for {className}", // Removed
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
@@ -323,6 +331,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordIncorrectError: "Incorrect password. Please try again.",
     classPasswordVerificationError: "Error verifying password. Please try again later.",
     classIsPasswordProtected: "This class is password protected.",
+    dbResetCardTitle: "Database Maintenance",
+    dbResetWarningDescription: "This action is irreversible and will delete all application data. A single admin user 'pablo' (password: 'soypablo') will be created.",
+    dbResetButtonLabel: "Reset Entire Database",
+    dbResettingButton: "Resetting...",
+    dbResetConfirmTitle: "Confirm Database Reset",
+    dbResetConfirmDescription: "Are you absolutely sure you want to reset the entire database? All current data (announcements, classes, users, events) will be PERMANENTLY DELETED. Only a new admin user 'pablo' will remain.",
+    dbResetConfirmButton: "Yes, Reset Database",
+    dbResetSuccessTitle: "Database Reset",
+    dbResetSuccessDescription: "The database has been reset. You will be logged out. Please log in with user 'pablo' and password 'soypablo'.",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -339,7 +356,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
     loginButtonLabel: "Iniciar Sesión",
-    // classPageTitle: "Eventos para {className}",
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
@@ -481,6 +497,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordIncorrectError: "Contraseña incorrecta. Inténtalo de nuevo.",
     classPasswordVerificationError: "Error al verificar la contraseña. Inténtalo de nuevo más tarde.",
     classIsPasswordProtected: "Esta clase está protegida por contraseña.",
+    dbResetCardTitle: "Mantenimiento de Base de Datos",
+    dbResetWarningDescription: "Esta acción es irreversible y eliminará todos los datos de la aplicación. Se creará un único usuario administrador 'pablo' (contraseña: 'soypablo').",
+    dbResetButtonLabel: "Reiniciar Toda la Base de Datos",
+    dbResettingButton: "Reiniciando...",
+    dbResetConfirmTitle: "Confirmar Reinicio de Base de Datos",
+    dbResetConfirmDescription: "¿Estás absolutamente seguro de que quieres reiniciar toda la base de datos? Todos los datos actuales (anuncios, clases, usuarios, eventos) serán ELIMINADOS PERMANENTEMENTE. Solo quedará un nuevo usuario administrador 'pablo'.",
+    dbResetConfirmButton: "Sí, Reiniciar Base de Datos",
+    dbResetSuccessTitle: "Base de Datos Reiniciada",
+    dbResetSuccessDescription: "La base de datos ha sido reiniciada. Serás desconectado. Por favor, inicia sesión con el usuario 'pablo' y la contraseña 'soypablo'.",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -497,7 +522,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
     loginButtonLabel: "Connexion",
-    // classPageTitle: "Événements pour {className}",
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
@@ -639,6 +663,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordIncorrectError: "Mot de passe incorrect. Veuillez réessayer.",
     classPasswordVerificationError: "Erreur lors de la vérification du mot de passe. Veuillez réessayer plus tard.",
     classIsPasswordProtected: "Cette classe est protégée par un mot de passe.",
+    dbResetCardTitle: "Maintenance de la Base de Données",
+    dbResetWarningDescription: "Cette action est irréversible et supprimera toutes les données de l'application. Un unique utilisateur admin 'pablo' (mot de passe: 'soypablo') sera créé.",
+    dbResetButtonLabel: "Réinitialiser Toute la Base de Données",
+    dbResettingButton: "Réinitialisation...",
+    dbResetConfirmTitle: "Confirmer la Réinitialisation de la Base de Données",
+    dbResetConfirmDescription: "Êtes-vous absolument sûr de vouloir réinitialiser toute la base de données ? Toutes les données actuelles (annonces, classes, utilisateurs, événements) seront DÉFINITIVEMENT SUPPRIMÉES. Seul un nouvel utilisateur admin 'pablo' restera.",
+    dbResetConfirmButton: "Oui, Réinitialiser la Base de Données",
+    dbResetSuccessTitle: "Base de Données Réinitialisée",
+    dbResetSuccessDescription: "La base de données a été réinitialisée. Vous allez être déconnecté. Veuillez vous connecter avec l'utilisateur 'pablo' et le mot de passe 'soypablo'.",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -655,7 +688,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
     loginButtonLabel: "Iniciar Sesión",
-    // classPageTitle: "Eventos para {className}",
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
@@ -797,6 +829,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordIncorrectError: "Contrasinal incorrecto. Inténtao de novo.",
     classPasswordVerificationError: "Erro ao verificar o contrasinal. Inténtao de novo máis tarde.",
     classIsPasswordProtected: "Esta clase está protexida por contrasinal.",
+    dbResetCardTitle: "Mantemento da Base de Datos",
+    dbResetWarningDescription: "Esta acción é irreversible e eliminará todos os datos da aplicación. Crearase un único usuario administrador 'pablo' (contrasinal: 'soypablo').",
+    dbResetButtonLabel: "Reiniciar Toda a Base de Datos",
+    dbResettingButton: "Reiniciando...",
+    dbResetConfirmTitle: "Confirmar Reinicio da Base de Datos",
+    dbResetConfirmDescription: "¿Estás absolutamente seguro de que queres reiniciar toda a base de datos? Todos os datos actuais (anuncios, clases, usuarios, eventos) serán ELIMINADOS PERMANENTEMENTE. Só quedará un novo usuario administrador 'pablo'.",
+    dbResetConfirmButton: "Si, Reiniciar Base de Datos",
+    dbResetSuccessTitle: "Base de Datos Reiniciada",
+    dbResetSuccessDescription: "A base de datos foi reiniciada. Serás desconectado. Por favor, inicia sesión co usuario 'pablo' e o contrasinal 'soypablo'.",
   },
 };
 
