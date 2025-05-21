@@ -16,6 +16,9 @@ import { ChevronDown, LogIn } from "lucide-react";
 import type { SchoolClass } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { Skeleton } from '@/components/ui/skeleton';
+import { usePathname } from 'next/navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 async function getClassesData(): Promise<SchoolClass[]> {
   try {
@@ -31,10 +34,18 @@ async function getClassesData(): Promise<SchoolClass[]> {
   }
 }
 
+const SIDEBAR_WIDTH_REM = 16; // Standard sidebar width
+
 export function GlobalHeader() {
   const { t } = useLanguage();
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
+
+  const pathname = usePathname();
+  const isMobile = useIsMobile();
+
+  const isAuthenticatedRoute = pathname.startsWith('/admin/') || pathname.startsWith('/delegate/');
+  const isDesktopAuthLayout = isAuthenticatedRoute && !isMobile;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,9 +57,31 @@ export function GlobalHeader() {
     fetchData();
   }, []);
 
+  // Define base padding, these can be adjusted if needed
+  const basePaddingX = "px-4"; // For mobile and public pages
+  const smBasePaddingX = "sm:px-6";
+  const lgBasePaddingX = "lg:px-8";
+
+  // Define padding for authenticated desktop view
+  // Assuming 1rem is roughly equivalent to px-4 for base calculations
+  const authDesktopPaddingL = `pl-[${SIDEBAR_WIDTH_REM + 1}rem]`; // Sidebar width + ~1rem base padding
+  const authDesktopPaddingR = "pr-4";
+  const smAuthDesktopPaddingL = `sm:pl-[${SIDEBAR_WIDTH_REM + 1.5}rem]`; // Sidebar width + ~1.5rem (sm:px-6)
+  const smAuthDesktopPaddingR = "sm:pr-6";
+  const lgAuthDesktopPaddingL = `lg:pl-[${SIDEBAR_WIDTH_REM + 2}rem]`; // Sidebar width + ~2rem (lg:px-8)
+  const lgAuthDesktopPaddingR = "lg:pr-8";
+
+
+  const containerClasses = cn(
+    "container mx-auto h-16 flex justify-between items-center",
+    isDesktopAuthLayout
+      ? `${authDesktopPaddingL} ${authDesktopPaddingR} ${smAuthDesktopPaddingL} ${smAuthDesktopPaddingR} ${lgAuthDesktopPaddingL} ${lgAuthDesktopPaddingR}`
+      : `${basePaddingX} ${smBasePaddingX} ${lgBasePaddingX}`
+  );
+
   return (
     <header className="sticky top-0 z-[60] w-full bg-background/90 backdrop-blur-sm shadow-md">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
+      <div className={containerClasses}>
         <div className="flex-shrink-0">
           <AppLogo />
         </div>
