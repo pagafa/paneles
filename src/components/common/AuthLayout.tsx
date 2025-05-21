@@ -9,8 +9,7 @@ import {
   UserCheck,
   ShieldCheck,
 } from "lucide-react";
-import { AppLogo } from "@/components/common/AppLogo";
-// UserNav is removed from here as it's now in GlobalHeader
+// AppLogo and UserNav are now in GlobalHeader
 import {
   SidebarProvider,
   Sidebar,
@@ -67,11 +66,7 @@ function SiteSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="flex items-center justify-between p-2">
         <div className={`duration-200 ${state === 'collapsed' ? 'opacity-0 -ml-8' : 'opacity-100'}`}>
-          {/* AppLogo is now in GlobalHeader, so it's removed from here. 
-              Admin sidebar can have its own title or logo if needed, or remain cleaner.
-              For now, let's keep it clean. If the global AppLogo isn't visible enough due to sidebar,
-              we might reconsider adding a smaller version or text here.
-          */}
+          {/* AppLogo is in GlobalHeader */}
         </div>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>
@@ -108,7 +103,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem("userRole");
       const userId = localStorage.getItem("userId");
-      if (!role || !userId) { // Check for userId as well
+      if (!role || !userId) {
         router.replace("/login");
       } else {
         setIsAuthCheckComplete(true);
@@ -126,18 +121,19 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full"> {/* This will be a child of RootLayout's main */}
+      {/* The GlobalHeader is rendered by RootLayout and sits above this entire structure */}
+      <div className="flex min-h-screen w-full"> {/* This div is inside RootLayout's <main> */}
         <SiteSidebar />
         <SidebarInset>
-          {/* The header here is specific to the authenticated layout, primarily for the mobile sidebar trigger */}
-          {/* UserNav is removed as it's now in GlobalHeader */}
+          {/* This header is specific to the authenticated layout for the mobile sidebar trigger */}
+          {/* It sits *below* the GlobalHeader */}
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:justify-end">
             <div className="md:hidden">
               <SidebarTrigger/>
             </div>
             {/* UserNav was here, now it's global */}
           </header>
-          <main className="flex-1 p-4 md:p-6 lg:p-8">
+          <main className="flex-1 p-4 md:p-6 lg:p-8"> {/* Added padding here */}
             {children}
           </main>
         </SidebarInset>

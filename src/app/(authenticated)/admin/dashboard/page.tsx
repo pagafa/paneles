@@ -47,7 +47,7 @@ export default function AdminDashboardPage() {
   
   const { toast } = useToast();
   const { language: currentSessionLanguage, setLanguage: setSessionLanguage, t } = useLanguage();
-  const { schoolName, setSchoolName: setGlobalSchoolName } = useSchoolName(); // Renamed to avoid conflict
+  const { schoolName, setSchoolName: setGlobalSchoolName } = useSchoolName();
   const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
   const [selectedGlobalLanguage, setSelectedGlobalLanguage] = useState<SupportedLanguage>(defaultLanguage);
 
@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
       if (storedAdminLang && supportedLanguages.includes(storedAdminLang)) {
         setSelectedGlobalLanguage(storedAdminLang);
       } else {
-        setSelectedGlobalLanguage(currentSessionLanguage); // Default to current session if no admin global is set
+        setSelectedGlobalLanguage(currentSessionLanguage);
       }
     }
   }, [currentSessionLanguage]);
@@ -185,7 +185,7 @@ export default function AdminDashboardPage() {
   };
 
   const handleSchoolNameSave = () => {
-    setGlobalSchoolName(editableSchoolName.trim()); // Use the renamed context function
+    setGlobalSchoolName(editableSchoolName.trim());
     toast({
       title: t('schoolNameUpdatedToastTitle'),
       description: t('schoolNameUpdatedToastDescription', { schoolName: editableSchoolName.trim() || "My School" }),
@@ -196,7 +196,6 @@ export default function AdminDashboardPage() {
     if (typeof window !== 'undefined') {
       localStorage.setItem(ADMIN_GLOBAL_LANGUAGE_KEY, selectedGlobalLanguage);
     }
-    // Also update the current admin's session language for immediate feedback
     setSessionLanguage(selectedGlobalLanguage); 
     toast({
       title: t('globalLanguageUpdatedToastTitle'),
@@ -220,67 +219,69 @@ export default function AdminDashboardPage() {
     <div className="container mx-auto py-8">
       <h1 className="text-3xl font-bold mb-8 text-primary">{t('adminDashboardTitle')}</h1>
       
-      <Card className="mb-8 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <Settings className="h-6 w-6 text-accent" />
-            {t('editSchoolNameCardTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="schoolNameInput">{t('schoolNameInputLabel')}</Label>
-              <Input
-                id="schoolNameInput"
-                value={editableSchoolName}
-                onChange={(e) => setEditableSchoolName(e.target.value)}
-                placeholder={t('schoolNameInputPlaceholder')}
-                className="mt-1"
-              />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Settings className="h-6 w-6 text-accent" />
+              {t('editSchoolNameCardTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="schoolNameInput">{t('schoolNameInputLabel')}</Label>
+                <Input
+                  id="schoolNameInput"
+                  value={editableSchoolName}
+                  onChange={(e) => setEditableSchoolName(e.target.value)}
+                  placeholder={t('schoolNameInputPlaceholder')}
+                  className="mt-1"
+                />
+              </div>
+              <Button onClick={handleSchoolNameSave}>
+                <Save className="mr-2 h-4 w-4" />
+                {t('saveSchoolNameButton')}
+              </Button>
             </div>
-            <Button onClick={handleSchoolNameSave}>
-              <Save className="mr-2 h-4 w-4" />
-              {t('saveSchoolNameButton')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card className="mb-8 shadow-lg">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <Globe className="h-6 w-6 text-accent" />
-            {t('globalLanguageSettingsCardTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="globalLanguageSelect">{t('globalLanguageSelectLabel')}</Label>
-              <Select 
-                value={selectedGlobalLanguage} 
-                onValueChange={(value) => setSelectedGlobalLanguage(value as SupportedLanguage)}
-              >
-                <SelectTrigger id="globalLanguageSelect" className="mt-1">
-                  <SelectValue placeholder={t('selectLanguagePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {supportedLanguages.map(lang => (
-                    <SelectItem key={lang} value={lang}>
-                      {lang.toUpperCase()} {/* Consider adding full language names in i18n later */}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Globe className="h-6 w-6 text-accent" />
+              {t('globalLanguageSettingsCardTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="globalLanguageSelect">{t('globalLanguageSelectLabel')}</Label>
+                <Select 
+                  value={selectedGlobalLanguage} 
+                  onValueChange={(value) => setSelectedGlobalLanguage(value as SupportedLanguage)}
+                >
+                  <SelectTrigger id="globalLanguageSelect" className="mt-1">
+                    <SelectValue placeholder={t('selectLanguagePlaceholder')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {supportedLanguages.map(lang => (
+                      <SelectItem key={lang} value={lang}>
+                        {lang.toUpperCase()}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleGlobalLanguageSave}>
+                <Save className="mr-2 h-4 w-4" />
+                {t('saveGlobalLanguageButton')}
+              </Button>
             </div>
-            <Button onClick={handleGlobalLanguageSave}>
-              <Save className="mr-2 h-4 w-4" />
-              {t('saveGlobalLanguageButton')}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
 
       <Card className="mb-8 shadow-lg">
