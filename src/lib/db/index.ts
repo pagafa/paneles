@@ -8,11 +8,17 @@ import type { Announcement, SchoolClass, User, SchoolEvent } from '@/types';
 import { mockClasses, mockUsers, mockSchoolEvents, mockAnnouncements } from '@/lib/placeholder-data';
 
 const dataDir = path.join(process.cwd(), 'data');
+
+// Promises to ensure initialization runs only once per datastore
+let announcementsDbInitializationPromise: Promise<Datastore<Announcement>> | null = null;
+let classesDbInitializationPromise: Promise<Datastore<SchoolClass>> | null = null;
+let usersDbInitializationPromise: Promise<Datastore<User>> | null = null;
+let schoolEventsDbInitializationPromise: Promise<Datastore<SchoolEvent>> | null = null;
+
 let announcementsDbInstance: Datastore<Announcement> | null = null;
 let classesDbInstance: Datastore<SchoolClass> | null = null;
 let usersDbInstance: Datastore<User> | null = null;
 let schoolEventsDbInstance: Datastore<SchoolEvent> | null = null;
-
 
 // Function to ensure the data directory exists
 async function ensureDataDirectory(): Promise<void> {
@@ -46,14 +52,24 @@ async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement
       console.error('Error seeding announcements DB:', seedError);
     }
   }
+  announcementsDbInstance = db;
   return db;
 }
 
 export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
-  if (!announcementsDbInstance) {
-    announcementsDbInstance = await initializeAnnouncementsDatabase();
+  if (announcementsDbInstance) {
+    return announcementsDbInstance;
   }
-  return announcementsDbInstance;
+  if (!announcementsDbInitializationPromise) {
+    announcementsDbInitializationPromise = initializeAnnouncementsDatabase();
+  }
+  try {
+    return await announcementsDbInitializationPromise;
+  } finally {
+    // Clear the promise once resolved or rejected to allow re-initialization on next call if failed.
+    // However, for successful initialization, instance is set, so future calls hit the first `if`.
+    announcementsDbInitializationPromise = null; 
+  }
 }
 
 // --- Classes Database ---
@@ -76,14 +92,22 @@ async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
       console.error('Error seeding classes DB:', seedError);
     }
   }
+  classesDbInstance = db;
   return db;
 }
 
 export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
-  if (!classesDbInstance) {
-    classesDbInstance = await initializeClassesDatabase();
+  if (classesDbInstance) {
+    return classesDbInstance;
   }
-  return classesDbInstance;
+  if (!classesDbInitializationPromise) {
+    classesDbInitializationPromise = initializeClassesDatabase();
+  }
+   try {
+    return await classesDbInitializationPromise;
+  } finally {
+    classesDbInitializationPromise = null;
+  }
 }
 
 // --- Users Database ---
@@ -101,22 +125,29 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
   const count = await db.count({});
   if (count === 0 && mockUsers && mockUsers.length > 0) {
     try {
-      await db.insert(mockUsers); 
+      await db.insert(mockUsers.map(({ password, ...user }) => ({ ...user, password }))); // Ensure password is included if type allows
       console.log('Users DB seeded with mockUsers.');
     } catch (seedError) {
       console.error('Error seeding users DB:', seedError);
     }
   }
+  usersDbInstance = db;
   return db;
 }
 
 export async function getUsersDb(): Promise<Datastore<User>> {
-  if (!usersDbInstance) {
-    usersDbInstance = await initializeUsersDatabase();
+  if (usersDbInstance) {
+    return usersDbInstance;
   }
-  return usersDbInstance;
+  if (!usersDbInitializationPromise) {
+    usersDbInitializationPromise = initializeUsersDatabase();
+  }
+  try {
+    return await usersDbInitializationPromise;
+  } finally {
+    usersDbInitializationPromise = null;
+  }
 }
-
 
 // --- SchoolEvents Database (Delegate Submissions) ---
 async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>> {
@@ -138,12 +169,20 @@ async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>>
       console.error('Error seeding schoolEvents DB:', seedError);
     }
   }
+  schoolEventsDbInstance = db;
   return db;
 }
 
 export async function getSchoolEventsDb(): Promise<Datastore<SchoolEvent>> {
-  if (!schoolEventsDbInstance) {
-    schoolEventsDbInstance = await initializeSchoolEventsDatabase();
+  if (schoolEventsDbInstance) {
+    return schoolEventsDbInstance;
   }
-  return schoolEventsDbInstance;
+  if (!schoolEventsDbInitializationPromise) {
+    schoolEventsDbInitializationPromise = initializeSchoolEventsDatabase();
+  }
+  try {
+    return await schoolEventsDbInitializationPromise;
+  } finally {
+    schoolEventsDbInitializationPromise = null;
+  }
 }
