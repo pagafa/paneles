@@ -1,9 +1,7 @@
 {"id":"class3","name":"3º ESO","delegateId":"user3","_id":"QLuwjLKaV45C5e7j","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747860966677}}
 {"id":"class2","name":"2º ESO","_id":"TJ0bbWUXqB9qPVCN","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747860958418}}
 {"id":"class4","name":"4º ESO","_id":"koTsEyFBIYvtsLlA","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747860980859}}
-{"id":"class-1747860994913-q029q","name":"Sala Profesores","_id":"sktbccLvNPrrAIhY","createdAt":{"$$date":1747860994625},"updatedAt":{"$$date":1747860994625}}
-{"id":"class1","name":"1º ESO","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747697561711}}
-{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
-{"id":"class1","name":"1º ESO","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747861445189},"password":"una"}
-{"id":"class-1747860994913-q029q","name":"Sala Profesores","_id":"sktbccLvNPrrAIhY","createdAt":{"$$date":1747860994625},"updatedAt":{"$$date":1747861655119},"password":"clave"}
 {"id":"class-1747860994913-q029q","name":"Sala Profesores","_id":"sktbccLvNPrrAIhY","createdAt":{"$$date":1747860994625},"updatedAt":{"$$date":1747861708163},"password":"clave"}
+{"id":"class1","name":"1º ESO","delegateId":"user2","_id":"uGSm0VwpUDQaSFvt","createdAt":{"$$date":1747697549820},"updatedAt":{"$$date":1747861445189},"password":"una"}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"id":"class-1747860994913-q029q","name":"Sala Profesores","_id":"sktbccLvNPrrAIhY","createdAt":{"$$date":1747860994625},"updatedAt":{"$$date":1747861873913},"password":"clave"}

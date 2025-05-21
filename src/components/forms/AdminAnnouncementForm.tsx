@@ -26,7 +26,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { Announcement, SchoolClass } from "@/types";
 import React, { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { mockClasses } from "@/lib/placeholder-data"; // For class selection
 
 const announcementFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
@@ -40,7 +39,7 @@ type AnnouncementFormValues = z.infer<typeof announcementFormSchema>;
 interface AdminAnnouncementFormProps {
   onSubmitSuccess?: (data: Announcement) => void;
   initialData?: Partial<AnnouncementFormValues & { id?: string }>;
-  availableClasses?: SchoolClass[]; // Pass available classes
+  availableClasses: SchoolClass[]; // Changed: No longer optional, must be provided
 }
 
 const CLASSES_COLUMN_THRESHOLD = 5; // Show columns if more than 5 classes
@@ -48,7 +47,7 @@ const CLASSES_COLUMN_THRESHOLD = 5; // Show columns if more than 5 classes
 export function AdminAnnouncementForm({ 
   onSubmitSuccess, 
   initialData,
-  availableClasses = mockClasses // Use mockClasses as default
+  availableClasses // Removed default value
 }: AdminAnnouncementFormProps) {
   const { toast } = useToast();
   const form = useForm<AnnouncementFormValues>({
@@ -73,14 +72,13 @@ export function AdminAnnouncementForm({
   }, [initialData, form]);
 
   async function onSubmit(values: AnnouncementFormValues) {
-    await new Promise(resolve => setTimeout(resolve, 500));
     const newAnnouncement: Announcement = {
       id: initialData?.id || `ann-${Date.now()}`,
       title: values.title,
       content: values.content,
       date: values.date.toISOString(),
       type: 'announcement',
-      targetClassIds: values.targetClassIds && values.targetClassIds.length > 0 ? values.targetClassIds : [], // Store empty array if none selected
+      targetClassIds: values.targetClassIds && values.targetClassIds.length > 0 ? values.targetClassIds : [], 
     };
     
     toast({

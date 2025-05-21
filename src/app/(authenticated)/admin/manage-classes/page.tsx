@@ -14,10 +14,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockUsers } from "@/lib/placeholder-data"; // Keep for availableDelegates for now
 import type { SchoolClass, User } from "@/types";
-import { Edit3, Book, Trash2, AlertTriangle } from "lucide-react";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { Edit3, Book, Trash2, AlertTriangle, KeyRound } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton"; // For loading state
+import { Skeleton } from "@/components/ui/skeleton"; 
 import { useLanguage } from "@/context/LanguageContext";
 
 const sortClasses = (classes: SchoolClass[]) => {
@@ -39,14 +38,30 @@ const sortClasses = (classes: SchoolClass[]) => {
 
 export default function ManageClassesPage() {
   const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [allUsersFromApi, setAllUsersFromApi] = useState<User[]>([]);
   const [editingClass, setEditingClass] = useState<SchoolClass | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { t } = useLanguage(); // For future i18n of this page
+  const { t } = useLanguage(); 
 
-  // For delegate dropdown in ClassForm - this could also be fetched if users are in DB
-  const availableDelegates = useMemo(() => mockUsers.filter(u => u.role === 'delegate'), []);
+  const fetchAllUsers = useCallback(async () => {
+    // Not setting isLoading specifically for users here, assuming it's part of general page load
+    try {
+      const response = await fetch('/api/users');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to fetch users for delegate names. Status: ${response.status}` }));
+        throw new Error(errorData.message);
+      }
+      const data: User[] = await response.json();
+      setAllUsersFromApi(data);
+    } catch (err) {
+      console.error('Error fetching users for ManageClassesPage:', err);
+      // Not setting main page error, ClassForm handles its own delegate loading error
+      setAllUsersFromApi([]); 
+    }
+  }, []);
+
 
   const fetchClasses = useCallback(async () => {
     setIsLoading(true);
@@ -70,7 +85,8 @@ export default function ManageClassesPage() {
 
   useEffect(() => {
     fetchClasses();
-  }, [fetchClasses]);
+    fetchAllUsers(); // Fetch users for delegate name resolution
+  }, [fetchClasses, fetchAllUsers]);
 
   const handleFormSubmit = async (data: SchoolClass) => {
     const isEditing = !!editingClass;
@@ -95,7 +111,7 @@ export default function ManageClassesPage() {
       });
 
       setEditingClass(null);
-      await fetchClasses(); // Refresh list
+      await fetchClasses(); 
     } catch (err) {
       console.error(err);
       toast({
@@ -125,7 +141,7 @@ export default function ManageClassesPage() {
         description: "The class has been successfully deleted.",
         variant: "destructive"
       });
-      await fetchClasses(); // Refresh list
+      await fetchClasses(); 
     } catch (err) {
        console.error(err);
        toast({
@@ -138,7 +154,7 @@ export default function ManageClassesPage() {
 
   const getDelegateName = (delegateId?: string) => {
     if (!delegateId) return 'N/A';
-    const delegate = availableDelegates.find(d => d.id === delegateId);
+    const delegate = allUsersFromApi.find(d => d.id === delegateId && d.role === 'delegate');
     return delegate ? delegate.name : 'Unknown Delegate';
   };
 
@@ -162,7 +178,6 @@ export default function ManageClassesPage() {
           <ClassForm 
             onSubmitSuccess={handleFormSubmit} 
             initialData={editingClass || undefined} 
-            availableDelegates={availableDelegates}
             key={editingClass ? editingClass.id : 'new'}
           />
         </CardContent>
@@ -208,7 +223,12 @@ export default function ManageClassesPage() {
               <TableBody>
                 {classes.map((cls) => (
                   <TableRow key={cls.id}>
-                    <TableCell className="font-medium">{cls.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {cls.password && cls.password.trim() !== "" && <KeyRound className="h-4 w-4 text-accent" />}
+                        <span>{cls.name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>{getDelegateName(cls.delegateId)}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(cls)} aria-label="Edit Class">

@@ -35,23 +35,25 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
 
   return (
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
-      <CardHeader className="pb-3 pt-4 flex flex-row justify-between items-start">
-        <div className="flex items-center gap-3"> {}
-          {showTypeIcon && TypeSpecificIcon && (
-            <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" aria-label={item.type} />
-          )}
-          <CardTitle className="text-xl font-semibold text-primary-foreground">{item.title}</CardTitle>
-        </div>
-        {showDelegateActions && onEdit && onDeleteRequest && (
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => onEdit(item)} aria-label="Edit Submission">
-              <Edit3 className="h-4 w-4" />
-            </Button>
-            <Button variant="destructive" size="icon" onClick={() => onDeleteRequest(item)} aria-label="Delete Submission">
-              <Trash2 className="h-4 w-4" />
-            </Button>
+      <CardHeader className="pb-3 pt-4">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            {showTypeIcon && TypeSpecificIcon && (
+              <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" aria-label={item.type} />
+            )}
+            <CardTitle className="text-xl font-semibold">{item.title}</CardTitle>
           </div>
-        )}
+          {showDelegateActions && onEdit && onDeleteRequest && (
+            <div className="flex gap-2">
+              <Button variant="outline" size="icon" onClick={() => onEdit(item)} aria-label="Edit Submission">
+                <Edit3 className="h-4 w-4" />
+              </Button>
+              <Button variant="destructive" size="icon" onClick={() => onDeleteRequest(item)} aria-label="Delete Submission">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="pt-0">
         {item.type === 'announcement' && <p className="text-lg text-foreground/90 mb-2">{(item as Announcement).content}</p>}
@@ -60,9 +62,8 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
         
         {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
         
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground mt-2">
           {formattedDate}
-          {item.class && ` - Class: ${item.class}`}
         </p>
       </CardContent>
     </Card>
