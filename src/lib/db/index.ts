@@ -25,7 +25,7 @@ async function ensureDataDirectory(): Promise<void> {
   try {
     await fs.mkdir(dataDir, { recursive: true });
   } catch (error) {
-    console.error('Error creating data directory:', error);
+    console.error('[DB Setup] Error creating data directory:', error);
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
       throw error;
     }
@@ -48,34 +48,50 @@ async function createOrRecoverDb<T extends { id: string }>(
     for (const index of uniqueIndexFields) {
       await db.ensureIndex(index);
     }
+    console.log(`[DB Setup] Successfully loaded or created ${dbNameForLog} database at ${dbPath}`);
   } catch (initializationError) {
     const err = initializationError as Error;
-    // Check for common NeDB corruption messages
-    if (err.message.includes("More than 10% of the data file is corrupt") || 
+    if (err.message.includes("More than 10% of the data file is corrupt") ||
         err.message.includes("unexpected end of file") ||
-        err.message.toLowerCase().includes("enoent") && err.message.includes("rename") && err.message.includes(".db~")) {
-      console.warn(`Database file (${dbPath}) for ${dbNameForLog} appears corrupt or inconsistent: "${err.message}". Attempting to delete and re-initialize.`);
+        (err.message.toLowerCase().includes("enoent") && err.message.includes("rename") && err.message.includes(".db~"))) {
+      console.warn(`[DB Recovery] Database file (${dbPath}) for ${dbNameForLog} appears corrupt or inconsistent: "${err.message}". Attempting to delete and re-initialize.`);
       try {
-        // Attempt to delete the main db file and any journal file (ending with ~)
-        await fs.unlink(dbPath).catch(() => { /* ignore if main file doesn't exist or fails */ });
-        await fs.unlink(`${dbPath}~`).catch(() => { /* ignore if journal file doesn't exist or fails */ });
+        try {
+          console.log(`[DB Recovery] Attempting to delete main DB file: ${dbPath}`);
+          await fs.unlink(dbPath);
+          console.log(`[DB Recovery] Successfully deleted main DB file: ${dbPath}`);
+        } catch (unlinkError: any) {
+          if (unlinkError.code !== 'ENOENT') { // File not found is okay here
+            console.warn(`[DB Recovery] Failed to delete main DB file ${dbPath} (might be okay if only journal existed or file already gone):`, unlinkError.message);
+          } else {
+            console.log(`[DB Recovery] Main DB file ${dbPath} did not exist, proceeding.`);
+          }
+        }
+        try {
+          const journalPath = `${dbPath}~`;
+          console.log(`[DB Recovery] Attempting to delete journal file: ${journalPath}`);
+          await fs.unlink(journalPath);
+          console.log(`[DB Recovery] Successfully deleted journal file: ${journalPath}`);
+        } catch (unlinkJournalError: any) {
+          if (unlinkJournalError.code !== 'ENOENT') { // File not found is okay here
+            console.warn(`[DB Recovery] Failed to delete journal file ${dbPath}~ (might be okay if it didn't exist):`, unlinkJournalError.message);
+          } else {
+            console.log(`[DB Recovery] Journal file ${dbPath}~ did not exist.`);
+          }
+        }
         
-        db = Datastore.create({ // This will create the file if it doesn't exist
-          filename: dbPath,
-          autoload: true, 
-          timestampData: true,
-        });
+        console.log(`[DB Recovery] Attempting to re-create database: ${dbPath}`);
+        db = Datastore.create({ filename: dbPath, autoload: true, timestampData: true });
         for (const index of uniqueIndexFields) {
           await db.ensureIndex(index);
         }
-        console.log(`Successfully re-initialized ${dbNameForLog} database (${dbPath}) after corruption attempt.`);
+        console.log(`[DB Recovery] Successfully re-initialized ${dbNameForLog} database (${dbPath}).`);
       } catch (reinitializationError) {
-        console.error(`Failed to re-initialize ${dbNameForLog} database (${dbPath}) after corruption:`, reinitializationError);
-        throw reinitializationError; // Throw the error from the second attempt
+        console.error(`[DB Recovery] Failed to re-initialize ${dbNameForLog} database (${dbPath}) after corruption attempt:`, reinitializationError);
+        throw reinitializationError;
       }
     } else {
-      // Not a corruption error we're attempting to handle this way
-      console.error(`Error initializing ${dbNameForLog} database (${dbPath}):`, err);
+      console.error(`[DB Setup] Error initializing ${dbNameForLog} database (${dbPath}):`, err);
       throw err;
     }
   }
@@ -93,9 +109,9 @@ async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement
   if (count === 0 && mockAnnouncements && mockAnnouncements.length > 0) {
     try {
       await db.insert(mockAnnouncements);
-      console.log('Announcements DB seeded with mockAnnouncements.');
+      console.log('[DB Seed] Announcements DB seeded with mockAnnouncements.');
     } catch (seedError) {
-      console.error('Error seeding announcements DB:', seedError);
+      console.error('[DB Seed] Error seeding announcements DB:', seedError);
     }
   }
   announcementsDbInstance = db;
@@ -103,26 +119,36 @@ async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement
 }
 
 export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
-  if (announcementsDbInstance) {
-    return announcementsDbInstance;
-  }
-  if (!announcementsDbInitializationPromise) {
-    announcementsDbInitializationPromise = initializeAnnouncementsDatabase();
-  }
-  try {
-    const db = await announcementsDbInitializationPromise;
-    announcementsDbInstance = db; // Set instance after promise resolves
-    return db;
-  } catch (error) {
-    announcementsDbInitializationPromise = null; // Clear promise on failure
-    throw error;
-  } finally {
-    // Optionally clear the promise if it succeeded to allow re-init if server restarts and instance is lost
-    // However, with instance check, this might not be needed unless instance becomes null elsewhere
-    if (announcementsDbInstance) {
-        announcementsDbInitializationPromise = null;
+  if (announcementsDbInstance) return announcementsDbInstance;
+  if (announcementsDbInitializationPromise) {
+    try {
+      await announcementsDbInitializationPromise;
+      if (announcementsDbInstance) return announcementsDbInstance;
+      console.warn("[getAnnouncementsDb] Awaited existing promise, but instance not set. Retrying initialization.");
+    } catch (e) {
+      console.warn(`[getAnnouncementsDb] Existing initialization promise failed. Error: ${(e as Error).message}. Retrying.`);
+      announcementsDbInitializationPromise = null;
     }
   }
+  if (!announcementsDbInstance) {
+    const newPromise = initializeAnnouncementsDatabase();
+    announcementsDbInitializationPromise = newPromise;
+    try {
+      const db = await newPromise;
+      announcementsDbInstance = db;
+      return db;
+    } catch (error) {
+      console.error(`[getAnnouncementsDb] Failed to initialize database on new attempt:`, error);
+      announcementsDbInitializationPromise = null;
+      throw error;
+    } finally {
+      if (announcementsDbInitializationPromise === newPromise) {
+        announcementsDbInitializationPromise = null;
+      }
+    }
+  }
+  if (!announcementsDbInstance) throw new Error("Failed to get announcementsDb instance after all attempts.");
+  return announcementsDbInstance;
 }
 
 // --- Classes Database ---
@@ -135,9 +161,9 @@ async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
   if (count === 0 && mockClasses && mockClasses.length > 0) {
     try {
       await db.insert(mockClasses);
-      console.log('Classes DB seeded with mockClasses.');
+      console.log('[DB Seed] Classes DB seeded with mockClasses.');
     } catch (seedError) {
-      console.error('Error seeding classes DB:', seedError);
+      console.error('[DB Seed] Error seeding classes DB:', seedError);
     }
   }
   classesDbInstance = db;
@@ -145,24 +171,36 @@ async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
 }
 
 export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
-  if (classesDbInstance) {
-    return classesDbInstance;
-  }
-  if (!classesDbInitializationPromise) {
-    classesDbInitializationPromise = initializeClassesDatabase();
-  }
-   try {
-    const db = await classesDbInitializationPromise;
-    classesDbInstance = db;
-    return db;
-  } catch (error) {
-    classesDbInitializationPromise = null;
-    throw error;
-  } finally {
-    if (classesDbInstance) {
-        classesDbInitializationPromise = null;
+  if (classesDbInstance) return classesDbInstance;
+  if (classesDbInitializationPromise) {
+    try {
+      await classesDbInitializationPromise;
+      if (classesDbInstance) return classesDbInstance;
+      console.warn("[getClassesDb] Awaited existing promise, but instance not set. Retrying initialization.");
+    } catch (e) {
+      console.warn(`[getClassesDb] Existing initialization promise failed. Error: ${(e as Error).message}. Retrying.`);
+      classesDbInitializationPromise = null;
     }
   }
+  if (!classesDbInstance) {
+    const newPromise = initializeClassesDatabase();
+    classesDbInitializationPromise = newPromise;
+    try {
+      const db = await newPromise;
+      classesDbInstance = db;
+      return db;
+    } catch (error) {
+      console.error(`[getClassesDb] Failed to initialize database on new attempt:`, error);
+      classesDbInitializationPromise = null;
+      throw error;
+    } finally {
+      if (classesDbInitializationPromise === newPromise) {
+        classesDbInitializationPromise = null;
+      }
+    }
+  }
+  if (!classesDbInstance) throw new Error("Failed to get classesDb instance after all attempts.");
+  return classesDbInstance;
 }
 
 // --- Users Database ---
@@ -177,12 +215,10 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
   const count = await db.count({});
   if (count === 0 && mockUsers && mockUsers.length > 0) {
     try {
-      // Ensure mock users have passwords for seeding if the type allows
-      const usersToSeed = mockUsers.map(u => ({...u, password: u.password || 'password'}));
-      await db.insert(usersToSeed);
-      console.log('Users DB seeded with mockUsers.');
+      await db.insert(mockUsers);
+      console.log('[DB Seed] Users DB seeded with mockUsers.');
     } catch (seedError) {
-      console.error('Error seeding users DB:', seedError);
+      console.error('[DB Seed] Error seeding users DB:', seedError);
     }
   }
   usersDbInstance = db;
@@ -190,24 +226,36 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
 }
 
 export async function getUsersDb(): Promise<Datastore<User>> {
-  if (usersDbInstance) {
-    return usersDbInstance;
-  }
-  if (!usersDbInitializationPromise) {
-    usersDbInitializationPromise = initializeUsersDatabase();
-  }
-  try {
-    const db = await usersDbInitializationPromise;
-    usersDbInstance = db;
-    return db;
-  } catch (error) {
-    usersDbInitializationPromise = null;
-    throw error;
-  } finally {
-    if (usersDbInstance) {
-        usersDbInitializationPromise = null;
+  if (usersDbInstance) return usersDbInstance;
+  if (usersDbInitializationPromise) {
+    try {
+      await usersDbInitializationPromise;
+      if (usersDbInstance) return usersDbInstance;
+      console.warn("[getUsersDb] Awaited existing promise, but instance not set. Retrying initialization.");
+    } catch (e) {
+      console.warn(`[getUsersDb] Existing initialization promise failed. Error: ${(e as Error).message}. Retrying.`);
+      usersDbInitializationPromise = null;
     }
   }
+  if(!usersDbInstance) {
+    const newPromise = initializeUsersDatabase();
+    usersDbInitializationPromise = newPromise;
+    try {
+      const db = await newPromise;
+      usersDbInstance = db;
+      return db;
+    } catch (error) {
+      console.error(`[getUsersDb] Failed to initialize database on new attempt:`, error);
+      usersDbInitializationPromise = null;
+      throw error;
+    } finally {
+      if (usersDbInitializationPromise === newPromise) {
+        usersDbInitializationPromise = null;
+      }
+    }
+  }
+  if (!usersDbInstance) throw new Error("Failed to get usersDb instance after all attempts.");
+  return usersDbInstance;
 }
 
 // --- SchoolEvents Database (Delegate Submissions) ---
@@ -220,9 +268,9 @@ async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>>
   if (count === 0 && mockSchoolEvents && mockSchoolEvents.length > 0) {
     try {
       await db.insert(mockSchoolEvents); 
-      console.log('SchoolEvents DB seeded with mockSchoolEvents.');
+      console.log('[DB Seed] SchoolEvents DB seeded with mockSchoolEvents.');
     } catch (seedError) {
-      console.error('Error seeding schoolEvents DB:', seedError);
+      console.error('[DB Seed] Error seeding schoolEvents DB:', seedError);
     }
   }
   schoolEventsDbInstance = db;
@@ -230,22 +278,34 @@ async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>>
 }
 
 export async function getSchoolEventsDb(): Promise<Datastore<SchoolEvent>> {
-  if (schoolEventsDbInstance) {
-    return schoolEventsDbInstance;
-  }
-  if (!schoolEventsDbInitializationPromise) {
-    schoolEventsDbInitializationPromise = initializeSchoolEventsDatabase();
-  }
-  try {
-    const db = await schoolEventsDbInitializationPromise;
-    schoolEventsDbInstance = db;
-    return db;
-  } catch (error) {
-    schoolEventsDbInitializationPromise = null;
-    throw error;
-  } finally {
-    if (schoolEventsDbInstance) {
-        schoolEventsDbInitializationPromise = null;
+  if (schoolEventsDbInstance) return schoolEventsDbInstance;
+  if (schoolEventsDbInitializationPromise) {
+    try {
+      await schoolEventsDbInitializationPromise;
+      if (schoolEventsDbInstance) return schoolEventsDbInstance;
+      console.warn("[getSchoolEventsDb] Awaited existing promise, but instance not set. Retrying initialization.");
+    } catch (e) {
+      console.warn(`[getSchoolEventsDb] Existing initialization promise failed. Error: ${(e as Error).message}. Retrying.`);
+      schoolEventsDbInitializationPromise = null;
     }
   }
+  if (!schoolEventsDbInstance) {
+    const newPromise = initializeSchoolEventsDatabase();
+    schoolEventsDbInitializationPromise = newPromise;
+    try {
+      const db = await newPromise;
+      schoolEventsDbInstance = db;
+      return db;
+    } catch (error) {
+      console.error(`[getSchoolEventsDb] Failed to initialize database on new attempt:`, error);
+      schoolEventsDbInitializationPromise = null;
+      throw error;
+    } finally {
+      if (schoolEventsDbInitializationPromise === newPromise) {
+        schoolEventsDbInitializationPromise = null;
+      }
+    }
+  }
+  if (!schoolEventsDbInstance) throw new Error("Failed to get schoolEventsDb instance after all attempts.");
+  return schoolEventsDbInstance;
 }
