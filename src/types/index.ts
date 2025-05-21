@@ -11,6 +11,7 @@ export interface BaseSchoolItem {
   description?: string;
   // For delegate submissions, to link back to the delegate user
   submittedByDelegateId?: string; 
+  classId?: string; // For delegate-submitted exams, deadlines, or class-specific announcements
 }
 
 export interface Announcement extends BaseSchoolItem {
@@ -22,13 +23,13 @@ export interface Announcement extends BaseSchoolItem {
 export interface Exam extends BaseSchoolItem {
   type: 'exam';
   subject: string;
-  classId?: string; // Changed from class?: string
+  // classId?: string; // Already in BaseSchoolItem
 }
 
 export interface Deadline extends BaseSchoolItem {
   type: 'deadline';
   assignmentName: string;
-  classId?: string; // Changed from class?: string
+  // classId?: string; // Already in BaseSchoolItem
 }
 
 export type SchoolEvent = Announcement | Exam | Deadline;
@@ -39,7 +40,7 @@ export interface User {
   id: string;
   name: string;
   username: string; 
-  role: UserRole;
+  password?: string; // Optional: only used for storage/validation, not sent to client lists
 }
 
 export interface SchoolClass {
@@ -47,4 +48,5 @@ export interface SchoolClass {
   name: string;
   delegateId?: string; 
   language?: SupportedLanguage; 
+  password?: string; // New field for class password
 }

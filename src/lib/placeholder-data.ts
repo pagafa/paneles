@@ -3,19 +3,19 @@ import type { SchoolEvent, User, SchoolClass, Announcement, Exam, Deadline } fro
 
 // --- Mock Classes (Used for DB seeding) ---
 export const mockClasses: SchoolClass[] = [
-  { id: 'eso1a', name: '1º ESO A', delegateId: 'laura_g' },
+  { id: 'eso1a', name: '1º ESO A', delegateId: 'laura_g_id', password: 'passwordeso1a' },
   { id: 'eso1b', name: '1º ESO B' },
   { id: 'eso2a', name: '2º ESO A' },
-  { id: 'bach1a', name: '1º Bacharelato A', delegateId: 'carlos_p' },
+  { id: 'bach1a', name: '1º Bacharelato A', delegateId: 'carlos_p_id', password: 'passwordbach1a' },
   { id: 'bach2a', name: '2º Bacharelato A' },
 ];
 
 // --- Mock Users (Used for DB seeding) ---
 export const mockUsers: User[] = [
-  { id: 'admin_mv_id', name: 'Administrador Principal', username: 'admin_mv', role: 'admin' },
-  { id: 'laura_g_id', name: 'Laura Gómez', username: 'laura_g', role: 'delegate' },
-  { id: 'carlos_p_id', name: 'Carlos Pérez', username: 'carlos_p', role: 'delegate' },
-  { id: 'ana_r_id', name: 'Ana Rodríguez', username: 'ana_r', role: 'delegate' },
+  { id: 'admin_mv_id', name: 'Administrador Principal', username: 'admin_mv', role: 'admin', password: 'password' },
+  { id: 'laura_g_id', name: 'Laura Gómez', username: 'laura_g', role: 'delegate', password: 'password' },
+  { id: 'carlos_p_id', name: 'Carlos Pérez', username: 'carlos_p', role: 'delegate', password: 'password' },
+  { id: 'ana_r_id', name: 'Ana Rodríguez', username: 'ana_r', role: 'delegate', password: 'password' },
 ];
 
 // --- Mock Admin Announcements (Used for DB seeding) ---
@@ -70,7 +70,7 @@ export const mockDeadlines: Deadline[] = [
     type: 'deadline',
     assignmentName: 'Investigación Idade Media',
     classId: 'eso2a',
-    submittedByDelegateId: 'ana_r_id', // Assuming Ana Rodriguez is delegate for 2º ESO A
+    submittedByDelegateId: 'ana_r_id', 
     description: "Extensión mínima de 5 páxinas."
   },
   {
@@ -80,7 +80,6 @@ export const mockDeadlines: Deadline[] = [
     type: 'deadline',
     assignmentName: 'Deseño App Móbil',
     classId: 'bach2a', 
-    // submittedByDelegateId: 'carlos_p_id', // Example: No specific delegate if a general class project
   },
 ];
 
@@ -97,5 +96,5 @@ export const mockSchoolEvents: SchoolEvent[] = [
     classId: 'eso1a', 
     submittedByDelegateId: 'laura_g_id',
     description: 'A lista completa está na aula virtual.'
-  } as Announcement,
+  } as Announcement, // Explicit cast for content field
 ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

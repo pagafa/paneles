@@ -19,7 +19,7 @@ interface Translations {
   viewClassesButtonLabel: string;
   noClassesHint: string;
   loginButtonLabel: string;
-  classPageTitle: string; 
+  // classPageTitle: string; // Removed as subtitle is gone
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
@@ -150,8 +150,19 @@ interface Translations {
   noClassActivityHint: string; 
   noClassesAvailableForActivity: string; 
   noEventsGeneralHint: string;
-  dashboardMenuItemLabel: string; // New key
-  logoutButtonLabel: string; // New key for logout button
+  dashboardMenuItemLabel: string; 
+  logoutButtonLabel: string; 
+
+  // New keys for class password
+  classPasswordLabel: string;
+  classPasswordPlaceholder: string;
+  classPasswordPromptTitle: string;
+  classPasswordPromptDescription: string;
+  classPasswordInputLabel: string;
+  classPasswordUnlockButton: string;
+  classPasswordIncorrectError: string;
+  classPasswordVerificationError: string;
+  classIsPasswordProtected: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -170,7 +181,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
     loginButtonLabel: "Login",
-    classPageTitle: "Events for {className}", 
+    // classPageTitle: "Events for {className}", // Removed
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
@@ -303,6 +314,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "No announcements, exams, or deadlines to display at the moment.",
     dashboardMenuItemLabel: "Dashboard",
     logoutButtonLabel: "Log out",
+    classPasswordLabel: "Class Password (Optional)",
+    classPasswordPlaceholder: "Leave blank for no password",
+    classPasswordPromptTitle: "Password Required",
+    classPasswordPromptDescription: "This class is password protected. Please enter the password to view its content.",
+    classPasswordInputLabel: "Class Password",
+    classPasswordUnlockButton: "Unlock",
+    classPasswordIncorrectError: "Incorrect password. Please try again.",
+    classPasswordVerificationError: "Error verifying password. Please try again later.",
+    classIsPasswordProtected: "This class is password protected.",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -319,7 +339,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
     loginButtonLabel: "Iniciar Sesión",
-    classPageTitle: "Eventos para {className}",
+    // classPageTitle: "Eventos para {className}",
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
@@ -452,6 +472,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "No hay anuncios, exámenes o plazos para mostrar en este momento.",
     dashboardMenuItemLabel: "Panel",
     logoutButtonLabel: "Cerrar Sesión",
+    classPasswordLabel: "Contraseña de Clase (Opcional)",
+    classPasswordPlaceholder: "Dejar en blanco si no requiere contraseña",
+    classPasswordPromptTitle: "Contraseña Requerida",
+    classPasswordPromptDescription: "Esta clase está protegida por contraseña. Por favor, introduce la contraseña para ver su contenido.",
+    classPasswordInputLabel: "Contraseña de la Clase",
+    classPasswordUnlockButton: "Desbloquear",
+    classPasswordIncorrectError: "Contraseña incorrecta. Inténtalo de nuevo.",
+    classPasswordVerificationError: "Error al verificar la contraseña. Inténtalo de nuevo más tarde.",
+    classIsPasswordProtected: "Esta clase está protegida por contraseña.",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -468,7 +497,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
     loginButtonLabel: "Connexion",
-    classPageTitle: "Événements pour {className}",
+    // classPageTitle: "Événements pour {className}",
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
@@ -601,6 +630,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "Aucune annonce, aucun examen ou aucun délai à afficher pour le moment.",
     dashboardMenuItemLabel: "Tableau de bord",
     logoutButtonLabel: "Déconnexion",
+    classPasswordLabel: "Mot de passe de la classe (Optionnel)",
+    classPasswordPlaceholder: "Laisser vide si pas de mot de passe",
+    classPasswordPromptTitle: "Mot de Passe Requis",
+    classPasswordPromptDescription: "Cette classe est protégée par un mot de passe. Veuillez entrer le mot de passe pour voir son contenu.",
+    classPasswordInputLabel: "Mot de Passe de la Classe",
+    classPasswordUnlockButton: "Déverrouiller",
+    classPasswordIncorrectError: "Mot de passe incorrect. Veuillez réessayer.",
+    classPasswordVerificationError: "Erreur lors de la vérification du mot de passe. Veuillez réessayer plus tard.",
+    classIsPasswordProtected: "Cette classe est protégée par un mot de passe.",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -617,7 +655,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
     loginButtonLabel: "Iniciar Sesión",
-    classPageTitle: "Eventos para {className}",
+    // classPageTitle: "Eventos para {className}",
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
@@ -750,6 +788,15 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "Non hai anuncios, exames ou prazos para amosar neste momento.",
     dashboardMenuItemLabel: "Panel",
     logoutButtonLabel: "Pechar Sesión",
+    classPasswordLabel: "Contrasinal da Clase (Opcional)",
+    classPasswordPlaceholder: "Deixar en branco se non require contrasinal",
+    classPasswordPromptTitle: "Requírese Contrasinal",
+    classPasswordPromptDescription: "Esta clase está protexida por contrasinal. Por favor, introduce o contrasinal para ver o seu contido.",
+    classPasswordInputLabel: "Contrasinal da Clase",
+    classPasswordUnlockButton: "Desbloquear",
+    classPasswordIncorrectError: "Contrasinal incorrecto. Inténtao de novo.",
+    classPasswordVerificationError: "Erro ao verificar o contrasinal. Inténtao de novo máis tarde.",
+    classIsPasswordProtected: "Esta clase está protexida por contrasinal.",
   },
 };
 

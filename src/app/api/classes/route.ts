@@ -10,7 +10,12 @@ export async function GET() {
   try {
     const db = await getClassesDb();
     const classes = await db.find({}).sort({ name: 1 }); // Sort by name ascending
-    return NextResponse.json(classes);
+    // Do NOT return passwords here
+    const classesWithoutPasswords = classes.map(cls => {
+      const { password, ...rest } = cls;
+      return rest;
+    });
+    return NextResponse.json(classesWithoutPasswords);
   } catch (error) {
     console.error('Error fetching classes:', error);
     return NextResponse.json({ message: 'Error fetching classes', error: (error as Error).message }, { status: 500 });
@@ -31,12 +36,14 @@ export async function POST(request: Request) {
     const classToAdd: SchoolClass = {
       id: newClassData.id || `class-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: newClassData.name,
-      delegateId: newClassData.delegateId || undefined, // Ensure it's undefined if not provided
-      // language field can be added here if needed by default
+      delegateId: newClassData.delegateId || undefined, 
+      language: newClassData.language,
+      password: newClassData.password || undefined, // Store password if provided
     };
 
     const savedClass = await db.insert(classToAdd);
-    return NextResponse.json(savedClass, { status: 201 });
+    const { password, ...classToReturn } = savedClass; // Don't return password
+    return NextResponse.json(classToReturn, { status: 201 });
   } catch (error) {
     console.error('Error creating class:', error);
     if ((error as Error).message.includes('unique constraint violated')) {

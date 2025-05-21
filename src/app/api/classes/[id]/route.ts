@@ -15,7 +15,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const schoolClass = await db.findOne({ id: params.id });
     
     if (schoolClass) {
-      return NextResponse.json(schoolClass);
+      const { password, ...classToReturn } = schoolClass; // Don't return password
+      return NextResponse.json(classToReturn);
     }
     return NextResponse.json({ message: 'Class not found' }, { status: 404 });
   } catch (error) {
@@ -34,15 +35,24 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const requestBody: Partial<Omit<SchoolClass, 'id'>> = await request.json();
     const updatePayload: Partial<SchoolClass> = {};
+    
     if (requestBody.name !== undefined) updatePayload.name = requestBody.name;
-    // Explicitly allow setting delegateId to empty string (to unset) or a value
     if (requestBody.delegateId !== undefined) updatePayload.delegateId = requestBody.delegateId === "" ? undefined : requestBody.delegateId;
     if (requestBody.language !== undefined) updatePayload.language = requestBody.language;
+    
+    // Handle password update: if an empty string is sent, treat as "remove password"
+    if (requestBody.password !== undefined) {
+      updatePayload.password = requestBody.password.trim() === "" ? undefined : requestBody.password.trim();
+    }
+
 
     if (Object.keys(updatePayload).length === 0) {
         const dbCheck = await getClassesDb();
         const existingDoc = await dbCheck.findOne({ id: classId });
-        if(existingDoc) return NextResponse.json(existingDoc);
+        if(existingDoc) {
+            const { password, ...classToReturn } = existingDoc;
+            return NextResponse.json(classToReturn);
+        }
         return NextResponse.json({ message: 'No updatable fields provided or class not found' }, { status: 400 });
     }
 
@@ -57,7 +67,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!updatedClass) {
         return NextResponse.json({ message: 'Class updated but failed to retrieve' }, { status: 500 });
     }
-    return NextResponse.json(updatedClass);
+    const { password, ...classToReturn } = updatedClass; // Don't return password
+    return NextResponse.json(classToReturn);
 
   } catch (error) {
     console.error(`Error updating class ${params.id}:`, error);
