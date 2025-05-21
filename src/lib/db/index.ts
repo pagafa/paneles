@@ -32,16 +32,62 @@ async function ensureDataDirectory(): Promise<void> {
   }
 }
 
+// Helper function to create or recover a NeDB datastore
+async function createOrRecoverDb<T extends { id: string }>(
+  dbPath: string,
+  dbNameForLog: string,
+  uniqueIndexFields: Array<{ fieldName: string, unique: boolean }> = [{ fieldName: 'id', unique: true }]
+): Promise<Datastore<T>> {
+  let db: Datastore<T>;
+  try {
+    db = Datastore.create({
+      filename: dbPath,
+      autoload: true,
+      timestampData: true,
+    });
+    for (const index of uniqueIndexFields) {
+      await db.ensureIndex(index);
+    }
+  } catch (initializationError) {
+    const err = initializationError as Error;
+    // Check for common NeDB corruption messages
+    if (err.message.includes("More than 10% of the data file is corrupt") || 
+        err.message.includes("unexpected end of file") ||
+        err.message.toLowerCase().includes("enoent") && err.message.includes("rename") && err.message.includes(".db~")) {
+      console.warn(`Database file (${dbPath}) for ${dbNameForLog} appears corrupt or inconsistent: "${err.message}". Attempting to delete and re-initialize.`);
+      try {
+        // Attempt to delete the main db file and any journal file (ending with ~)
+        await fs.unlink(dbPath).catch(() => { /* ignore if main file doesn't exist or fails */ });
+        await fs.unlink(`${dbPath}~`).catch(() => { /* ignore if journal file doesn't exist or fails */ });
+        
+        db = Datastore.create({ // This will create the file if it doesn't exist
+          filename: dbPath,
+          autoload: true, 
+          timestampData: true,
+        });
+        for (const index of uniqueIndexFields) {
+          await db.ensureIndex(index);
+        }
+        console.log(`Successfully re-initialized ${dbNameForLog} database (${dbPath}) after corruption attempt.`);
+      } catch (reinitializationError) {
+        console.error(`Failed to re-initialize ${dbNameForLog} database (${dbPath}) after corruption:`, reinitializationError);
+        throw reinitializationError; // Throw the error from the second attempt
+      }
+    } else {
+      // Not a corruption error we're attempting to handle this way
+      console.error(`Error initializing ${dbNameForLog} database (${dbPath}):`, err);
+      throw err;
+    }
+  }
+  return db;
+}
+
+
 // --- Announcements Database ---
 async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement>> {
   await ensureDataDirectory();
   const dbPath = path.join(dataDir, 'announcements.db');
-  const db = Datastore.create({
-    filename: dbPath,
-    autoload: true,
-    timestampData: true,
-  });
-  await db.ensureIndex({ fieldName: 'id', unique: true });
+  const db = await createOrRecoverDb<Announcement>(dbPath, 'Announcements', [{fieldName: 'id', unique: true}]);
   
   const count = await db.count({});
   if (count === 0 && mockAnnouncements && mockAnnouncements.length > 0) {
@@ -64,11 +110,18 @@ export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
     announcementsDbInitializationPromise = initializeAnnouncementsDatabase();
   }
   try {
-    return await announcementsDbInitializationPromise;
+    const db = await announcementsDbInitializationPromise;
+    announcementsDbInstance = db; // Set instance after promise resolves
+    return db;
+  } catch (error) {
+    announcementsDbInitializationPromise = null; // Clear promise on failure
+    throw error;
   } finally {
-    // Clear the promise once resolved or rejected to allow re-initialization on next call if failed.
-    // However, for successful initialization, instance is set, so future calls hit the first `if`.
-    announcementsDbInitializationPromise = null; 
+    // Optionally clear the promise if it succeeded to allow re-init if server restarts and instance is lost
+    // However, with instance check, this might not be needed unless instance becomes null elsewhere
+    if (announcementsDbInstance) {
+        announcementsDbInitializationPromise = null;
+    }
   }
 }
 
@@ -76,12 +129,7 @@ export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
 async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
   await ensureDataDirectory();
   const dbPath = path.join(dataDir, 'classes.db');
-  const db = Datastore.create({
-    filename: dbPath,
-    autoload: true,
-    timestampData: true,
-  });
-  await db.ensureIndex({ fieldName: 'id', unique: true });
+  const db = await createOrRecoverDb<SchoolClass>(dbPath, 'Classes', [{fieldName: 'id', unique: true}]);
 
   const count = await db.count({});
   if (count === 0 && mockClasses && mockClasses.length > 0) {
@@ -104,9 +152,16 @@ export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
     classesDbInitializationPromise = initializeClassesDatabase();
   }
    try {
-    return await classesDbInitializationPromise;
-  } finally {
+    const db = await classesDbInitializationPromise;
+    classesDbInstance = db;
+    return db;
+  } catch (error) {
     classesDbInitializationPromise = null;
+    throw error;
+  } finally {
+    if (classesDbInstance) {
+        classesDbInitializationPromise = null;
+    }
   }
 }
 
@@ -114,18 +169,17 @@ export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
 async function initializeUsersDatabase(): Promise<Datastore<User>> {
   await ensureDataDirectory();
   const dbPath = path.join(dataDir, 'users.db');
-  const db = Datastore.create({
-    filename: dbPath,
-    autoload: true,
-    timestampData: true,
-  });
-  await db.ensureIndex({ fieldName: 'id', unique: true });
-  await db.ensureIndex({ fieldName: 'username', unique: true });
+  const db = await createOrRecoverDb<User>(dbPath, 'Users', [
+    { fieldName: 'id', unique: true },
+    { fieldName: 'username', unique: true }
+  ]);
   
   const count = await db.count({});
   if (count === 0 && mockUsers && mockUsers.length > 0) {
     try {
-      await db.insert(mockUsers.map(({ password, ...user }) => ({ ...user, password }))); // Ensure password is included if type allows
+      // Ensure mock users have passwords for seeding if the type allows
+      const usersToSeed = mockUsers.map(u => ({...u, password: u.password || 'password'}));
+      await db.insert(usersToSeed);
       console.log('Users DB seeded with mockUsers.');
     } catch (seedError) {
       console.error('Error seeding users DB:', seedError);
@@ -143,9 +197,16 @@ export async function getUsersDb(): Promise<Datastore<User>> {
     usersDbInitializationPromise = initializeUsersDatabase();
   }
   try {
-    return await usersDbInitializationPromise;
-  } finally {
+    const db = await usersDbInitializationPromise;
+    usersDbInstance = db;
+    return db;
+  } catch (error) {
     usersDbInitializationPromise = null;
+    throw error;
+  } finally {
+    if (usersDbInstance) {
+        usersDbInitializationPromise = null;
+    }
   }
 }
 
@@ -153,12 +214,7 @@ export async function getUsersDb(): Promise<Datastore<User>> {
 async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>> {
   await ensureDataDirectory();
   const dbPath = path.join(dataDir, 'schoolevents.db');
-  const db = Datastore.create({
-    filename: dbPath,
-    autoload: true,
-    timestampData: true,
-  });
-  await db.ensureIndex({ fieldName: 'id', unique: true });
+  const db = await createOrRecoverDb<SchoolEvent>(dbPath, 'SchoolEvents', [{fieldName: 'id', unique: true}]);
 
   const count = await db.count({});
   if (count === 0 && mockSchoolEvents && mockSchoolEvents.length > 0) {
@@ -181,8 +237,15 @@ export async function getSchoolEventsDb(): Promise<Datastore<SchoolEvent>> {
     schoolEventsDbInitializationPromise = initializeSchoolEventsDatabase();
   }
   try {
-    return await schoolEventsDbInitializationPromise;
-  } finally {
+    const db = await schoolEventsDbInitializationPromise;
+    schoolEventsDbInstance = db;
+    return db;
+  } catch (error) {
     schoolEventsDbInitializationPromise = null;
+    throw error;
+  } finally {
+    if (schoolEventsDbInstance) {
+        schoolEventsDbInitializationPromise = null;
+    }
   }
 }
