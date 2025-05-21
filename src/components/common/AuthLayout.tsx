@@ -4,18 +4,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation"; 
 import {
-  // LayoutDashboard, // Not used directly, ShieldCheck used for Admin Dashboard
-  // Megaphone, // Not used directly
-  // ClipboardList, // Not used directly
   Users,
-  Book, // Changed from Library
+  Book,
   UserCheck,
   ShieldCheck,
-  // BookOpenCheck, // Not used directly
 } from "lucide-react";
 import { AppLogo } from "@/components/common/AppLogo";
-import { UserNav } from "@/components/common/UserNav";
-// import { Button } from "@/components/ui/button"; // Not used
+// UserNav is removed from here as it's now in GlobalHeader
 import {
   SidebarProvider,
   Sidebar,
@@ -24,7 +19,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  // SidebarFooter, // Removed
   SidebarTrigger,
   SidebarInset,
   useSidebar,
@@ -37,14 +31,14 @@ import type { TranslationKey } from "@/lib/i18n";
 
 interface NavItem {
   href: string;
-  labelKey: TranslationKey; // Changed from label to labelKey
+  labelKey: TranslationKey;
   icon: React.ElementType;
   roles: UserRole[];
 }
 
 const navItems: NavItem[] = [
   { href: "/admin/dashboard", labelKey: "adminDashboardTitle", icon: ShieldCheck, roles: ["admin"] },
-  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Book, roles: ["admin"] }, // Changed icon here
+  { href: "/admin/manage-classes", labelKey: "manageClassesTitle", icon: Book, roles: ["admin"] },
   { href: "/admin/manage-users", labelKey: "manageUsersTitle", icon: Users, roles: ["admin"] },
   { href: "/delegate/dashboard", labelKey: "delegateDashboardTitle", icon: UserCheck, roles: ["delegate"] },
 ];
@@ -73,7 +67,11 @@ function SiteSidebar() {
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="flex items-center justify-between p-2">
         <div className={`duration-200 ${state === 'collapsed' ? 'opacity-0 -ml-8' : 'opacity-100'}`}>
-          <AppLogo />
+          {/* AppLogo is now in GlobalHeader, so it's removed from here. 
+              Admin sidebar can have its own title or logo if needed, or remain cleaner.
+              For now, let's keep it clean. If the global AppLogo isn't visible enough due to sidebar,
+              we might reconsider adding a smaller version or text here.
+          */}
         </div>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>
@@ -109,7 +107,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const role = localStorage.getItem("userRole");
-      if (!role) {
+      const userId = localStorage.getItem("userId");
+      if (!role || !userId) { // Check for userId as well
         router.replace("/login");
       } else {
         setIsAuthCheckComplete(true);
@@ -127,14 +126,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full"> {/* This will be a child of RootLayout's main */}
         <SiteSidebar />
         <SidebarInset>
+          {/* The header here is specific to the authenticated layout, primarily for the mobile sidebar trigger */}
+          {/* UserNav is removed as it's now in GlobalHeader */}
           <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-sm md:justify-end">
             <div className="md:hidden">
               <SidebarTrigger/>
             </div>
-            <UserNav />
+            {/* UserNav was here, now it's global */}
           </header>
           <main className="flex-1 p-4 md:p-6 lg:p-8">
             {children}
