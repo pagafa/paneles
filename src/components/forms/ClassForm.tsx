@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, EyeOff, Eye, XCircle } from "lucide-react"; 
+import { PlusCircle, XCircle } from "lucide-react"; 
 import { useToast } from "@/hooks/use-toast";
 import type { SchoolClass, User } from "@/types";
 import { useState, useEffect, useCallback } from "react";
@@ -27,7 +27,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 const classFormSchema = z.object({
   name: z.string().min(2, { message: "Class name must be at least 2 characters." }),
   delegateId: z.string().optional(),
-  password: z.string().optional(),
   isHidden: z.boolean().optional().default(false),
 });
 
@@ -53,7 +52,6 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
     defaultValues: {
       name: initialData?.name || "",
       delegateId: initialData?.delegateId || "",
-      password: "", // Always start empty for security, user must re-enter if changing
       isHidden: initialData?.isHidden || false,
     },
   });
@@ -63,7 +61,7 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
     try {
       const response = await fetch('/api/users');
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: `Failed to fetch users for delegate names. Status: ${response.status}` }));
+        const errorData = await response.json().catch(() => ({ message: `Failed to fetch users. Status: ${response.status}` }));
         throw new Error(errorData.message);
       }
       const allUsers: User[] = await response.json();
@@ -86,11 +84,10 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
       form.reset({
         name: initialData.name || "",
         delegateId: initialData.delegateId || "",
-        password: "", // Password field is for setting a NEW password or changing it
         isHidden: initialData.isHidden || false,
       });
     } else {
-        form.reset({ name: "", delegateId: "", password: "", isHidden: false });
+        form.reset({ name: "", delegateId: "", isHidden: false });
     }
   }, [initialData, form]);
 
@@ -100,29 +97,17 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
       id: initialData?.id || `class-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
       name: values.name,
       delegateId: values.delegateId === UNASSIGNED_DELEGATE_SELECT_VALUE ? undefined : values.delegateId,
-      language: initialData?.language, // Language is not editable via this form directly
+      language: initialData?.language, 
       isHidden: values.isHidden,
     };
-
-    // Only include password in the submission if it's being set/changed
-    if (values.password && values.password.trim() !== "") {
-      classToSubmit.password = values.password.trim();
-    } else if (isEditing && values.password === "") {
-      // If editing and password field is explicitly emptied, it means remove password
-      // Send an empty string to signal password removal to the API
-      // The API needs to handle empty string as "remove password"
-       classToSubmit.password = ""; 
-    }
-
 
     if (onSubmitSuccess) {
       onSubmitSuccess(classToSubmit);
     }
-     if (!initialData?.id) { // Only reset for new class creation
-      form.reset({ name: "", delegateId: "", password: "", isHidden: false });
+     if (!initialData?.id) { 
+      form.reset({ name: "", delegateId: "", isHidden: false });
     } else {
-      // For editing, just clear the password field after submit, keep other values for potential further edits
-      form.reset({...form.getValues(), password: ""});
+      form.reset({...form.getValues()});
     }
   }
 
@@ -176,22 +161,6 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
         />
         <FormField
           control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('classPasswordLabel')}</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder={t('classPasswordPlaceholder')} {...field} />
-              </FormControl>
-              <FormDescription>
-                {t('classPasswordDescription')}
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="isHidden"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-card-foreground/5">
@@ -213,7 +182,7 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
           )}
         />
         <div className="flex flex-col sm:flex-row gap-2">
-          <Button type="submit" className="w-full sm:flex-grow">
+          <Button type="submit" className="w-full sm:w-auto">
             <PlusCircle className="mr-2 h-4 w-4" />
             {isEditing ? t('updateClassButton') : t('createClassButton')}
           </Button>
@@ -228,3 +197,4 @@ export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdi
     </Form>
   );
 }
+
