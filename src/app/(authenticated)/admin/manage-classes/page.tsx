@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { SchoolClass, User } from "@/types";
-import { Edit3, Book, Trash2, AlertTriangle, Eye, EyeOff } from "lucide-react"; // Engadido Eye, EyeOff
+import { Edit3, Book, Trash2, AlertTriangle, Eye, EyeOff, KeyRound } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
@@ -31,7 +31,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton"; 
 import { useLanguage } from "@/context/LanguageContext";
-import { Badge } from "@/components/ui/badge"; // Engadido Badge
+import { Badge } from "@/components/ui/badge";
 
 const sortClasses = (classes: SchoolClass[]) => {
   return [...classes].sort((a, b) => a.name.localeCompare(b.name));
@@ -125,6 +125,10 @@ export default function ManageClassesPage() {
     setEditingClass(cls);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  
+  const handleCancelEdit = () => {
+    setEditingClass(null);
+  };
 
   const handleDelete = async (classId: string) => {
     try {
@@ -169,7 +173,7 @@ export default function ManageClassesPage() {
           </CardTitle>
            {editingClass && (
             <CardDescription>
-              {t('editingClassDescription', { name: editingClass.name})} <Button variant="link" size="sm" onClick={() => setEditingClass(null)}>{t('cancelEditButton')}</Button>
+              {t('editingClassDescription', { name: editingClass.name})}
             </CardDescription>
           )}
         </CardHeader>
@@ -178,6 +182,8 @@ export default function ManageClassesPage() {
             onSubmitSuccess={handleFormSubmit} 
             initialData={editingClass || undefined} 
             key={editingClass ? editingClass.id : 'new'}
+            isEditing={!!editingClass}
+            onCancelEdit={handleCancelEdit}
           />
         </CardContent>
       </Card>
@@ -223,8 +229,9 @@ export default function ManageClassesPage() {
               <TableBody>
                 {classes.map((cls) => (
                   <TableRow key={cls.id}>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium flex items-center gap-2">
                         <span>{cls.name}</span>
+                        {cls.password && cls.password.trim() !== "" && <KeyRound className="h-4 w-4 text-accent" />}
                     </TableCell>
                     <TableCell>{getDelegateName(cls.delegateId)}</TableCell>
                     <TableCell>

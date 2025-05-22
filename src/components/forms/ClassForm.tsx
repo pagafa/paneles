@@ -16,30 +16,33 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle, EyeOff, Eye } from "lucide-react"; // Engadido EyeOff e Eye
+import { PlusCircle, EyeOff, Eye, XCircle } from "lucide-react"; 
 import { useToast } from "@/hooks/use-toast";
 import type { SchoolClass, User } from "@/types";
 import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { Checkbox } from "@/components/ui/checkbox"; // Engadido Checkbox
+import { Checkbox } from "@/components/ui/checkbox";
 
 
 const classFormSchema = z.object({
   name: z.string().min(2, { message: "Class name must be at least 2 characters." }),
   delegateId: z.string().optional(),
-  isHidden: z.boolean().optional().default(false), // Novo campo no esquema
+  password: z.string().optional(),
+  isHidden: z.boolean().optional().default(false),
 });
 
 type ClassFormValues = z.infer<typeof classFormSchema>;
 
 interface ClassFormProps {
   onSubmitSuccess?: (data: SchoolClass) => void;
-  initialData?: Partial<ClassFormValues & { id?: string, language?: string, isHidden?: boolean }>; // Engadido isHidden
+  initialData?: Partial<ClassFormValues & { id?: string, language?: string, isHidden?: boolean }>;
+  isEditing?: boolean;
+  onCancelEdit?: () => void;
 }
 
 const UNASSIGNED_DELEGATE_SELECT_VALUE = "__NONE_OPTION__";
 
-export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
+export function ClassForm({ onSubmitSuccess, initialData, isEditing, onCancelEdit }: ClassFormProps) {
   const { toast } = useToast();
   const { t } = useLanguage();
   const [availableDelegates, setAvailableDelegates] = useState<User[]>([]);
@@ -50,7 +53,8 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
     defaultValues: {
       name: initialData?.name || "",
       delegateId: initialData?.delegateId || "",
-      isHidden: initialData?.isHidden || false, // Inicializar isHidden
+      password: "", // Always start empty for security, user must re-enter if changing
+      isHidden: initialData?.isHidden || false,
     },
   });
 
@@ -82,10 +86,11 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
       form.reset({
         name: initialData.name || "",
         delegateId: initialData.delegateId || "",
-        isHidden: initialData.isHidden || false, // Resetear isHidden
+        password: "", // Password field is for setting a NEW password or changing it
+        isHidden: initialData.isHidden || false,
       });
     } else {
-        form.reset({ name: "", delegateId: "", isHidden: false }); // Resetear isHidden para novas clases
+        form.reset({ name: "", delegateId: "", password: "", isHidden: false });
     }
   }, [initialData, form]);
 
@@ -95,15 +100,29 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
       id: initialData?.id || `class-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
       name: values.name,
       delegateId: values.delegateId === UNASSIGNED_DELEGATE_SELECT_VALUE ? undefined : values.delegateId,
-      language: initialData?.language,
-      isHidden: values.isHidden, // Engadir isHidden
+      language: initialData?.language, // Language is not editable via this form directly
+      isHidden: values.isHidden,
     };
+
+    // Only include password in the submission if it's being set/changed
+    if (values.password && values.password.trim() !== "") {
+      classToSubmit.password = values.password.trim();
+    } else if (isEditing && values.password === "") {
+      // If editing and password field is explicitly emptied, it means remove password
+      // Send an empty string to signal password removal to the API
+      // The API needs to handle empty string as "remove password"
+       classToSubmit.password = ""; 
+    }
+
 
     if (onSubmitSuccess) {
       onSubmitSuccess(classToSubmit);
     }
-     if (!initialData?.id) {
-      form.reset({ name: "", delegateId: "", isHidden: false });
+     if (!initialData?.id) { // Only reset for new class creation
+      form.reset({ name: "", delegateId: "", password: "", isHidden: false });
+    } else {
+      // For editing, just clear the password field after submit, keep other values for potential further edits
+      form.reset({...form.getValues(), password: ""});
     }
   }
 
@@ -157,6 +176,22 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
         />
         <FormField
           control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('classPasswordLabel')}</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder={t('classPasswordPlaceholder')} {...field} />
+              </FormControl>
+              <FormDescription>
+                {t('classPasswordDescription')}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="isHidden"
           render={({ field }) => (
             <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-card-foreground/5">
@@ -177,10 +212,18 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full sm:w-auto">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          {initialData?.id ? t('updateClassButton') : t('createClassButton')}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button type="submit" className="w-full sm:flex-grow">
+            <PlusCircle className="mr-2 h-4 w-4" />
+            {isEditing ? t('updateClassButton') : t('createClassButton')}
+          </Button>
+          {isEditing && onCancelEdit && (
+            <Button type="button" variant="outline" onClick={onCancelEdit} className="w-full sm:w-auto">
+              <XCircle className="mr-2 h-4 w-4" />
+              {t('cancelEditButton')}
+            </Button>
+          )}
+        </div>
       </form>
     </Form>
   );
