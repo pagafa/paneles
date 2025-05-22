@@ -48,7 +48,7 @@ export default function ManageClassesPage() {
 
   const fetchAllUsers = useCallback(async () => {
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/users', { cache: 'no-store' });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Failed to fetch users for delegate names. Status: ${response.status}` }));
         throw new Error(errorData.message);
@@ -66,7 +66,7 @@ export default function ManageClassesPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/classes');
+      const response = await fetch('/api/classes', { cache: 'no-store' });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Failed to fetch classes. Status: ${response.status}` }));
         throw new Error(errorData.message || `Failed to fetch classes. Status: ${response.status}`);
