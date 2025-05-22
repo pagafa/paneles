@@ -1,1 +1,5 @@
+{"id":"ann-eso1a-1","title":"Material Necesario para Plástica - 1º ESO A","content":"Lémbrase aos alumnos de 1º ESO A que deben traer o material de plástica solicitado para a clase do mércores.","date":"2025-05-23T17:47:40.443Z","type":"announcement","targetClassIds":["eso1a"],"_id":"3jtLPH8E59HKoiQZ","createdAt":{"$$date":1747936062243},"updatedAt":{"$$date":1747936062243}}
+{"id":"ann-global-1","title":"Reunión Informativa Xeral de Principio de Curso","content":"Convócase a todas as familias a unha reunión informativa o vindeiro luns ás 18:00 no salón de actos.","date":"2025-05-24T17:47:40.443Z","type":"announcement","targetClassIds":[],"_id":"8xQMYacpz5pXGvBt","createdAt":{"$$date":1747936062243},"updatedAt":{"$$date":1747936062243}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"$$deleted":true,"_id":"8xQMYacpz5pXGvBt"}
+{"$$deleted":true,"_id":"3jtLPH8E59HKoiQZ"}

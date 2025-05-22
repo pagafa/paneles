@@ -1,5 +1,6 @@
 
 import type { SchoolEvent, User, SchoolClass, Announcement, Exam, Deadline } from '@/types';
+import bcrypt from 'bcrypt'; // For hashing passwords during seeding
 
 // --- Mock Classes (Used for DB seeding) ---
 export const mockClasses: SchoolClass[] = [
@@ -14,46 +15,48 @@ export const mockClasses: SchoolClass[] = [
 ];
 
 // --- Mock Users (Used for DB seeding) ---
+// Passwords will be hashed during the seeding process in db/index.ts
 export const mockUsers: User[] = [
   {
     id: 'admin-pablo-001', // Static ID for the main admin
     name: 'Pablo Admin',
     username: 'pablo',
     role: 'admin',
-    password: 'soypablo', // This will be hashed during seeding
+    password: 'soypablo', // Will be hashed
   },
   {
     id: 'delegate-laura-g',
     name: 'Laura Gómez',
     username: 'laura_g',
     role: 'delegate',
-    password: 'passwordlaura', // This will be hashed
+    password: 'passwordlaura', // Will be hashed
   },
   {
     id: 'delegate-carlos-p',
     name: 'Carlos Pérez',
     username: 'carlos_p',
     role: 'delegate',
-    password: 'passwordcarlos', // This will be hashed
+    password: 'passwordcarlos', // Will be hashed
   },
    {
     id: 'user-ana-s',
     name: 'Ana Suárez',
     username: 'ana_s',
-    role: 'delegate', // Example of another delegate
-    password: 'passwordana', // This will be hashed
+    role: 'delegate',
+    password: 'passwordana', // Will be hashed
   }
 ];
 
 // --- Mock Admin Announcements (Used for DB seeding) ---
+// All announcements must now have targetClassIds
 export const mockAnnouncements: Announcement[] = [
   {
-    id: 'ann-global-1',
+    id: 'ann-general-1',
     title: 'Reunión Informativa Xeral de Principio de Curso',
     content: 'Convócase a todas as familias a unha reunión informativa o vindeiro luns ás 18:00 no salón de actos.',
     date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // In 2 days
     type: 'announcement',
-    targetClassIds: [], // School-wide
+    targetClassIds: ['eso1a', 'eso2b', 'bach1c', 'bach2d', 'fpbasic', 'fpscm', 'fpsasir', 'fpsdaw'], // Example: targets all initially defined classes
   },
   {
     id: 'ann-eso1a-1',
@@ -112,23 +115,7 @@ export const mockDeadlines: Deadline[] = [
   },
 ];
 
-// --- Mock SchoolEvents (Composite for DB seeding - primarily delegate-type submissions) ---
-// This list will now only contain exams and deadlines, as delegate announcements
-// can be handled as regular announcements with targetClassIds and submittedByDelegateId if needed,
-// or we could add a specific 'delegate-announcement' type to SchoolEvent if distinct handling is required.
-// For now, keeping it simpler.
 export const mockSchoolEvents: SchoolEvent[] = [
   ...mockExams,
   ...mockDeadlines,
-  // Example of a delegate-submitted announcement if we were to handle it via schoolevents
-  // {
-  //   id: 'evt-ann-delegate-1',
-  //   title: 'Recordatorio Asemblea Delegados 1º ESO A',
-  //   date: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
-  //   type: 'announcement', // Could be a special type like 'delegate_announcement'
-  //   content: 'Lembrade a asemblea de delegados mañá no recreo na aula de usos múltiples.',
-  //   classId: 'eso1a',
-  //   submittedByDelegateId: 'delegate-laura-g',
-  //   description: 'Traede as vosas propostas.'
-  // }
 ];

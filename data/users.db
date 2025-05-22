@@ -1,3 +1,3 @@
-{"id":"user-admin-pablo-reset-1747935135205","name":"Pablo Admin","username":"pablo","role":"admin","password":"$2b$10$hhP698UckXUtF5sFTrxHsekhWctjSooGZMh7LGNHhTnOa456ecDxO","_id":"3NS5Absb64oaHjJM","createdAt":{"$$date":1747935135402},"updatedAt":{"$$date":1747935135402}}
+{"id":"admin-pablo-001","name":"Pablo Admin","username":"pablo","role":"admin","password":"$2b$10$F6VVnbiE2GsIbADHeoB2uOx8..lgKUlhPHXeGIGVvW8QxM6BPZ/P.","_id":"undfaHMZdGxvDmoz","createdAt":{"$$date":1747936062902},"updatedAt":{"$$date":1747936258472}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}

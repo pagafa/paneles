@@ -26,12 +26,13 @@ import { useToast } from "@/hooks/use-toast";
 import type { Announcement, SchoolClass } from "@/types";
 import React, { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
 
 const announcementFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
   content: z.string().min(10, { message: "Content must be at least 10 characters." }),
   date: z.date({ required_error: "A date for the announcement is required." }),
-  targetClassIds: z.array(z.string()).optional(),
+  targetClassIds: z.array(z.string()).min(1, { message: "At least one target class must be selected." }),
 });
 
 type AnnouncementFormValues = z.infer<typeof announcementFormSchema>;
@@ -39,17 +40,19 @@ type AnnouncementFormValues = z.infer<typeof announcementFormSchema>;
 interface AdminAnnouncementFormProps {
   onSubmitSuccess?: (data: Announcement) => void;
   initialData?: Partial<AnnouncementFormValues & { id?: string }>;
-  availableClasses: SchoolClass[]; // Changed: No longer optional, must be provided
+  availableClasses: SchoolClass[];
 }
 
 const CLASSES_COLUMN_THRESHOLD = 5; // Show columns if more than 5 classes
 
-export function AdminAnnouncementForm({ 
-  onSubmitSuccess, 
+export function AdminAnnouncementForm({
+  onSubmitSuccess,
   initialData,
-  availableClasses // Removed default value
+  availableClasses
 }: AdminAnnouncementFormProps) {
   const { toast } = useToast();
+  const { t } = useLanguage(); // Get translation function
+
   const form = useForm<AnnouncementFormValues>({
     resolver: zodResolver(announcementFormSchema),
     defaultValues: {
@@ -78,17 +81,18 @@ export function AdminAnnouncementForm({
       content: values.content,
       date: values.date.toISOString(),
       type: 'announcement',
-      targetClassIds: values.targetClassIds && values.targetClassIds.length > 0 ? values.targetClassIds : [], 
+      targetClassIds: values.targetClassIds, // Will always have at least one item due to validation
     };
-    
+
     toast({
-      title: initialData?.id ? "Announcement Updated!" : "Announcement Posted!",
-      description: `"${newAnnouncement.title}" has been successfully ${initialData?.id ? 'updated' : 'posted'}.`,
+      title: initialData?.id ? t('announcementUpdatedToastTitle') : t('announcementPostedToastTitle'),
+      description: t('announcementActionSuccessToastDescription', { title: newAnnouncement.title, action: initialData?.id ? t('updated') : t('posted') }),
     });
+
     if (onSubmitSuccess) {
       onSubmitSuccess(newAnnouncement);
     }
-    if (!initialData?.id) { 
+    if (!initialData?.id) {
       form.reset({ title: "", content: "", date: new Date(), targetClassIds: [] });
     }
   }
@@ -101,9 +105,9 @@ export function AdminAnnouncementForm({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Announcement Title</FormLabel>
+              <FormLabel>{t('formTitleLabel')}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., School Holiday Notice" {...field} />
+                <Input placeholder={t('formTitlePlaceholder', {tabName: t('announcementTabLabel')})} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -114,9 +118,9 @@ export function AdminAnnouncementForm({
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Content</FormLabel>
+              <FormLabel>{t('formAnnouncementContentLabel')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Detailed information about the announcement..." {...field} rows={5} />
+                <Textarea placeholder={t('formAnnouncementContentPlaceholder')} {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -155,7 +159,7 @@ export function AdminAnnouncementForm({
 
             return (
               <FormItem className="flex flex-col">
-                <FormLabel>Announcement Date and Time</FormLabel>
+                <FormLabel>{t('formDateTimeLabel')}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -170,7 +174,7 @@ export function AdminAnnouncementForm({
                         {field.value ? (
                           format(field.value, "PPP HH:mm")
                         ) : (
-                          <span>Pick a date and time</span>
+                          <span>{t('formPickDateTimeButton')}</span>
                         )}
                       </Button>
                     </FormControl>
@@ -183,7 +187,7 @@ export function AdminAnnouncementForm({
                       initialFocus
                     />
                     <div className="p-2 border-t border-border">
-                      <p className="text-sm font-medium mb-2 text-center">Select time</p>
+                      <p className="text-sm font-medium mb-2 text-center">{t('formSelectTimeLabel')}</p>
                       <div className="flex gap-2 justify-center">
                         <Select
                           value={String(currentHour).padStart(2, '0')}
@@ -228,14 +232,14 @@ export function AdminAnnouncementForm({
           render={({ field }) => {
             const allClassIds = availableClasses ? availableClasses.map(cls => cls.id) : [];
             const areAllSelected = availableClasses && field.value && field.value.length === allClassIds.length && field.value.length > 0;
-            const buttonText = areAllSelected ? "Deselect All Classes" : "Select All Classes";
-            
+            const buttonText = areAllSelected ? t('deselectAllClassesButtonLabel') : t('selectAllClassesButtonLabel');
+
             return (
               <FormItem>
                 <div className="mb-2">
-                  <FormLabel className="text-base">Target Classes</FormLabel>
+                  <FormLabel className="text-base">{t('targetClassesLabel')}</FormLabel>
                   <FormDescription>
-                    Select classes to target. Leave all unchecked for a school-wide announcement.
+                    {t('selectAtLeastOneClassDescription')}
                   </FormDescription>
                 </div>
 
@@ -258,9 +262,9 @@ export function AdminAnnouncementForm({
                 )}
 
                 <div className={cn(
-                  availableClasses && availableClasses.length > CLASSES_COLUMN_THRESHOLD 
-                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1" 
-                    : "space-y-1" 
+                  availableClasses && availableClasses.length > CLASSES_COLUMN_THRESHOLD
+                    ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1"
+                    : "space-y-1"
                 )}>
                   {(availableClasses || []).map((classItem) => (
                     <FormField
@@ -304,7 +308,7 @@ export function AdminAnnouncementForm({
 
         <Button type="submit" className="w-full sm:w-auto">
           <PlusCircle className="mr-2 h-4 w-4" />
-          {initialData?.id ? "Update Announcement" : "Post Announcement"}
+          {initialData?.id ? t('updateAnnouncementButton') : t('postAnnouncementButton')}
         </Button>
       </form>
     </Form>

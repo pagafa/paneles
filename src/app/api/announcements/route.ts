@@ -22,21 +22,24 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const newAnnouncementData: Omit<Announcement, 'id' | 'type'> & { id?: string; type?: string } = await request.json();
-    
+
     if (!newAnnouncementData.title || !newAnnouncementData.content || !newAnnouncementData.date) {
       return NextResponse.json({ message: 'Missing required fields (title, content, date)' }, { status: 400 });
     }
 
+    if (!newAnnouncementData.targetClassIds || newAnnouncementData.targetClassIds.length === 0) {
+      return NextResponse.json({ message: 'Missing required field: targetClassIds must not be empty.' }, { status: 400 });
+    }
+
     const db = await getAnnouncementsDb();
-    
+
     const announcementToAdd: Announcement = {
       id: newAnnouncementData.id || `ann-${Date.now()}`, // Ensure our app-level ID
       title: newAnnouncementData.title,
       content: newAnnouncementData.content,
       date: newAnnouncementData.date,
       type: 'announcement', // Always 'announcement' for this endpoint
-      targetClassIds: newAnnouncementData.targetClassIds || [],
-      // NeDB will add _id, createdAt, updatedAt automatically
+      targetClassIds: newAnnouncementData.targetClassIds,
     };
 
     const savedAnnouncement = await db.insert(announcementToAdd);

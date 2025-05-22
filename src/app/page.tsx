@@ -1,11 +1,11 @@
 
-"use client"; 
+"use client";
 
-import type { SchoolClass, Announcement, SchoolEvent } from '@/types';
-import { Activity } from 'lucide-react'; 
-import { Card, CardContent } from '@/components/ui/card'; 
-import { Badge } from '@/components/ui/badge'; 
-import { useLanguage } from '@/context/LanguageContext'; 
+import type { SchoolClass, Announcement, SchoolEvent, Exam, Deadline } from '@/types';
+import { Activity } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -14,7 +14,7 @@ async function getClassesData(): Promise<SchoolClass[]> {
   try {
     const response = await fetch('/api/classes');
     if (!response.ok) {
-      console.error("Failed to fetch classes for kiosk", response.status, await response.text().catch(() => ""));
+      console.error("Failed to fetch classes for Kiosk", response.status, await response.text().catch(() => ""));
       return [];
     }
     return (await response.json()).sort((a:SchoolClass, b:SchoolClass) => a.name.localeCompare(b.name));
@@ -56,7 +56,7 @@ async function getAllSchoolEventsData(): Promise<SchoolEvent[]> {
 
 
 export default function KioskPage() {
-  const { t } = useLanguage(); 
+  const { t } = useLanguage();
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
 
@@ -79,18 +79,17 @@ export default function KioskPage() {
         getAllSchoolEventsData(),
       ]);
 
-      setClasses(classesData); 
+      setClasses(classesData);
       setIsLoadingClasses(false);
-    
+
       const counts: { [classId: string]: number } = {};
       if (classesData.length > 0) {
         classesData.forEach(cls => {
           let count = 0;
-          // Count admin announcements targeted to this class OR school-wide
+          // Count admin announcements targeted to this class
           allAdminAnnouncementsData.forEach(ann => {
-            if (!ann.targetClassIds || ann.targetClassIds.length === 0) { // School-wide
-                count++;
-            } else if (ann.targetClassIds.includes(cls.id)) { // Targeted to this class
+             // All admin announcements must have targetClassIds now
+            if (ann.targetClassIds && ann.targetClassIds.includes(cls.id)) {
               count++;
             }
           });
@@ -106,8 +105,8 @@ export default function KioskPage() {
       setClassMessageCounts(counts);
       setIsLoadingClassCounts(false);
 
-    } catch (e) { 
-      console.error("Error fetching data for KioskPage", e); 
+    } catch (e) {
+      console.error("Error fetching data for KioskPage", e);
       setIsLoadingClasses(false);
       setIsLoadingClassCounts(false);
     }
@@ -118,7 +117,7 @@ export default function KioskPage() {
   }, [fetchData]);
 
 
-  if (isLoadingClasses && isLoadingClassCounts) { 
+  if (isLoadingClasses && isLoadingClassCounts) {
     return (
       <div className="w-full max-w-4xl mx-auto py-8">
         <Skeleton className="h-10 w-48 mb-4" />
@@ -128,7 +127,7 @@ export default function KioskPage() {
   }
 
   return (
-    <section className="w-full max-w-4xl mx-auto"> {/* Added mx-auto here */}
+    <section className="w-full max-w-4xl mx-auto py-8"> {/* Added py-8 for vertical spacing */}
       <div className="flex items-center mb-6">
         <Activity className="h-8 w-8 text-primary mr-3" />
         <h2 className="text-3xl font-semibold text-primary/90">{t('activityByClassSectionTitle')}</h2>
@@ -168,4 +167,3 @@ export default function KioskPage() {
     </section>
   );
 }
-

@@ -12,45 +12,45 @@ interface Translations {
   manageClassesTitle: string;
   manageUsersTitle: string;
   delegateDashboardTitle: string;
-  announcementsSectionTitle: string; 
-  examsSectionTitle: string; 
-  deadlinesSectionTitle: string; 
-  checkBackLaterHint: string; 
+  announcementsSectionTitle: string;
+  examsSectionTitle: string;
+  deadlinesSectionTitle: string;
+  checkBackLaterHint: string;
   viewClassesButtonLabel: string;
   noClassesHint: string;
   loginButtonLabel: string;
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
-  delegateIdLabel: string; 
-  noEventsForClassHint: string; 
+  delegateIdLabel: string;
+  noEventsForClassHint: string;
   loadingLabel: string;
   assignedClassesLabel: string;
   noAssignedClassesLabel: string;
   editInformationTitle: string;
   submitNewInformationTitle: string;
-  editingSubmissionDescription: string; 
+  editingSubmissionDescription: string;
   cancelEditButton: string;
   delegateFormDescription: string;
   yourRecentSubmissionsTitle: string;
   noSubmissionsYetHint: string;
   alertDialogTitle: string;
-  alertDialogDescription: string; 
+  alertDialogDescription: string;
   cancelButton: string;
   deleteButton: string;
   submissionUpdatedToastTitle: string;
-  submissionUpdatedToastDescription: string; 
+  submissionUpdatedToastDescription: string;
   submissionSubmittedToastTitle: string;
-  submissionSubmittedToastDescription: string; 
+  submissionSubmittedToastDescription: string;
   submissionDeletedToastTitle: string;
-  submissionDeletedToastDescription: string; 
+  submissionDeletedToastDescription: string;
   errorLoadingSubmissionsTitle: string;
   noAssignedClassesToSubmitHint: string;
   announcementTabLabel: string;
   examTabLabel: string;
   deadlineTabLabel: string;
   formTitleLabel: string;
-  formTitlePlaceholder: string; 
+  formTitlePlaceholder: string;
   formDateTimeLabel: string;
   formPickDateTimeButton: string;
   formSelectTimeLabel: string;
@@ -72,72 +72,72 @@ interface Translations {
   schoolNameInputPlaceholder: string;
   saveSchoolNameButton: string;
   schoolNameUpdatedToastTitle: string;
-  schoolNameUpdatedToastDescription: string; 
+  schoolNameUpdatedToastDescription: string;
   editAnnouncementTitle: string;
   postNewAnnouncementTitle: string;
-  editingAnnouncementDescription: string; 
+  editingAnnouncementDescription: string;
   currentAnnouncementsTitle: string;
-  noAnnouncementsPostedHint: string;
-  schoolWideTarget: string;
-  classesTargetLabel: string; 
-  targetLabel: string; 
+  noAnnouncementsPostedHint: string; // Keep for admin dashboard if no specific announcements
+  // schoolWideTarget: string; // Removed
+  classesTargetLabel: string;
+  targetLabel: string;
   editButtonLabel: string;
   deleteButtonLabel: string;
-  deleteAnnouncementConfirmation: string; 
+  deleteAnnouncementConfirmation: string;
   announcementUpdatedToastTitle: string;
   announcementPostedToastTitle: string;
-  announcementActionSuccessToastDescription: string; 
-  updated: string; 
-  posted: string; 
+  announcementActionSuccessToastDescription: string;
+  updated: string;
+  posted: string;
   announcementDeletedToastTitle: string;
   announcementDeletedToastDescription: string;
-  errorDialogTitle: string; 
-  errorFetchingAnnouncements: string; 
-  errorLoadingAnnouncementsTitle: string; 
+  errorDialogTitle: string;
+  errorFetchingAnnouncements: string;
+  errorLoadingAnnouncementsTitle: string;
   retryButtonLabel: string;
-  userUpdatedToastTitle: string; 
-  userCreatedToastTitle: string; 
-  userActionSuccessToastDescription: string; 
-  actionProhibitedToastTitle: string; 
-  cannotDeleteDefaultAdminToastDescription: string; 
-  userDeletedToastTitle: string; 
-  userDeletedToastDescription: string; 
-  editUserAccountTitle: string; 
-  createNewUserAccountTitle: string; 
-  editingUserAccountDescription: string; 
-  existingUsersTitle: string; 
-  errorLoadingUsersTitle: string; 
-  noUsersCreatedHint: string; 
-  userNameTableHeader: string; 
-  usernameTableHeader: string; 
-  userRoleTableHeader: string; 
-  actionsTableHeader: string; 
-  adminRoleLabel: string; 
-  delegateRoleLabel: string; 
-  editUserButtonLabel: string; 
-  deleteUserButtonLabel: string; 
-  deleteUserConfirmation: string; 
-  userNamePlaceholder: string; 
-  usernamePlaceholder: string; 
-  usernameEditWarning: string; 
-  selectRolePlaceholder: string; 
-  newPasswordOptionalLabel: string; 
-  passwordLabel: string; 
-  passwordEditHint: string; 
-  updateUserButton: string; 
-  createUserButton: string; 
-  passwordRequiredForNewUser: string; 
-  classNameLabel: string; 
-  classNamePlaceholder: string; 
-  classDelegateLabel: string; 
-  optionalLabel: string; 
-  loadingDelegatesPlaceholder: string; 
-  selectDelegatePlaceholder: string; 
-  noDelegateOption: string; 
-  noDelegatesAvailableHint: string; 
-  updateClassButton: string; 
-  createClassButton: string; 
-  errorFetchingDelegates: string; 
+  userUpdatedToastTitle: string;
+  userCreatedToastTitle: string;
+  userActionSuccessToastDescription: string;
+  actionProhibitedToastTitle: string;
+  cannotDeleteDefaultAdminToastDescription: string;
+  userDeletedToastTitle: string;
+  userDeletedToastDescription: string;
+  editUserAccountTitle: string;
+  createNewUserAccountTitle: string;
+  editingUserAccountDescription: string;
+  existingUsersTitle: string;
+  errorLoadingUsersTitle: string;
+  noUsersCreatedHint: string;
+  userNameTableHeader: string;
+  usernameTableHeader: string;
+  userRoleTableHeader: string;
+  actionsTableHeader: string;
+  adminRoleLabel: string;
+  delegateRoleLabel: string;
+  editUserButtonLabel: string;
+  deleteUserButtonLabel: string;
+  deleteUserConfirmation: string;
+  userNamePlaceholder: string;
+  usernamePlaceholder: string;
+  usernameEditWarning: string;
+  selectRolePlaceholder: string;
+  newPasswordOptionalLabel: string;
+  passwordLabel: string;
+  passwordEditHint: string;
+  updateUserButton: string;
+  createUserButton: string;
+  passwordRequiredForNewUser: string;
+  classNameLabel: string;
+  classNamePlaceholder: string;
+  classDelegateLabel: string;
+  optionalLabel: string;
+  loadingDelegatesPlaceholder: string;
+  selectDelegatePlaceholder: string;
+  noDelegateOption: string;
+  noDelegatesAvailableHint: string;
+  updateClassButton: string;
+  createClassButton: string;
+  errorFetchingDelegates: string;
   globalLanguageSettingsCardTitle: string;
   globalLanguageSelectLabel: string;
   selectLanguagePlaceholder: string;
@@ -145,12 +145,12 @@ interface Translations {
   globalLanguageUpdatedToastTitle: string;
   globalLanguageUpdatedToastDescription: string;
   activityByClassSectionTitle: string;
-  messagesCountLabel: string; 
-  noClassActivityHint: string; 
-  noClassesAvailableForActivity: string; 
+  messagesCountLabel: string;
+  noClassActivityHint: string;
+  noClassesAvailableForActivity: string;
   noEventsGeneralHint: string;
-  dashboardMenuItemLabel: string; 
-  logoutButtonLabel: string; 
+  dashboardMenuItemLabel: string;
+  logoutButtonLabel: string;
 
   classPasswordLabel: string;
   classPasswordPlaceholder: string;
@@ -175,31 +175,38 @@ interface Translations {
   confirmPasswordLabel: string;
   confirmNewPasswordLabel: string;
   passwordsDoNotMatchValidation: string;
-  passwordTooShortValidation: string; // For new password length
+  passwordTooShortValidation: string;
   confirmPasswordRequiredValidation: string;
   enterNewPasswordFirstValidation: string;
+
+  targetClassesLabel: string; // New
+  selectAtLeastOneClassDescription: string; // New
+  selectAllClassesButtonLabel: string; // New
+  deselectAllClassesButtonLabel: string; // New
+  updateAnnouncementButton: string; // New
+  postAnnouncementButton: string; // New
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
   en: {
-    appTitle: "IES Monte da Vila", 
+    appTitle: "IES Monte da Vila",
     loginTitle: "Welcome Back!",
     loginDescription: "Log in to manage announcements and school information.",
     adminDashboardTitle: "Admin Dashboard",
     manageClassesTitle: "Manage Classes",
     manageUsersTitle: "Manage Users",
     delegateDashboardTitle: "Delegate Dashboard",
-    announcementsSectionTitle: "Announcements", 
-    examsSectionTitle: "Exams", 
-    deadlinesSectionTitle: "Assignments", 
-    checkBackLaterHint: "Please check back later for updates.", 
+    announcementsSectionTitle: "Announcements",
+    examsSectionTitle: "Exams",
+    deadlinesSectionTitle: "Assignments",
+    checkBackLaterHint: "Please check back later for updates.",
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
     loginButtonLabel: "Login",
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
-    delegateIdLabel: "Delegate", 
+    delegateIdLabel: "Delegate",
     noEventsForClassHint: "Looks like this class is on a secret mission! Nothing to show right now.",
     loadingLabel: "Loading...",
     assignedClassesLabel: "Assigned classes",
@@ -251,11 +258,10 @@ export const translations: Record<SupportedLanguage, Translations> = {
     schoolNameUpdatedToastTitle: "School Name Updated",
     schoolNameUpdatedToastDescription: "The school name has been updated to \"{schoolName}\".",
     editAnnouncementTitle: "Edit Announcement",
-    postNewAnnouncementTitle: "Post New School-Wide Announcement",
+    postNewAnnouncementTitle: "Post New Announcement",
     editingAnnouncementDescription: "You are editing: \"{title}\"",
     currentAnnouncementsTitle: "Current Announcements",
-    noAnnouncementsPostedHint: "No announcements posted yet.",
-    schoolWideTarget: "School-wide",
+    noAnnouncementsPostedHint: "No announcements posted yet for any class.",
     classesTargetLabel: "Classes",
     targetLabel: "Target",
     editButtonLabel: "Edit",
@@ -303,7 +309,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     passwordEditHint: "Leave blank to keep current password.",
     updateUserButton: "Update User",
     createUserButton: "Create User",
-    passwordRequiredForNewUser: "Password is required for new users.", 
+    passwordRequiredForNewUser: "Password is required for new users.",
     classNameLabel: "Class Name",
     classNamePlaceholder: "e.g., Grade 10A, Computer Science Club",
     classDelegateLabel: "Delegate",
@@ -314,7 +320,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noDelegatesAvailableHint: "No delegates available to assign. Create delegate users first.",
     updateClassButton: "Update Class",
     createClassButton: "Create Class",
-    errorFetchingDelegates: "Error fetching delegates: {message}", 
+    errorFetchingDelegates: "Error fetching delegates: {message}",
     globalLanguageSettingsCardTitle: "Global Language Settings",
     globalLanguageSelectLabel: "Set Global Application Language",
     selectLanguagePlaceholder: "Select a language",
@@ -327,12 +333,12 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesAvailableForActivity: "No classes configured to show activity.",
     noEventsGeneralHint: "No announcements, exams, or deadlines to display at the moment.",
     dashboardMenuItemLabel: "Dashboard",
-    logoutButtonLabel: "Log out", 
+    logoutButtonLabel: "Log out",
 
     classPasswordLabel: "Class Password (Optional)",
     classPasswordPlaceholder: "Leave blank for no password",
     classPasswordPromptTitle: "Password Required",
-    classPasswordPromptDescription: "This class is password protected. Please enter the password to view its content.",
+    classPasswordPromptDescription: "This class \"{className}\" is password protected. Please enter the password to view its content.",
     classPasswordInputLabel: "Class Password",
     classPasswordUnlockButton: "Unlock",
     classPasswordIncorrectError: "Incorrect password. Please try again.",
@@ -348,13 +354,20 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Yes, Reset Database",
     dbResetSuccessTitle: "Database Reset",
     dbResetSuccessDescription: "The database has been reset. You will be logged out. Please log in with user 'pablo' and password 'soypablo'.",
-    
+
     confirmPasswordLabel: "Confirm Password",
     confirmNewPasswordLabel: "Confirm New Password",
     passwordsDoNotMatchValidation: "Passwords do not match.",
     passwordTooShortValidation: "New password must be at least 6 characters.",
     confirmPasswordRequiredValidation: "Please confirm your new password.",
     enterNewPasswordFirstValidation: "Enter the new password first before confirming.",
+
+    targetClassesLabel: "Target Classes",
+    selectAtLeastOneClassDescription: "Select at least one class to target.",
+    selectAllClassesButtonLabel: "Select All Classes",
+    deselectAllClassesButtonLabel: "Deselect All Classes",
+    updateAnnouncementButton: "Update Announcement",
+    postAnnouncementButton: "Post Announcement",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -364,17 +377,17 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gestionar Clases",
     manageUsersTitle: "Gestionar Usuarios",
     delegateDashboardTitle: "Panel de Delegado",
-    announcementsSectionTitle: "Anuncios", 
-    examsSectionTitle: "Exámenes", 
-    deadlinesSectionTitle: "Tareas", 
-    checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.", 
+    announcementsSectionTitle: "Anuncios",
+    examsSectionTitle: "Exámenes",
+    deadlinesSectionTitle: "Tareas",
+    checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
     loginButtonLabel: "Iniciar Sesión",
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
-    delegateIdLabel: "Delegado/a", 
+    delegateIdLabel: "Delegado/a",
     noEventsForClassHint: "¡Parece que esta clase está en una misión secreta! No hay nada que mostrar por ahora.",
     loadingLabel: "Cargando...",
     assignedClassesLabel: "Clases asignadas",
@@ -426,11 +439,10 @@ export const translations: Record<SupportedLanguage, Translations> = {
     schoolNameUpdatedToastTitle: "Nombre de Escuela Actualizado",
     schoolNameUpdatedToastDescription: "El nombre de la escuela ha sido actualizado a \"{schoolName}\".",
     editAnnouncementTitle: "Editar Anuncio",
-    postNewAnnouncementTitle: "Publicar Nuevo Anuncio Escolar",
+    postNewAnnouncementTitle: "Publicar Nuevo Anuncio",
     editingAnnouncementDescription: "Estás editando: \"{title}\"",
     currentAnnouncementsTitle: "Anuncios Actuales",
-    noAnnouncementsPostedHint: "No hay anuncios publicados todavía.",
-    schoolWideTarget: "Toda la escuela",
+    noAnnouncementsPostedHint: "No hay anuncios publicados todavía para ninguna clase.",
     classesTargetLabel: "Clases",
     targetLabel: "Dirigido a",
     editButtonLabel: "Editar",
@@ -506,7 +518,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordLabel: "Contraseña de Clase (Opcional)",
     classPasswordPlaceholder: "Dejar en blanco si no requiere contraseña",
     classPasswordPromptTitle: "Contraseña Requerida",
-    classPasswordPromptDescription: "Esta clase está protegida por contraseña. Por favor, introduce la contraseña para ver su contenido.",
+    classPasswordPromptDescription: "Esta clase \"{className}\" está protegida por contraseña. Por favor, introduce la contraseña para ver su contenido.",
     classPasswordInputLabel: "Contraseña de la Clase",
     classPasswordUnlockButton: "Desbloquear",
     classPasswordIncorrectError: "Contraseña incorrecta. Inténtalo de nuevo.",
@@ -521,13 +533,20 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Sí, Reiniciar Base de Datos",
     dbResetSuccessTitle: "Base de Datos Reiniciada",
     dbResetSuccessDescription: "La base de datos ha sido reiniciada. Serás desconectado. Por favor, inicia sesión con el usuario 'pablo' y la contraseña 'soypablo'.",
-    
+
     confirmPasswordLabel: "Confirmar Contraseña",
     confirmNewPasswordLabel: "Confirmar Nueva Contraseña",
     passwordsDoNotMatchValidation: "Las contraseñas no coinciden.",
     passwordTooShortValidation: "La nueva contraseña debe tener al menos 6 caracteres.",
     confirmPasswordRequiredValidation: "Por favor, confirma tu nueva contraseña.",
     enterNewPasswordFirstValidation: "Introduce la nueva contraseña primero antes de confirmar.",
+
+    targetClassesLabel: "Clases de Destino",
+    selectAtLeastOneClassDescription: "Selecciona al menos una clase de destino.",
+    selectAllClassesButtonLabel: "Seleccionar Todas las Clases",
+    deselectAllClassesButtonLabel: "Deseleccionar Todas las Clases",
+    updateAnnouncementButton: "Actualizar Anuncio",
+    postAnnouncementButton: "Publicar Anuncio",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -537,17 +556,17 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Gérer les Classes",
     manageUsersTitle: "Gérer les Utilisateurs",
     delegateDashboardTitle: "Tableau de bord Délégué",
-    announcementsSectionTitle: "Annonces", 
-    examsSectionTitle: "Examens", 
-    deadlinesSectionTitle: "Devoirs",  
-    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.", 
+    announcementsSectionTitle: "Annonces",
+    examsSectionTitle: "Examens",
+    deadlinesSectionTitle: "Devoirs",
+    checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.",
     viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
     loginButtonLabel: "Connexion",
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
-    delegateIdLabel: "Délégué(e)", 
+    delegateIdLabel: "Délégué(e)",
     noEventsForClassHint: "On dirait que cette classe est en mission secrète ! Rien à afficher pour le moment.",
     loadingLabel: "Chargement...",
     assignedClassesLabel: "Classes assignées",
@@ -599,11 +618,10 @@ export const translations: Record<SupportedLanguage, Translations> = {
     schoolNameUpdatedToastTitle: "Nom de l'École Mis à Jour",
     schoolNameUpdatedToastDescription: "Le nom de l'école a été mis à jour à \"{schoolName}\".",
     editAnnouncementTitle: "Modifier l'Annonce",
-    postNewAnnouncementTitle: "Publier une Nouvelle Annonce Scolaire",
+    postNewAnnouncementTitle: "Publier une Nouvelle Annonce",
     editingAnnouncementDescription: "Vous modifiez : \"{title}\"",
     currentAnnouncementsTitle: "Annonces Actuelles",
-    noAnnouncementsPostedHint: "Aucune annonce publiée pour l'instant.",
-    schoolWideTarget: "Toute l'école",
+    noAnnouncementsPostedHint: "Aucune annonce publiée pour l'instant pour aucune classe.",
     classesTargetLabel: "Classes",
     targetLabel: "Cible",
     editButtonLabel: "Modifier",
@@ -679,7 +697,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordLabel: "Mot de passe de la classe (Optionnel)",
     classPasswordPlaceholder: "Laisser vide si pas de mot de passe",
     classPasswordPromptTitle: "Mot de Passe Requis",
-    classPasswordPromptDescription: "Cette classe est protégée par un mot de passe. Veuillez entrer le mot de passe pour voir son contenu.",
+    classPasswordPromptDescription: "Cette classe \"{className}\" est protégée par un mot de passe. Veuillez entrer le mot de passe pour voir son contenu.",
     classPasswordInputLabel: "Mot de Passe de la Classe",
     classPasswordUnlockButton: "Déverrouiller",
     classPasswordIncorrectError: "Mot de passe incorrect. Veuillez réessayer.",
@@ -701,6 +719,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     passwordTooShortValidation: "Le nouveau mot de passe doit comporter au moins 6 caractères.",
     confirmPasswordRequiredValidation: "Veuillez confirmer votre nouveau mot de passe.",
     enterNewPasswordFirstValidation: "Entrez d'abord le nouveau mot de passe avant de confirmer.",
+
+    targetClassesLabel: "Classes Cibles",
+    selectAtLeastOneClassDescription: "Sélectionnez au moins une classe cible.",
+    selectAllClassesButtonLabel: "Sélectionner Toutes les Classes",
+    deselectAllClassesButtonLabel: "Désélectionner Toutes les Classes",
+    updateAnnouncementButton: "Mettre à Jour l'Annonce",
+    postAnnouncementButton: "Publier l'Annonce",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -710,18 +735,18 @@ export const translations: Record<SupportedLanguage, Translations> = {
     manageClassesTitle: "Xestionar Clases",
     manageUsersTitle: "Xestionar Usuarios",
     delegateDashboardTitle: "Panel de Delegado",
-    announcementsSectionTitle: "Anuncios", 
-    examsSectionTitle: "Exames",  
-    deadlinesSectionTitle: "Tarefas",  
-    checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.", 
+    announcementsSectionTitle: "Anuncios",
+    examsSectionTitle: "Exames",
+    deadlinesSectionTitle: "Tarefas",
+    checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
     loginButtonLabel: "Iniciar Sesión",
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
-    delegateIdLabel: "Delegado/a", 
-    noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.",
+    delegateIdLabel: "Delegado/a",
+    noEventsForClassHint: "Parece que esta clase \"{className}\" está nunha misión secreta! Non hai nada que amosar polo de agora.",
     loadingLabel: "Cargando...",
     assignedClassesLabel: "Clases asignadas",
     noAssignedClassesLabel: "Actualmente non tes clases asignadas.",
@@ -772,11 +797,10 @@ export const translations: Record<SupportedLanguage, Translations> = {
     schoolNameUpdatedToastTitle: "Nome da Escola Actualizado",
     schoolNameUpdatedToastDescription: "O nome da escola actualizouse a \"{schoolName}\".",
     editAnnouncementTitle: "Editar Anuncio",
-    postNewAnnouncementTitle: "Publicar Novo Anuncio Escolar",
+    postNewAnnouncementTitle: "Publicar Novo Anuncio",
     editingAnnouncementDescription: "Estás a editar: \"{title}\"",
     currentAnnouncementsTitle: "Anuncios Actuais",
-    noAnnouncementsPostedHint: "Aínda non hai anuncios publicados.",
-    schoolWideTarget: "Toda a escola",
+    noAnnouncementsPostedHint: "Aínda non hai anuncios publicados para ningunha clase.",
     classesTargetLabel: "Clases",
     targetLabel: "Dirixido a",
     editButtonLabel: "Editar",
@@ -852,7 +876,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordLabel: "Contrasinal da Clase (Opcional)",
     classPasswordPlaceholder: "Deixar en branco se non require contrasinal",
     classPasswordPromptTitle: "Requírese Contrasinal",
-    classPasswordPromptDescription: "Esta clase está protexida por contrasinal. Por favor, introduce o contrasinal para ver o seu contido.",
+    classPasswordPromptDescription: "Esta clase \"{className}\" está protexida por contrasinal. Por favor, introduce o contrasinal para ver o seu contido.",
     classPasswordInputLabel: "Contrasinal da Clase",
     classPasswordUnlockButton: "Desbloquear",
     classPasswordIncorrectError: "Contrasinal incorrecto. Inténtao de novo.",
@@ -867,13 +891,20 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Si, Reiniciar Base de Datos",
     dbResetSuccessTitle: "Base de Datos Reiniciada",
     dbResetSuccessDescription: "A base de datos foi reiniciada. Serás desconectado. Por favor, inicia sesión co usuario 'pablo' e o contrasinal 'soypablo'.",
-    
+
     confirmPasswordLabel: "Confirmar Contrasinal",
     confirmNewPasswordLabel: "Confirmar Novo Contrasinal",
     passwordsDoNotMatchValidation: "Os contrasinais non coinciden.",
     passwordTooShortValidation: "O novo contrasinal debe ter polo menos 6 caracteres.",
     confirmPasswordRequiredValidation: "Por favor, confirma o teu novo contrasinal.",
     enterNewPasswordFirstValidation: "Introduce o novo contrasinal primeiro antes de confirmar.",
+
+    targetClassesLabel: "Clases de Destino",
+    selectAtLeastOneClassDescription: "Selecciona polo menos unha clase de destino.",
+    selectAllClassesButtonLabel: "Seleccionar Todas as Clases",
+    deselectAllClassesButtonLabel: "Deseleccionar Todas as Clases",
+    updateAnnouncementButton: "Actualizar Anuncio",
+    postAnnouncementButton: "Publicar Anuncio",
   },
 };
 
@@ -882,5 +913,3 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
-
-    

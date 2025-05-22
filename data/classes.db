@@ -1,8 +1,19 @@
-{"id":"class-1747935493960-yzta6","name":"1º BACH","_id":"7Wq09raW2oauR5Od","createdAt":{"$$date":1747935493875},"updatedAt":{"$$date":1747935493875}}
-{"id":"class-1747935471466-kpsnk","name":"1º ESO","_id":"KGIGPP3JOIRlcoWY","createdAt":{"$$date":1747935471408},"updatedAt":{"$$date":1747935471408}}
-{"id":"class-1747935483964-qfpp1","name":"3º ESO","_id":"Rrbze2ZTJjEn7IJk","createdAt":{"$$date":1747935483878},"updatedAt":{"$$date":1747935483878}}
-{"id":"class-1747935488824-2xpwq","name":"4º ESO","_id":"T3vHvxtrwxQkCXU9","createdAt":{"$$date":1747935488736},"updatedAt":{"$$date":1747935488736}}
-{"id":"class-1747935478410-c6d7b","name":"2º ESO","_id":"TDySRunNCGeoW6dL","createdAt":{"$$date":1747935478320},"updatedAt":{"$$date":1747935478320}}
-{"id":"class-1747935499130-gk0r5","name":"2º BACH","_id":"yu45V25T4E67Ta6l","createdAt":{"$$date":1747935499040},"updatedAt":{"$$date":1747935499040}}
-{"id":"class-1747935517950-gefxg","name":"Sala Profesores","password":"clave","_id":"yxrryCoythNRTRXe","createdAt":{"$$date":1747935517992},"updatedAt":{"$$date":1747935517992}}
+{"id":"fpsdaw","name":"CS DAW","_id":"02FdmtmWgWrTlJ40","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936062197}}
+{"id":"eso2b","name":"2º ESO B","delegateId":"delegate-carlos-p","_id":"0dXcU0kD4dzwglgN","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936062197}}
+{"id":"fpsasir","name":"CS ASIR","_id":"JNjbCo8qTM6u9by7","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936062197}}
+{"id":"eso1a","name":"1º ESO A","delegateId":"delegate-laura-g","password":"passwordeso1a","_id":"ZBW08XrlZxNjafuI","createdAt":{"$$date":1747936062196},"updatedAt":{"$$date":1747936062196}}
+{"id":"fpbasic","name":"FP Básica Informática","_id":"f9tmpiMnKI4ZEPkg","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936062197}}
+{"id":"bach2d","name":"2º Bacharelato D","delegateId":"delegate-laura-g","_id":"hhO9dd76eQATMKZq","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936062197}}
+{"id":"fpscm","name":"CM SMR","_id":"jV5aP8FP3jV03AYi","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936062197}}
+{"id":"bach1c","name":"1º Bacharelato C","password":"clase","_id":"kyKnkprL5GEjcTFc","createdAt":{"$$date":1747936062197},"updatedAt":{"$$date":1747936207770}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"$$deleted":true,"_id":"ZBW08XrlZxNjafuI"}
+{"$$deleted":true,"_id":"kyKnkprL5GEjcTFc"}
+{"$$deleted":true,"_id":"hhO9dd76eQATMKZq"}
+{"$$deleted":true,"_id":"0dXcU0kD4dzwglgN"}
+{"$$deleted":true,"_id":"jV5aP8FP3jV03AYi"}
+{"$$deleted":true,"_id":"JNjbCo8qTM6u9by7"}
+{"$$deleted":true,"_id":"02FdmtmWgWrTlJ40"}
+{"$$deleted":true,"_id":"f9tmpiMnKI4ZEPkg"}
+{"id":"class-1747936327866-plzlc","name":"1º ESO A","_id":"pNZncyAGHqHlPhl9","createdAt":{"$$date":1747936327785},"updatedAt":{"$$date":1747936327785}}
+{"id":"class-1747936336551-jjqr3","name":"Sala de profesores","_id":"2a9Hw4chC8KunsZy","createdAt":{"$$date":1747936336468},"updatedAt":{"$$date":1747936336468}}
