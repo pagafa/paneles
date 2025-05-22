@@ -48,7 +48,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     if (validTargetClassIds.length === 0) {
-        const errorMessage = `After filtering non-existent classes, no valid target classes remain. An announcement must target at least one existing class. Original targets: ${requestBody.targetClassIds.join(', ')}.`;
+        const originalTargets = requestBody.targetClassIds.join(', ') || 'none';
+        const errorMessage = `After filtering non-existent classes, no valid target classes remain. An announcement must target at least one existing class. Original target IDs provided: ${originalTargets}.`;
         return NextResponse.json({ 
             message: errorMessage,
             error: 'Invalid target classes after filtering' 

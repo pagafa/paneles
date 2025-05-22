@@ -15,13 +15,7 @@ export async function GET(request: Request, { params }: { params: { classId: str
     const schoolClass = await db.findOne({ id: params.classId });
     
     if (schoolClass) {
-      const classToReturn = {
-        ...schoolClass,
-        passwordProtected: false, // Since password functionality was removed
-      };
-      // Do not return the actual password, even if it was present
-      // delete (classToReturn as any).password; 
-      return NextResponse.json(classToReturn);
+      return NextResponse.json(schoolClass);
     }
     return NextResponse.json({ message: 'Class not found' }, { status: 404 });
   } catch (error) {
@@ -47,20 +41,17 @@ export async function PUT(request: Request, { params }: { params: { classId: str
         updatePayload.delegateId = requestBody.delegateId === "" ? undefined : requestBody.delegateId;
     }
     if (requestBody.language !== undefined) updatePayload.language = requestBody.language;
-    if (requestBody.isHidden !== undefined) updatePayload.isHidden = requestBody.isHidden;
     
-    // Password functionality was removed
-    // if (Object.prototype.hasOwnProperty.call(requestBody, 'password')) { 
-    //   // ...
-    // }
+    // Ensure isHidden is handled correctly
+    if (requestBody.isHidden !== undefined) {
+      updatePayload.isHidden = requestBody.isHidden;
+    }
 
     if (Object.keys(updatePayload).length === 0) {
         const dbCheck = await getClassesDb();
         const existingDoc = await dbCheck.findOne({ id: classId });
         if(existingDoc) {
-             const classToReturn = { ...existingDoc, passwordProtected: false };
-            // delete (classToReturn as any).password;
-            return NextResponse.json(classToReturn);
+            return NextResponse.json(existingDoc);
         }
         return NextResponse.json({ message: 'No updatable fields provided or class not found' }, { status: 400 });
     }
@@ -78,9 +69,7 @@ export async function PUT(request: Request, { params }: { params: { classId: str
         if (updatePayload.isHidden !== undefined && updatePayload.isHidden !== existingClass.isHidden) noMeaningfulChange = false;
 
         if (noMeaningfulChange) {
-            const classToReturn = { ...existingClass, passwordProtected: false };
-            // delete (classToReturn as any).password;
-            return NextResponse.json(classToReturn);
+            return NextResponse.json(existingClass);
         }
       }
       return NextResponse.json({ message: 'Class not found or no changes made' }, { status: 404 });
@@ -90,9 +79,7 @@ export async function PUT(request: Request, { params }: { params: { classId: str
     if (!updatedClass) {
         return NextResponse.json({ message: 'Class updated but failed to retrieve' }, { status: 500 });
     }
-    const classToReturn = { ...updatedClass, passwordProtected: false };
-    // delete (classToReturn as any).password;
-    return NextResponse.json(classToReturn);
+    return NextResponse.json(updatedClass);
 
   } catch (error) {
     console.error(`[API PUT /api/classes/${params.classId}] Error:`, error);
