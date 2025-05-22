@@ -1,4 +1,3 @@
-{"id":"user-admin-pablo-1747865879347","name":"Pablo Admin","username":"pablo","role":"admin","password":"soypablo","_id":"a44dhQULnSJQjRBh","createdAt":{"$$date":1747865879351},"updatedAt":{"$$date":1747865879351}}
+{"id":"user-admin-pablo-1747865879347","name":"Pablo Admin","username":"pablo","role":"admin","password":"soypablo","_id":"a44dhQULnSJQjRBh","createdAt":{"$$date":1747865879351},"updatedAt":{"$$date":1747932392901}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
-{"id":"user-admin-pablo-1747865879347","name":"Pablo Admin","username":"pablo","role":"admin","password":"soypablo","_id":"a44dhQULnSJQjRBh","createdAt":{"$$date":1747865879351},"updatedAt":{"$$date":1747932392901}}

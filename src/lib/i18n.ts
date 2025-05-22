@@ -162,7 +162,6 @@ interface Translations {
   classPasswordVerificationError: string;
   classIsPasswordProtected: string;
 
-  // Database Reset Translations
   dbResetCardTitle: string;
   dbResetWarningDescription: string;
   dbResetButtonLabel: string;
@@ -172,6 +171,13 @@ interface Translations {
   dbResetConfirmButton: string;
   dbResetSuccessTitle: string;
   dbResetSuccessDescription: string;
+
+  confirmPasswordLabel: string;
+  confirmNewPasswordLabel: string;
+  passwordsDoNotMatchValidation: string;
+  passwordTooShortValidation: string; // For new password length
+  confirmPasswordRequiredValidation: string;
+  enterNewPasswordFirstValidation: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -297,7 +303,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     passwordEditHint: "Leave blank to keep current password.",
     updateUserButton: "Update User",
     createUserButton: "Create User",
-    passwordRequiredForNewUser: "Password is required for new users.",
+    passwordRequiredForNewUser: "Password is required for new users.", 
     classNameLabel: "Class Name",
     classNamePlaceholder: "e.g., Grade 10A, Computer Science Club",
     classDelegateLabel: "Delegate",
@@ -308,7 +314,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noDelegatesAvailableHint: "No delegates available to assign. Create delegate users first.",
     updateClassButton: "Update Class",
     createClassButton: "Create Class",
-    errorFetchingDelegates: "Error fetching delegates: {message}",
+    errorFetchingDelegates: "Error fetching delegates: {message}", 
     globalLanguageSettingsCardTitle: "Global Language Settings",
     globalLanguageSelectLabel: "Set Global Application Language",
     selectLanguagePlaceholder: "Select a language",
@@ -321,7 +327,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noClassesAvailableForActivity: "No classes configured to show activity.",
     noEventsGeneralHint: "No announcements, exams, or deadlines to display at the moment.",
     dashboardMenuItemLabel: "Dashboard",
-    logoutButtonLabel: "Log out",
+    logoutButtonLabel: "Log out", 
+
     classPasswordLabel: "Class Password (Optional)",
     classPasswordPlaceholder: "Leave blank for no password",
     classPasswordPromptTitle: "Password Required",
@@ -331,6 +338,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classPasswordIncorrectError: "Incorrect password. Please try again.",
     classPasswordVerificationError: "Error verifying password. Please try again later.",
     classIsPasswordProtected: "This class is password protected.",
+
     dbResetCardTitle: "Database Maintenance",
     dbResetWarningDescription: "This action is irreversible and will delete all application data. A single admin user 'pablo' (password: 'soypablo') will be created.",
     dbResetButtonLabel: "Reset Entire Database",
@@ -340,6 +348,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Yes, Reset Database",
     dbResetSuccessTitle: "Database Reset",
     dbResetSuccessDescription: "The database has been reset. You will be logged out. Please log in with user 'pablo' and password 'soypablo'.",
+    
+    confirmPasswordLabel: "Confirm Password",
+    confirmNewPasswordLabel: "Confirm New Password",
+    passwordsDoNotMatchValidation: "Passwords do not match.",
+    passwordTooShortValidation: "New password must be at least 6 characters.",
+    confirmPasswordRequiredValidation: "Please confirm your new password.",
+    enterNewPasswordFirstValidation: "Enter the new password first before confirming.",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -506,6 +521,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Sí, Reiniciar Base de Datos",
     dbResetSuccessTitle: "Base de Datos Reiniciada",
     dbResetSuccessDescription: "La base de datos ha sido reiniciada. Serás desconectado. Por favor, inicia sesión con el usuario 'pablo' y la contraseña 'soypablo'.",
+    
+    confirmPasswordLabel: "Confirmar Contraseña",
+    confirmNewPasswordLabel: "Confirmar Nueva Contraseña",
+    passwordsDoNotMatchValidation: "Las contraseñas no coinciden.",
+    passwordTooShortValidation: "La nueva contraseña debe tener al menos 6 caracteres.",
+    confirmPasswordRequiredValidation: "Por favor, confirma tu nueva contraseña.",
+    enterNewPasswordFirstValidation: "Introduce la nueva contraseña primero antes de confirmar.",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -672,6 +694,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Oui, Réinitialiser la Base de Données",
     dbResetSuccessTitle: "Base de Données Réinitialisée",
     dbResetSuccessDescription: "La base de données a été réinitialisée. Vous allez être déconnecté. Veuillez vous connecter avec l'utilisateur 'pablo' et le mot de passe 'soypablo'.",
+
+    confirmPasswordLabel: "Confirmer le mot de passe",
+    confirmNewPasswordLabel: "Confirmer le nouveau mot de passe",
+    passwordsDoNotMatchValidation: "Les mots de passe ne correspondent pas.",
+    passwordTooShortValidation: "Le nouveau mot de passe doit comporter au moins 6 caractères.",
+    confirmPasswordRequiredValidation: "Veuillez confirmer votre nouveau mot de passe.",
+    enterNewPasswordFirstValidation: "Entrez d'abord le nouveau mot de passe avant de confirmer.",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -838,6 +867,13 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Si, Reiniciar Base de Datos",
     dbResetSuccessTitle: "Base de Datos Reiniciada",
     dbResetSuccessDescription: "A base de datos foi reiniciada. Serás desconectado. Por favor, inicia sesión co usuario 'pablo' e o contrasinal 'soypablo'.",
+    
+    confirmPasswordLabel: "Confirmar Contrasinal",
+    confirmNewPasswordLabel: "Confirmar Novo Contrasinal",
+    passwordsDoNotMatchValidation: "Os contrasinais non coinciden.",
+    passwordTooShortValidation: "O novo contrasinal debe ter polo menos 6 caracteres.",
+    confirmPasswordRequiredValidation: "Por favor, confirma o teu novo contrasinal.",
+    enterNewPasswordFirstValidation: "Introduce o novo contrasinal primeiro antes de confirmar.",
   },
 };
 
@@ -846,3 +882,5 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
+
+    
