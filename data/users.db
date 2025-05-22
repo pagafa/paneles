@@ -1,3 +1,0 @@
-{"id":"user-admin-pablo-1747934278858","name":"Pablo Admin","username":"pablo","role":"admin","password":"soypablo","_id":"OBKjLTGhxtqyfUjU","createdAt":{"$$date":1747934278865},"updatedAt":{"$$date":1747934278865}}
-{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
-{"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
