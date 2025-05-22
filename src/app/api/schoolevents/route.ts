@@ -2,7 +2,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getSchoolEventsDb } from '@/lib/db';
+import { getSchoolEventsDb, getClassesDb } from '@/lib/db'; // Added getClassesDb
 import type { SchoolEvent, Exam, Deadline, Announcement } from '@/types';
 
 // GET all school events (or filtered)
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       query.type = type;
     }
     if (classId) {
-      query.classId = classId; // Assumes events store classId
+      query.classId = classId; 
     }
     // if (submittedByDelegateId) {
     //   query.submittedByDelegateId = submittedByDelegateId;
@@ -50,8 +50,22 @@ export async function POST(request: Request) {
     if (newEventData.type === 'deadline' && !(newEventData as Deadline).assignmentName) {
         return NextResponse.json({ message: 'Missing assignmentName for deadline' }, { status: 400 });
     }
-     if (newEventData.type === 'announcement' && !(newEventData as Announcement).content) { // Delegate announcement content
+    if (newEventData.type === 'announcement' && !(newEventData as Announcement).content) { 
         return NextResponse.json({ message: 'Missing content for announcement' }, { status: 400 });
+    }
+
+    // Validate classId if provided for exam or deadline
+    if ((newEventData.type === 'exam' || newEventData.type === 'deadline') && newEventData.classId && newEventData.classId.trim() !== "") {
+      const classesDb = await getClassesDb();
+      const schoolClass = await classesDb.findOne({ id: newEventData.classId });
+      if (!schoolClass) {
+        return NextResponse.json({ message: `Invalid classId: Class with ID "${newEventData.classId}" does not exist.` }, { status: 400 });
+      }
+    } else if ((newEventData.type === 'exam' || newEventData.type === 'deadline') && (!newEventData.classId || newEventData.classId.trim() === "")) {
+        // For exams and deadlines, classId is typically expected.
+        // Depending on requirements, you might make it mandatory here.
+        // For now, we allow it to be undefined if not provided or empty.
+        (newEventData as Exam | Deadline).classId = undefined;
     }
 
 
@@ -66,9 +80,12 @@ export async function POST(request: Request) {
     return NextResponse.json(savedEvent, { status: 201 });
   } catch (error) {
     console.error('Error creating school event:', error);
-    if ((error as Error).message.includes('unique constraint violated')) {
-        return NextResponse.json({ message: 'Error creating school event: ID already exists.', error: (error as Error).message }, { status: 409 });
+    const errorMessage = (error as Error).message;
+    if (errorMessage.includes('unique constraint violated')) { // Assuming 'id' is unique
+        return NextResponse.json({ message: `Error creating school event: ID already exists. Detail: ${errorMessage}` }, { status: 409 });
     }
-    return NextResponse.json({ message: 'Error creating school event', error: (error as Error).message }, { status: 500 });
+    return NextResponse.json({ message: `Error creating school event: ${errorMessage}` }, { status: 500 });
   }
 }
+
+    

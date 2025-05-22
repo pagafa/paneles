@@ -2,7 +2,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getSchoolEventsDb } from '@/lib/db';
+import { getSchoolEventsDb, getClassesDb } from '@/lib/db'; // Added getClassesDb
 import type { SchoolEvent, Exam, Deadline, Announcement } from '@/types';
 
 // GET a single school event by ID
@@ -33,42 +33,66 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const requestBody: Partial<Omit<SchoolEvent, 'id' | 'type'>> & {type?: SchoolEvent['type']} = await request.json();
+    const db = await getSchoolEventsDb(); // SchoolEvents DB
     
-    const updatePayload: Partial<SchoolEvent> = { ...requestBody };
-    // Ensure type is not changed if not explicitly provided or if it's different from existing.
-    // For simplicity, this PUT assumes type doesn't change. More complex logic would be needed otherwise.
-    // delete updatePayload.type; // Or validate it matches existing.
-    
-    if (Object.keys(updatePayload).length === 0) {
-        const dbCheck = await getSchoolEventsDb();
-        const existingDoc = await dbCheck.findOne({ id: eventId });
-        if(existingDoc) return NextResponse.json(existingDoc);
-        return NextResponse.json({ message: 'No updatable fields provided or event not found' }, { status: 400 });
-    }
-
-    // Type-specific validations on update
-    const db = await getSchoolEventsDb();
     const existingEvent = await db.findOne({ id: eventId });
     if (!existingEvent) {
       return NextResponse.json({ message: 'School event not found for update' }, { status: 404 });
     }
 
-    const finalPayload = { ...existingEvent, ...updatePayload }; // Merge to ensure type and other fields are present
+    const updatePayload: Partial<SchoolEvent> = { ...requestBody };
+    
+    // Validate classId if provided and event type is exam or deadline
+    if ((existingEvent.type === 'exam' || existingEvent.type === 'deadline') && Object.prototype.hasOwnProperty.call(requestBody, 'classId')) {
+      if (requestBody.classId && requestBody.classId.trim() !== "") {
+        const classesDb = await getClassesDb();
+        const schoolClass = await classesDb.findOne({ id: requestBody.classId });
+        if (!schoolClass) {
+          return NextResponse.json({ message: `Invalid classId: Class with ID "${requestBody.classId}" does not exist.` }, { status: 400 });
+        }
+        updatePayload.classId = requestBody.classId;
+      } else {
+        // If classId is explicitly set to empty or null, remove it from the event
+        updatePayload.classId = undefined;
+      }
+    }
+    
+    // Ensure type is not changed from existing event's type
+    updatePayload.type = existingEvent.type; 
+    
+    const finalPayload = { ...existingEvent, ...updatePayload }; // Merge to ensure all fields are handled correctly
 
+    // Type-specific validations on the final merged payload
     if (finalPayload.type === 'exam' && !finalPayload.subject) {
         return NextResponse.json({ message: 'Missing subject for exam update' }, { status: 400 });
     }
     if (finalPayload.type === 'deadline' && !finalPayload.assignmentName) {
         return NextResponse.json({ message: 'Missing assignmentName for deadline update' }, { status: 400 });
     }
-    if (finalPayload.type === 'announcement' && !finalPayload.content) {
+    if (finalPayload.type === 'announcement' && !finalPayload.content) { // Delegate announcements
         return NextResponse.json({ message: 'Missing content for announcement update' }, { status: 400 });
     }
-
 
     const numAffected = await db.update({ id: eventId }, { $set: finalPayload });
 
     if (numAffected === 0) {
+      // Check if it was because no actual change was made
+      let noMeaningfulChange = true;
+      for (const key in finalPayload) {
+        if (finalPayload[key as keyof SchoolEvent] !== existingEvent[key as keyof SchoolEvent]) {
+          // A deep comparison might be needed for objects/arrays if they exist in SchoolEvent
+          if (typeof finalPayload[key as keyof SchoolEvent] === 'object') {
+             if (JSON.stringify(finalPayload[key as keyof SchoolEvent]) !== JSON.stringify(existingEvent[key as keyof SchoolEvent])) {
+                noMeaningfulChange = false;
+                break;
+             }
+          } else {
+            noMeaningfulChange = false;
+            break;
+          }
+        }
+      }
+      if (noMeaningfulChange) return NextResponse.json(existingEvent);
       return NextResponse.json({ message: 'School event not found or no changes made' }, { status: 404 });
     }
 
@@ -104,3 +128,5 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     return NextResponse.json({ message: 'Error deleting school event', error: (error as Error).message }, { status: 500 });
   }
 }
+
+    
