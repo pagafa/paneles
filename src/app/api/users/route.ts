@@ -9,9 +9,12 @@ import type { User } from '@/types';
 export async function GET() {
   try {
     const db = await getUsersDb();
-    const users = await db.find({}).sort({ name: 1 });
-    // Exclude password if it were part of the User type and stored in DB
-    // For this app, User type does not have password, so no need to exclude here.
+    const usersFromDb = await db.find({}).sort({ name: 1 });
+    // Exclude password from the response for security
+    const users = usersFromDb.map(user => {
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    });
     return NextResponse.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -24,41 +27,44 @@ export async function POST(request: Request) {
   try {
     const newUserData: Omit<User, 'id'> & { id?: string, password?: string } = await request.json();
     
-    if (!newUserData.name || !newUserData.username || !newUserData.role) {
-      return NextResponse.json({ message: 'Missing required fields (name, username, role)' }, { status: 400 });
+    if (!newUserData.name || !newUserData.username || !newUserData.role || !newUserData.password) {
+      return NextResponse.json({ message: 'Missing required fields (name, username, role, password)' }, { status: 400 });
     }
-    // Password is handled by the form for new users, but not stored in User model in DB
 
     const db = await getUsersDb();
     
+    // Check for existing username
+    const existingUserByUsername = await db.findOne({ username: newUserData.username });
+    if (existingUserByUsername) {
+      return NextResponse.json({ message: `Error creating user: Username "${newUserData.username}" is already taken.` }, { status: 409 });
+    }
+    
+    const userId = newUserData.id || `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    // Check for existing ID (less likely with generated IDs but good practice)
+    const existingUserById = await db.findOne({ id: userId });
+    if (existingUserById) {
+      return NextResponse.json({ message: `Error creating user: ID "${userId}" already exists. Please try again.` }, { status: 409 });
+    }
+
     const userToAdd: User = {
-      id: newUserData.id || `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id: userId,
       name: newUserData.name,
       username: newUserData.username,
       role: newUserData.role,
-      // Password is not part of the User type stored in the database
+      password: newUserData.password, // Ensure password from the form is included
     };
 
-    // Check for existing username
-    const existingUserByUsername = await db.findOne({ username: userToAdd.username });
-    if (existingUserByUsername) {
-      return NextResponse.json({ message: `Error creating user: Username "${userToAdd.username}" is already taken.` }, { status: 409 });
-    }
 
-    // Check for existing ID (less likely with generated IDs but good practice)
-    const existingUserById = await db.findOne({ id: userToAdd.id });
-    if (existingUserById) {
-      return NextResponse.json({ message: `Error creating user: ID "${userToAdd.id}" already exists. Please try again.` }, { status: 409 });
-    }
-
-    const savedUser = await db.insert(userToAdd);
-
-    if (!savedUser || (Array.isArray(savedUser) && savedUser.length === 0)) {
+    const savedUserDoc = await db.insert(userToAdd);
+    
+    if (!savedUserDoc || (Array.isArray(savedUserDoc) && savedUserDoc.length === 0)) {
       console.error('User data was valid, but NeDB insert returned no document or an empty array.');
       return NextResponse.json({ message: 'Failed to save user to database after validation. The database did not return the saved document.' }, { status: 500 });
     }
     
-    const userToReturn = Array.isArray(savedUser) ? savedUser[0] : savedUser;
+    const userToReturnFromDb = Array.isArray(savedUserDoc) ? savedUserDoc[0] : savedUserDoc;
+    // Exclude password from the response for security
+    const { password, ...userToReturn } = userToReturnFromDb;
     
     return NextResponse.json(userToReturn, { status: 201 });
 
@@ -78,3 +84,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: `Error creating user: ${errorMessage}`, error: errorMessage }, { status: 500 });
   }
 }
+
