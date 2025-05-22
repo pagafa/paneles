@@ -13,7 +13,7 @@ export async function GET() {
     const announcements = await db.find({}).sort({ date: -1 });
     return NextResponse.json(announcements);
   } catch (error) {
-    console.error('Error fetching announcements:', error);
+    console.error('[API GET /api/announcements] Error:', error);
     return NextResponse.json({ message: 'Error fetching announcements', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -27,8 +27,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Missing required fields (title, content, date)' }, { status: 400 });
     }
 
-    if (!newAnnouncementData.targetClassIds || newAnnouncementData.targetClassIds.length === 0) {
-      return NextResponse.json({ message: 'Missing required field: targetClassIds must not be empty.' }, { status: 400 });
+    if (!newAnnouncementData.targetClassIds || !Array.isArray(newAnnouncementData.targetClassIds) || newAnnouncementData.targetClassIds.length === 0) {
+      return NextResponse.json({ message: 'targetClassIds must be a non-empty array' }, { status: 400 });
     }
 
     const db = await getAnnouncementsDb();
@@ -45,8 +45,7 @@ export async function POST(request: Request) {
     const savedAnnouncement = await db.insert(announcementToAdd);
     return NextResponse.json(savedAnnouncement, { status: 201 });
   } catch (error) {
-    console.error('Error creating announcement:', error);
-    // Handle unique constraint violation for 'id' if it occurs
+    console.error('[API POST /api/announcements] Error creating announcement:', error);
     if ((error as Error).message.includes('unique constraint violated')) {
         return NextResponse.json({ message: 'Error creating announcement: ID already exists.', error: (error as Error).message }, { status: 409 });
     }

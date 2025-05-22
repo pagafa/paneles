@@ -2,7 +2,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getAnnouncementsDb, getClassesDb } from '@/lib/db'; // Added getClassesDb
+import { getAnnouncementsDb, getClassesDb } from '@/lib/db';
 import type { Announcement } from '@/types';
 
 // GET a single announcement by ID (our app-level ID)
@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
     return NextResponse.json({ message: 'Announcement not found' }, { status: 404 });
   } catch (error) {
-    console.error(`Error fetching announcement ${params.id}:`, error);
+    console.error(`[API GET /api/announcements/${params.id}] Error:`, error);
     return NextResponse.json({ message: 'Error fetching announcement', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -38,7 +38,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'targetClassIds must be a non-empty array' }, { status: 400 });
     }
 
-    // Verify target classes and filter out non-existent ones
     const classesDb = await getClassesDb();
     const validTargetClassIds: string[] = [];
     for (const classId of requestBody.targetClassIds) {
@@ -61,8 +60,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (requestBody.content !== undefined) updatePayload.content = requestBody.content;
     if (requestBody.date !== undefined) updatePayload.date = requestBody.date;
     
-    updatePayload.targetClassIds = validTargetClassIds; // Use the filtered list
-    updatePayload.type = 'announcement'; // Ensure type is not changed
+    updatePayload.targetClassIds = validTargetClassIds;
+    updatePayload.type = 'announcement';
 
     const db = await getAnnouncementsDb();
     const numAffected = await db.update({ id: appLevelId }, { $set: updatePayload });
@@ -90,7 +89,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json(updatedAnnouncement);
 
   } catch (error) {
-    console.error(`Error updating announcement ${params.id}:`, error);
+    console.error(`[API PUT /api/announcements/${params.id}] Error:`, error);
     return NextResponse.json({ message: 'Error updating announcement', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -111,7 +110,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Announcement deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error(`Error deleting announcement ${params.id}:`, error);
+    console.error(`[API DELETE /api/announcements/${params.id}] Error:`, error);
     return NextResponse.json({ message: 'Error deleting announcement', error: (error as Error).message }, { status: 500 });
   }
 }

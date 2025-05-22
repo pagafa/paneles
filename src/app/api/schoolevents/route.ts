@@ -2,7 +2,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getSchoolEventsDb, getClassesDb } from '@/lib/db'; // Added getClassesDb
+import { getSchoolEventsDb, getClassesDb } from '@/lib/db';
 import type { SchoolEvent, Exam, Deadline, Announcement } from '@/types';
 
 // GET all school events (or filtered)
@@ -11,8 +11,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') as SchoolEvent['type'] | null;
     const classId = searchParams.get('classId');
-    // const submittedByDelegateId = searchParams.get('submittedByDelegateId'); // For future filtering
-
+    
     const db = await getSchoolEventsDb();
     let query: any = {};
 
@@ -22,14 +21,11 @@ export async function GET(request: Request) {
     if (classId) {
       query.classId = classId; 
     }
-    // if (submittedByDelegateId) {
-    //   query.submittedByDelegateId = submittedByDelegateId;
-    // }
     
     const events = await db.find(query).sort({ date: -1 });
     return NextResponse.json(events);
   } catch (error) {
-    console.error('Error fetching school events:', error);
+    console.error('[API GET /api/schoolevents] Error:', error);
     return NextResponse.json({ message: 'Error fetching school events', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -43,7 +39,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Missing required fields (title, date, type)' }, { status: 400 });
     }
 
-    // Type-specific validations
     if (newEventData.type === 'exam' && !(newEventData as Exam).subject) {
         return NextResponse.json({ message: 'Missing subject for exam' }, { status: 400 });
     }
@@ -54,20 +49,16 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'Missing content for announcement' }, { status: 400 });
     }
 
-    // Validate classId if provided for exam or deadline
-    if ((newEventData.type === 'exam' || newEventData.type === 'deadline') && newEventData.classId && newEventData.classId.trim() !== "") {
+    if ((newEventData.type === 'exam' || newEventData.type === 'deadline' || newEventData.type === 'announcement') && newEventData.classId && newEventData.classId.trim() !== "") {
       const classesDb = await getClassesDb();
       const schoolClass = await classesDb.findOne({ id: newEventData.classId });
       if (!schoolClass) {
         return NextResponse.json({ message: `Invalid classId: Class with ID "${newEventData.classId}" does not exist.` }, { status: 400 });
       }
-    } else if ((newEventData.type === 'exam' || newEventData.type === 'deadline') && (!newEventData.classId || newEventData.classId.trim() === "")) {
-        // For exams and deadlines, classId is typically expected.
-        // Depending on requirements, you might make it mandatory here.
-        // For now, we allow it to be undefined if not provided or empty.
-        (newEventData as Exam | Deadline).classId = undefined;
+    } else if ((newEventData.type === 'exam' || newEventData.type === 'deadline' || newEventData.type === 'announcement') && (!newEventData.classId || newEventData.classId.trim() === "")) {
+        // For exams, deadlines, and delegate announcements, classId is typically expected.
+        return NextResponse.json({ message: `classId is required for event type "${newEventData.type}"` }, { status: 400 });
     }
-
 
     const db = await getSchoolEventsDb();
     
@@ -79,13 +70,11 @@ export async function POST(request: Request) {
     const savedEvent = await db.insert(eventToAdd);
     return NextResponse.json(savedEvent, { status: 201 });
   } catch (error) {
-    console.error('Error creating school event:', error);
+    console.error('[API POST /api/schoolevents] Error creating school event:', error);
     const errorMessage = (error as Error).message;
-    if (errorMessage.includes('unique constraint violated')) { // Assuming 'id' is unique
+    if (errorMessage.includes('unique constraint violated')) {
         return NextResponse.json({ message: `Error creating school event: ID already exists. Detail: ${errorMessage}` }, { status: 409 });
     }
     return NextResponse.json({ message: `Error creating school event: ${errorMessage}` }, { status: 500 });
   }
 }
-
-    

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,24 +16,25 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, EyeOff, Eye } from "lucide-react"; // Engadido EyeOff e Eye
 import { useToast } from "@/hooks/use-toast";
 import type { SchoolClass, User } from "@/types";
 import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { Checkbox } from "@/components/ui/checkbox"; // Engadido Checkbox
 
 
 const classFormSchema = z.object({
   name: z.string().min(2, { message: "Class name must be at least 2 characters." }),
   delegateId: z.string().optional(),
-  password: z.string().optional().or(z.literal('')), // Optional, allow empty string
+  isHidden: z.boolean().optional().default(false), // Novo campo no esquema
 });
 
 type ClassFormValues = z.infer<typeof classFormSchema>;
 
 interface ClassFormProps {
   onSubmitSuccess?: (data: SchoolClass) => void;
-  initialData?: Partial<ClassFormValues & { id?: string, language?: string }>;
+  initialData?: Partial<ClassFormValues & { id?: string, language?: string, isHidden?: boolean }>; // Engadido isHidden
 }
 
 const UNASSIGNED_DELEGATE_SELECT_VALUE = "__NONE_OPTION__";
@@ -48,31 +50,23 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
     defaultValues: {
       name: initialData?.name || "",
       delegateId: initialData?.delegateId || "",
-      password: initialData?.password || "",
+      isHidden: initialData?.isHidden || false, // Inicializar isHidden
     },
   });
 
   const fetchDelegates = useCallback(async () => {
     setIsLoadingDelegates(true);
     try {
-      const response = await fetch('/api/users?role=delegate');
+      const response = await fetch('/api/users');
       if (!response.ok) {
-        // Try fetching all users if role-specific fetch fails
-        const fallbackResponse = await fetch('/api/users');
-        if (!fallbackResponse.ok) {
-          const errorData = await fallbackResponse.json().catch(() => ({ message: `Failed to fetch delegates. Status: ${fallbackResponse.status}` }));
-          throw new Error(errorData.message || `Failed to fetch delegates. Status: ${fallbackResponse.status}`);
-        }
-        const allUsers: User[] = await fallbackResponse.json();
-        setAvailableDelegates(allUsers.filter(u => u.role === 'delegate'));
-      } else {
-        const delegates: User[] = await response.json();
-        // Filter again here just in case the API didn't filter perfectly or returned other roles
-        setAvailableDelegates(delegates.filter(u => u.role === 'delegate'));
+        const errorData = await response.json().catch(() => ({ message: `Failed to fetch users for delegate names. Status: ${response.status}` }));
+        throw new Error(errorData.message);
       }
+      const allUsers: User[] = await response.json();
+      setAvailableDelegates(allUsers.filter(u => u.role === 'delegate'));
     } catch (error) {
       console.error("Error fetching delegates for ClassForm:", error);
-      setAvailableDelegates([]); // Ensure it's an empty array on error
+      setAvailableDelegates([]);
       toast({ title: t('errorDialogTitle'), description: t('errorFetchingDelegates', { message: (error as Error).message }), variant: 'destructive' });
     } finally {
       setIsLoadingDelegates(false);
@@ -88,10 +82,10 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
       form.reset({
         name: initialData.name || "",
         delegateId: initialData.delegateId || "",
-        password: initialData.password || "",
+        isHidden: initialData.isHidden || false, // Resetear isHidden
       });
     } else {
-        form.reset({ name: "", delegateId: "", password: "" });
+        form.reset({ name: "", delegateId: "", isHidden: false }); // Resetear isHidden para novas clases
     }
   }, [initialData, form]);
 
@@ -101,15 +95,15 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
       id: initialData?.id || `class-${Date.now()}-${Math.random().toString(36).substring(2,7)}`,
       name: values.name,
       delegateId: values.delegateId === UNASSIGNED_DELEGATE_SELECT_VALUE ? undefined : values.delegateId,
-      password: values.password && values.password.trim() !== "" ? values.password.trim() : undefined,
-      language: initialData?.language // Preserve language if editing, or undefined if new
+      language: initialData?.language,
+      isHidden: values.isHidden, // Engadir isHidden
     };
 
     if (onSubmitSuccess) {
       onSubmitSuccess(classToSubmit);
     }
-     if (!initialData?.id) { // Only reset for new class creation
-      form.reset({ name: "", delegateId: "", password: "" });
+     if (!initialData?.id) {
+      form.reset({ name: "", delegateId: "", isHidden: false });
     }
   }
 
@@ -163,14 +157,21 @@ export function ClassForm({ onSubmitSuccess, initialData }: ClassFormProps) {
         />
         <FormField
           control={form.control}
-          name="password"
+          name="isHidden"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('classPasswordLabel')}</FormLabel>
+            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-card-foreground/5">
+              <div className="space-y-0.5">
+                <FormLabel className="text-base">{t('classIsHiddenLabel')}</FormLabel>
+                <FormDescription>
+                  {t('classIsHiddenDescription')}
+                </FormDescription>
+              </div>
               <FormControl>
-                <div> {/* Explicit single child wrapper for Slot */}
-                  <Input type="password" placeholder={t('classPasswordPlaceholder')} {...field} />
-                </div>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  aria-label={t('classIsHiddenLabel')}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

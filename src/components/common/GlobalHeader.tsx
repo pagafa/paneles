@@ -2,7 +2,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react'; // Engadido useCallback
 import { AppLogo } from "@/components/common/AppLogo";
 import { UserNav } from "@/components/common/UserNav";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ import { usePathname } from 'next/navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 
-// This should match the --sidebar-width CSS variable in globals.css or sidebar.tsx
 const SIDEBAR_WIDTH_DESKTOP_EXPANDED_REM = 16;
 
 async function getClassesData(): Promise<SchoolClass[]> {
@@ -30,7 +29,9 @@ async function getClassesData(): Promise<SchoolClass[]> {
       console.error("Failed to fetch classes for GlobalHeader dropdown", response.status, await response.text().catch(() => ""));
       return [];
     }
-    return (await response.json()).sort((a:SchoolClass, b:SchoolClass) => a.name.localeCompare(b.name));
+    const allClasses: SchoolClass[] = await response.json();
+    // Filtrar clases ocultas
+    return allClasses.filter(cls => !cls.isHidden).sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error('Error fetching classes for GlobalHeader dropdown:', error);
     return [];
@@ -39,7 +40,7 @@ async function getClassesData(): Promise<SchoolClass[]> {
 
 export function GlobalHeader() {
   const { t } = useLanguage();
-  const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [visibleClasses, setVisibleClasses] = useState<SchoolClass[]>([]); // Cambiado a visibleClasses
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
 
   const pathname = usePathname();
@@ -48,25 +49,24 @@ export function GlobalHeader() {
   const isAuthenticatedRoute = pathname.startsWith('/admin/') || pathname.startsWith('/delegate/');
   const isDesktopAuthLayout = isAuthenticatedRoute && !isMobile;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoadingClasses(true);
-      const classesData = await getClassesData();
-      setClasses(classesData);
-      setIsLoadingClasses(false);
-    };
-    fetchData();
-  }, []);
+  const fetchData = useCallback(async () => { // Engadido useCallback
+    setIsLoadingClasses(true);
+    const classesData = await getClassesData(); // Xa filtradas
+    setVisibleClasses(classesData);
+    setIsLoadingClasses(false);
+  }, []); // useCallback sen dependencias se getClassesData non depende de props/estado deste compoñente
 
-  // Base horizontal padding for content within the header for public pages or mobile
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]); // Dependencia en fetchData (que agora é useCallback)
+
   const baseContentPaddingX = "px-4 sm:px-6 lg:px-8";
 
-  // Classes for the main content div inside the header
   const headerInternalDivClasses = cn(
-    "h-16 flex justify-between items-center w-full", // Always full-width and flex properties
+    "h-16 flex justify-between items-center w-full",
     isDesktopAuthLayout
-      ? `pl-[${SIDEBAR_WIDTH_DESKTOP_EXPANDED_REM}rem] pr-4 sm:pr-6 lg:pr-8` // Padding for desktop authenticated view
-      : baseContentPaddingX // Standard padding for public/mobile
+      ? `pl-[calc(var(--sidebar-width,${SIDEBAR_WIDTH_DESKTOP_EXPANDED_REM}rem)_+_1rem)] pr-4 sm:pr-6 lg:pr-8`
+      : baseContentPaddingX
   );
 
   return (
@@ -85,8 +85,8 @@ export function GlobalHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="mt-2">
               {isLoadingClasses && <DropdownMenuItem disabled>{t('loadingLabel')}</DropdownMenuItem>}
-              {!isLoadingClasses && classes.length > 0 ? (
-                classes.map((cls) => (
+              {!isLoadingClasses && visibleClasses.length > 0 ? ( // Usar visibleClasses
+                visibleClasses.map((cls) => ( // Usar visibleClasses
                   <DropdownMenuItem key={cls.id} asChild>
                     <Link href={`/class/${cls.id}`} className="w-full text-left">
                       {cls.name}

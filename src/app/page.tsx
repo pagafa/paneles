@@ -9,7 +9,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useEffect, useState, useCallback } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Fetch classes data
+// Obter datos das clases
 async function getClassesData(): Promise<SchoolClass[]> {
   try {
     const response = await fetch('/api/classes');
@@ -17,14 +17,16 @@ async function getClassesData(): Promise<SchoolClass[]> {
       console.error("Failed to fetch classes for Kiosk", response.status, await response.text().catch(() => ""));
       return [];
     }
-    return (await response.json()).sort((a:SchoolClass, b:SchoolClass) => a.name.localeCompare(b.name));
+    const allClasses: SchoolClass[] = await response.json();
+    // Filtrar clases ocultas
+    return allClasses.filter(cls => !cls.isHidden).sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     console.error('Error fetching classes for Kiosk:', error);
     return [];
   }
 }
 
-// Fetch all admin announcements (for counts, and later for filtering upcoming)
+// Obter todos os anuncios do administrador
 async function getAllAdminAnnouncements(): Promise<Announcement[]> {
   try {
     const response = await fetch('/api/announcements');
@@ -39,10 +41,10 @@ async function getAllAdminAnnouncements(): Promise<Announcement[]> {
   }
 }
 
-// Fetch ALL school events (delegate submissions for counts, and later for filtering upcoming)
+// Obter TODOS os eventos escolares
 async function getAllSchoolEventsData(): Promise<SchoolEvent[]> {
   try {
-    const response = await fetch('/api/schoolevents'); // No type filter
+    const response = await fetch('/api/schoolevents');
     if (!response.ok) {
       console.error("Failed to fetch all school events for counts", response.status, await response.text().catch(() => ""));
       return [];
@@ -57,7 +59,7 @@ async function getAllSchoolEventsData(): Promise<SchoolEvent[]> {
 
 export default function KioskPage() {
   const { t } = useLanguage();
-  const [classes, setClasses] = useState<SchoolClass[]>([]);
+  const [visibleClasses, setVisibleClasses] = useState<SchoolClass[]>([]);
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
 
   const [classMessageCounts, setClassMessageCounts] = useState<{ [classId: string]: number }>({});
@@ -70,7 +72,7 @@ export default function KioskPage() {
 
     try {
       const [
-        classesData,
+        classesData, // Xa filtradas para excluír as ocultas
         allAdminAnnouncementsData,
         allSchoolEventsForCountsData,
       ] = await Promise.all([
@@ -79,12 +81,11 @@ export default function KioskPage() {
         getAllSchoolEventsData(),
       ]);
 
-      setClasses(classesData);
+      setVisibleClasses(classesData);
       setIsLoadingClasses(false);
 
-      // Calculate message counts (includes past and future for "Activity by Class")
       const counts: { [classId: string]: number } = {};
-      if (classesData.length > 0) {
+      if (classesData.length > 0) { // Usar classesData (xa filtradas)
         classesData.forEach(cls => {
           let count = 0;
           allAdminAnnouncementsData.forEach(ann => {
@@ -107,6 +108,7 @@ export default function KioskPage() {
       console.error("Error fetching data for KioskPage", e);
       setIsLoadingClasses(false);
       setIsLoadingClassCounts(false);
+      // Considerar mostrar un erro na UI
     }
   }, []);
 
@@ -136,12 +138,12 @@ export default function KioskPage() {
           <Skeleton className="h-8 w-2/3 rounded-md" />
           <Skeleton className="h-8 w-1/2 rounded-md" />
         </div></CardContent></Card>
-      ) : classes.length > 0 ? (
+      ) : visibleClasses.length > 0 ? ( // Usar visibleClasses
         <Card className="shadow-md">
           <CardContent className="pt-6">
             {Object.keys(classMessageCounts).length > 0 ? (
               <ul className="space-y-3">
-                {classes.map((cls) => (
+                {visibleClasses.map((cls) => ( // Usar visibleClasses
                   <li key={cls.id} className="flex justify-between items-center p-3 rounded-md hover:bg-muted/50 transition-colors border border-border">
                     <span className="font-medium text-foreground/90 text-lg">{cls.name}</span>
                     <Badge variant={(classMessageCounts[cls.id] || 0) > 0 ? "default" : "secondary"} className="text-sm px-3 py-1">

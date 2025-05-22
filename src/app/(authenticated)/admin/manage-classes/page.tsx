@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { SchoolClass, User } from "@/types";
-import { Edit3, Book, Trash2, AlertTriangle, KeyRound } from "lucide-react";
+import { Edit3, Book, Trash2, AlertTriangle, Eye, EyeOff } from "lucide-react"; // Engadido Eye, EyeOff
 import { useState, useEffect, useCallback } from "react";
 import {
   AlertDialog,
@@ -31,6 +31,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton"; 
 import { useLanguage } from "@/context/LanguageContext";
+import { Badge } from "@/components/ui/badge"; // Engadido Badge
 
 const sortClasses = (classes: SchoolClass[]) => {
   return [...classes].sort((a, b) => a.name.localeCompare(b.name));
@@ -46,7 +47,6 @@ export default function ManageClassesPage() {
   const { t } = useLanguage(); 
 
   const fetchAllUsers = useCallback(async () => {
-    // Not setting isLoading specifically for users here, assuming it's part of general page load
     try {
       const response = await fetch('/api/users');
       if (!response.ok) {
@@ -57,7 +57,6 @@ export default function ManageClassesPage() {
       setAllUsersFromApi(data);
     } catch (err) {
       console.error('Error fetching users for ManageClassesPage:', err);
-      // Not setting main page error, ClassForm handles its own delegate loading error
       setAllUsersFromApi([]); 
     }
   }, []);
@@ -85,7 +84,7 @@ export default function ManageClassesPage() {
 
   useEffect(() => {
     fetchClasses();
-    fetchAllUsers(); // Fetch users for delegate name resolution
+    fetchAllUsers();
   }, [fetchClasses, fetchAllUsers]);
 
   const handleFormSubmit = async (data: SchoolClass) => {
@@ -106,8 +105,8 @@ export default function ManageClassesPage() {
       }
       
       toast({
-        title: isEditing ? "Class Updated!" : "Class Created!",
-        description: `Class "${data.name}" has been successfully ${isEditing ? 'updated' : 'created'}.`,
+        title: isEditing ? t("classUpdatedToastTitle") : t("classCreatedToastTitle"),
+        description: t('classActionSuccessToastDescription', { name: data.name, action: isEditing ? t('updated') : t('created') }),
       });
 
       setEditingClass(null);
@@ -115,7 +114,7 @@ export default function ManageClassesPage() {
     } catch (err) {
       console.error(err);
       toast({
-        title: "Error",
+        title: t("errorDialogTitle"),
         description: (err as Error).message,
         variant: "destructive",
       });
@@ -137,15 +136,15 @@ export default function ManageClassesPage() {
         throw new Error(errorData.message || `Failed to delete class. Status: ${response.status}`);
       }
       toast({
-        title: "Class Deleted",
-        description: "The class has been successfully deleted.",
+        title: t("classDeletedToastTitle"),
+        description: t("classDeletedToastDescription"),
         variant: "destructive"
       });
       await fetchClasses(); 
     } catch (err) {
        console.error(err);
        toast({
-        title: "Error",
+        title: t("errorDialogTitle"),
         description: (err as Error).message,
         variant: "destructive",
       });
@@ -153,7 +152,7 @@ export default function ManageClassesPage() {
   };
 
   const getDelegateName = (delegateId?: string) => {
-    if (!delegateId) return 'N/A';
+    if (!delegateId) return t('noDelegateOption');
     const delegate = allUsersFromApi.find(d => d.id === delegateId && d.role === 'delegate');
     return delegate ? delegate.name : 'Unknown Delegate';
   };
@@ -166,11 +165,11 @@ export default function ManageClassesPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-xl">
             <Book className="h-6 w-6 text-accent" />
-            {editingClass ? "Edit Class" : "Add New Class"}
+            {editingClass ? t('editClassTitle') : t('addNewClassTitle')}
           </CardTitle>
            {editingClass && (
             <CardDescription>
-              You are editing: "{editingClass.name}". <Button variant="link" size="sm" onClick={() => setEditingClass(null)}>Cancel Edit</Button>
+              {t('editingClassDescription', { name: editingClass.name})} <Button variant="link" size="sm" onClick={() => setEditingClass(null)}>{t('cancelEditButton')}</Button>
             </CardDescription>
           )}
         </CardHeader>
@@ -185,7 +184,7 @@ export default function ManageClassesPage() {
 
       <Separator className="my-8" />
 
-      <h2 className="text-2xl font-semibold mb-6">Existing Classes</h2>
+      <h2 className="text-2xl font-semibold mb-6">{t('existingClassesTitle')}</h2>
       {isLoading && (
         <div className="space-y-4">
           <Skeleton className="h-12 w-full rounded-md" />
@@ -197,17 +196,17 @@ export default function ManageClassesPage() {
         <Card className="border-destructive bg-destructive/10">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle /> Error Loading Classes
+              <AlertTriangle /> {t('errorLoadingClassesTitle')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-destructive">{error}</p>
-            <Button onClick={fetchClasses} className="mt-4">Retry</Button>
+            <Button onClick={fetchClasses} className="mt-4">{t('retryButtonLabel')}</Button>
           </CardContent>
         </Card>
       )}
       {!isLoading && !error && classes.length === 0 && (
-        <p className="text-muted-foreground">No classes created yet.</p>
+        <p className="text-muted-foreground">{t('noClassesCreatedHint')}</p>
       )}
       {!isLoading && !error && classes.length > 0 && (
         <Card className="shadow-md">
@@ -215,42 +214,53 @@ export default function ManageClassesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Class Name</TableHead>
-                  <TableHead>Delegate</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('classNameTableHeader')}</TableHead>
+                  <TableHead>{t('classDelegateTableHeader')}</TableHead>
+                  <TableHead>{t('statusTableHeader')}</TableHead> 
+                  <TableHead className="text-right">{t('actionsTableHeader')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {classes.map((cls) => (
                   <TableRow key={cls.id}>
                     <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        {cls.password && cls.password.trim() !== "" && <KeyRound className="h-4 w-4 text-accent" />}
                         <span>{cls.name}</span>
-                      </div>
                     </TableCell>
                     <TableCell>{getDelegateName(cls.delegateId)}</TableCell>
+                    <TableCell>
+                      {cls.isHidden ? (
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <EyeOff className="h-3.5 w-3.5" />
+                          {t('hiddenStatusBadge')}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                           <Eye className="h-3.5 w-3.5" />
+                          {t('visibleStatusBadge')}
+                        </Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(cls)} aria-label="Edit Class">
+                      <Button variant="outline" size="icon" className="mr-2" onClick={() => handleEdit(cls)} aria-label={t('editClassButtonAriaLabel')}>
                         <Edit3 className="h-4 w-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                           <Button variant="destructive" size="icon" aria-label="Delete Class">
+                           <Button variant="destructive" size="icon" aria-label={t('deleteClassButtonAriaLabel')}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('alertDialogTitle')}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the class "{cls.name}".
+                              {t('deleteClassConfirmation', { name: cls.name })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
                             <AlertDialogAction onClick={() => handleDelete(cls.id)}>
-                              Delete
+                              {t('deleteButton')}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

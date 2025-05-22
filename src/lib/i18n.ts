@@ -118,7 +118,6 @@ interface Translations {
   deleteUserConfirmation: string;
   userNamePlaceholder: string;
   usernamePlaceholder: string;
-  usernameEditWarning: string;
   selectRolePlaceholder: string;
   newPasswordOptionalLabel: string;
   passwordLabel: string;
@@ -127,6 +126,11 @@ interface Translations {
   createUserButton: string;
   passwordRequiredForNewUser: string;
   classNameLabel: string;
+  classNameTableHeader: string; // Engadida para consistencia
+  classDelegateTableHeader: string; // Engadida para consistencia
+  editClassButtonAriaLabel: string; // Engadida para aria-label
+  deleteClassButtonAriaLabel: string; // Engadida para aria-label
+  deleteClassConfirmation: string; // Engadida para consistencia
   classNamePlaceholder: string;
   classDelegateLabel: string;
   optionalLabel: string;
@@ -150,16 +154,6 @@ interface Translations {
   noEventsGeneralHint: string;
   dashboardMenuItemLabel: string;
   logoutButtonLabel: string;
-
-  classPasswordLabel: string;
-  classPasswordPlaceholder: string;
-  classPasswordPromptTitle: string;
-  classPasswordPromptDescription: string;
-  classPasswordInputLabel: string;
-  classPasswordUnlockButton: string;
-  classPasswordIncorrectError: string;
-  classPasswordVerificationError: string;
-  classIsPasswordProtected: string;
 
   dbResetCardTitle: string;
   dbResetWarningDescription: string;
@@ -185,6 +179,24 @@ interface Translations {
   updateAnnouncementButton: string; 
   postAnnouncementButton: string;
   pastEventIndicatorLabel: string;
+
+  classUpdatedToastTitle: string;
+  classCreatedToastTitle: string;
+  classActionSuccessToastDescription: string;
+  classDeletedToastTitle: string;
+  classDeletedToastDescription: string;
+  errorLoadingClassesTitle: string;
+  noClassesCreatedHint: string;
+  editClassTitle: string;
+  addNewClassTitle: string;
+  editingClassDescription: string;
+  existingClassesTitle: string;
+
+  classIsHiddenLabel: string; // Nova
+  classIsHiddenDescription: string; // Nova
+  statusTableHeader: string; // Nova
+  hiddenStatusBadge: string; // Nova
+  visibleStatusBadge: string; // Nova
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -261,7 +273,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Post New Announcement",
     editingAnnouncementDescription: "You are editing: \"{title}\"",
     currentAnnouncementsTitle: "Current Announcements",
-    noAnnouncementsPostedHint: "No announcements posted yet for any class.",
+    noAnnouncementsPostedHint: "No announcements posted yet for any class.", 
     classesTargetLabel: "Classes",
     targetLabel: "Target",
     editButtonLabel: "Edit",
@@ -302,7 +314,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deleteUserConfirmation: "This action cannot be undone. This will permanently delete the user account for \"{name}\".",
     userNamePlaceholder: "e.g., John Doe",
     usernamePlaceholder: "e.g., johndoe",
-    usernameEditWarning: "Username can be changed, but ensure it remains unique.",
     selectRolePlaceholder: "Select a role",
     newPasswordOptionalLabel: "New Password (Optional)",
     passwordLabel: "Password",
@@ -311,6 +322,11 @@ export const translations: Record<SupportedLanguage, Translations> = {
     createUserButton: "Create User",
     passwordRequiredForNewUser: "Password is required for new users.",
     classNameLabel: "Class Name",
+    classNameTableHeader: "Class Name",
+    classDelegateTableHeader: "Delegate",
+    editClassButtonAriaLabel: "Edit Class",
+    deleteClassButtonAriaLabel: "Delete Class",
+    deleteClassConfirmation: "This action cannot be undone. This will permanently delete the class \"{name}\".",
     classNamePlaceholder: "e.g., Grade 10A, Computer Science Club",
     classDelegateLabel: "Delegate",
     optionalLabel: "Optional",
@@ -335,16 +351,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dashboardMenuItemLabel: "Dashboard",
     logoutButtonLabel: "Log out",
 
-    classPasswordLabel: "Class Password (Optional)",
-    classPasswordPlaceholder: "Leave blank for no password",
-    classPasswordPromptTitle: "Password Required",
-    classPasswordPromptDescription: "This class \"{className}\" is password protected. Please enter the password to view its content.",
-    classPasswordInputLabel: "Class Password",
-    classPasswordUnlockButton: "Unlock",
-    classPasswordIncorrectError: "Incorrect password. Please try again.",
-    classPasswordVerificationError: "Error verifying password. Please try again later.",
-    classIsPasswordProtected: "This class is password protected.",
-
     dbResetCardTitle: "Database Maintenance",
     dbResetWarningDescription: "This action is irreversible and will delete all application data. A single admin user 'pablo' (password: 'soypablo') will be created.",
     dbResetButtonLabel: "Reset Entire Database",
@@ -363,12 +369,30 @@ export const translations: Record<SupportedLanguage, Translations> = {
     enterNewPasswordFirstValidation: "Enter the new password first before confirming.",
 
     targetClassesLabel: "Target Classes",
-    selectAtLeastOneClassDescription: "Select at least one class to target.",
+    selectAtLeastOneClassDescription: "Select at least one target class.",
     selectAllClassesButtonLabel: "Select All Classes",
     deselectAllClassesButtonLabel: "Deselect All Classes",
     updateAnnouncementButton: "Update Announcement",
     postAnnouncementButton: "Post Announcement",
     pastEventIndicatorLabel: "Event has passed",
+
+    classUpdatedToastTitle: "Class Updated!",
+    classCreatedToastTitle: "Class Created!",
+    classActionSuccessToastDescription: "Class \"{name}\" has been successfully {action}.",
+    classDeletedToastTitle: "Class Deleted",
+    classDeletedToastDescription: "The class has been successfully deleted.",
+    errorLoadingClassesTitle: "Error Loading Classes",
+    noClassesCreatedHint: "No classes created yet.",
+    editClassTitle: "Edit Class",
+    addNewClassTitle: "Add New Class",
+    editingClassDescription: "You are editing: \"{name}\"",
+    existingClassesTitle: "Existing Classes",
+
+    classIsHiddenLabel: "Hidden Class",
+    classIsHiddenDescription: "Hidden classes won't appear in public listings or dropdowns.",
+    statusTableHeader: "Status",
+    hiddenStatusBadge: "Hidden",
+    visibleStatusBadge: "Visible",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -484,7 +508,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deleteUserConfirmation: "Esta acción no se puede deshacer. Esto eliminará permanentemente la cuenta de usuario de \"{name}\".",
     userNamePlaceholder: "p.ej., Juan Pérez",
     usernamePlaceholder: "p.ej., juan.perez",
-    usernameEditWarning: "El nombre de usuario se puede cambiar, pero asegúrate de que siga siendo único.",
     selectRolePlaceholder: "Selecciona un rol",
     newPasswordOptionalLabel: "Nueva Contraseña (Opcional)",
     passwordLabel: "Contraseña",
@@ -493,6 +516,11 @@ export const translations: Record<SupportedLanguage, Translations> = {
     createUserButton: "Crear Usuario",
     passwordRequiredForNewUser: "La contraseña es obligatoria para nuevos usuarios.",
     classNameLabel: "Nombre de la Clase",
+    classNameTableHeader: "Nombre de Clase",
+    classDelegateTableHeader: "Delegado",
+    editClassButtonAriaLabel: "Editar Clase",
+    deleteClassButtonAriaLabel: "Eliminar Clase",
+    deleteClassConfirmation: "Esta acción no se puede deshacer. Esto eliminará permanentemente la clase \"{name}\".",
     classNamePlaceholder: "p.ej., 1º ESO A, Club de Informática",
     classDelegateLabel: "Delegado",
     optionalLabel: "Opcional",
@@ -516,15 +544,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "No hay anuncios, exámenes o plazos para mostrar en este momento.",
     dashboardMenuItemLabel: "Panel",
     logoutButtonLabel: "Cerrar Sesión",
-    classPasswordLabel: "Contraseña de Clase (Opcional)",
-    classPasswordPlaceholder: "Dejar en blanco si no requiere contraseña",
-    classPasswordPromptTitle: "Contraseña Requerida",
-    classPasswordPromptDescription: "Esta clase \"{className}\" está protegida por contraseña. Por favor, introduce la contraseña para ver su contenido.",
-    classPasswordInputLabel: "Contraseña de la Clase",
-    classPasswordUnlockButton: "Desbloquear",
-    classPasswordIncorrectError: "Contraseña incorrecta. Inténtalo de nuevo.",
-    classPasswordVerificationError: "Error al verificar la contraseña. Inténtalo de nuevo más tarde.",
-    classIsPasswordProtected: "Esta clase está protegida por contraseña.",
     dbResetCardTitle: "Mantenimiento de Base de Datos",
     dbResetWarningDescription: "Esta acción es irreversible y eliminará todos los datos de la aplicación. Se creará un único usuario administrador 'pablo' (contraseña: 'soypablo').",
     dbResetButtonLabel: "Reiniciar Toda la Base de Datos",
@@ -549,6 +568,24 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateAnnouncementButton: "Actualizar Anuncio",
     postAnnouncementButton: "Publicar Anuncio",
     pastEventIndicatorLabel: "El evento ha pasado",
+
+    classUpdatedToastTitle: "¡Clase Actualizada!",
+    classCreatedToastTitle: "¡Clase Creada!",
+    classActionSuccessToastDescription: "La clase \"{name}\" ha sido {action} correctamente.",
+    classDeletedToastTitle: "Clase Eliminada",
+    classDeletedToastDescription: "La clase ha sido eliminada correctamente.",
+    errorLoadingClassesTitle: "Error al Cargar Clases",
+    noClassesCreatedHint: "No hay clases creadas todavía.",
+    editClassTitle: "Editar Clase",
+    addNewClassTitle: "Añadir Nueva Clase",
+    editingClassDescription: "Estás editando: \"{name}\"",
+    existingClassesTitle: "Clases Existentes",
+
+    classIsHiddenLabel: "Clase Oculta",
+    classIsHiddenDescription: "Las clases ocultas no aparecerán en listados públicos o desplegables.",
+    statusTableHeader: "Estado",
+    hiddenStatusBadge: "Oculta",
+    visibleStatusBadge: "Visible",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -664,7 +701,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deleteUserConfirmation: "Cette action est irréversible. Cela supprimera définitiveiment le compte utilisateur de \"{name}\".",
     userNamePlaceholder: "ex: Jean Dupont",
     usernamePlaceholder: "ex: jeandupont",
-    usernameEditWarning: "Le nom d'utilisateur peut être modifié, mais assurez-vous qu'il reste unique.",
     selectRolePlaceholder: "Sélectionner un rôle",
     newPasswordOptionalLabel: "Nouveau Mot de Passe (Optionnel)",
     passwordLabel: "Mot de Passe",
@@ -673,6 +709,11 @@ export const translations: Record<SupportedLanguage, Translations> = {
     createUserButton: "Créer Utilisateur",
     passwordRequiredForNewUser: "Le mot de passe est requis pour les nouveaux utilisateurs.",
     classNameLabel: "Nom de la Classe",
+    classNameTableHeader: "Nom de Classe",
+    classDelegateTableHeader: "Délégué",
+    editClassButtonAriaLabel: "Modifier Classe",
+    deleteClassButtonAriaLabel: "Supprimer Classe",
+    deleteClassConfirmation: "Cette action est irréversible. Cela supprimera définitivement la classe \"{name}\".",
     classNamePlaceholder: "ex: Seconde A, Club d'Informatique",
     classDelegateLabel: "Délégué",
     optionalLabel: "Optionnel",
@@ -696,15 +737,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "Aucune annonce, aucun examen ou aucun délai à afficher pour le moment.",
     dashboardMenuItemLabel: "Tableau de bord",
     logoutButtonLabel: "Déconnexion",
-    classPasswordLabel: "Mot de passe de la classe (Optionnel)",
-    classPasswordPlaceholder: "Laisser vide si pas de mot de passe",
-    classPasswordPromptTitle: "Mot de Passe Requis",
-    classPasswordPromptDescription: "Cette classe \"{className}\" est protégée par un mot de passe. Veuillez entrer le mot de passe pour voir son contenu.",
-    classPasswordInputLabel: "Mot de Passe de la Classe",
-    classPasswordUnlockButton: "Déverrouiller",
-    classPasswordIncorrectError: "Mot de passe incorrect. Veuillez réessayer.",
-    classPasswordVerificationError: "Erreur lors de la vérification du mot de passe. Veuillez réessayer plus tard.",
-    classIsPasswordProtected: "Cette classe est protégée par un mot de passe.",
     dbResetCardTitle: "Maintenance de la Base de Données",
     dbResetWarningDescription: "Cette action est irréversible et supprimera toutes les données de l'application. Un unique utilisateur admin 'pablo' (mot de passe: 'soypablo') sera créé.",
     dbResetButtonLabel: "Réinitialiser Toute la Base de Données",
@@ -729,6 +761,24 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateAnnouncementButton: "Mettre à Jour l'Annonce",
     postAnnouncementButton: "Publier l'Annonce",
     pastEventIndicatorLabel: "L'événement est passé",
+
+    classUpdatedToastTitle: "Classe Mise à Jour !",
+    classCreatedToastTitle: "Classe Créée !",
+    classActionSuccessToastDescription: "La classe \"{name}\" a été {action} avec succès.",
+    classDeletedToastTitle: "Classe Supprimée",
+    classDeletedToastDescription: "La classe a été supprimée avec succès.",
+    errorLoadingClassesTitle: "Erreur de Chargement des Classes",
+    noClassesCreatedHint: "Aucune classe créée pour l'instant.",
+    editClassTitle: "Modifier Classe",
+    addNewClassTitle: "Ajouter Nouvelle Classe",
+    editingClassDescription: "Vous modifiez : \"{name}\"",
+    existingClassesTitle: "Classes Existantes",
+
+    classIsHiddenLabel: "Classe Cachée",
+    classIsHiddenDescription: "Les classes cachées n'apparaîtront pas dans les listes publiques ou les menus déroulants.",
+    statusTableHeader: "Statut",
+    hiddenStatusBadge: "Cachée",
+    visibleStatusBadge: "Visible",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -749,7 +799,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
     delegateIdLabel: "Delegado/a",
-    noEventsForClassHint: "Parece que esta clase \"{className}\" está nunha misión secreta! Non hai nada que amosar polo de agora.",
+    noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.",
     loadingLabel: "Cargando...",
     assignedClassesLabel: "Clases asignadas",
     noAssignedClassesLabel: "Actualmente non tes clases asignadas.",
@@ -844,7 +894,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deleteUserConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente a conta de usuario de \"{name}\".",
     userNamePlaceholder: "p.ex., Xoán Ninguén",
     usernamePlaceholder: "p.ex., xoan.ninguen",
-    usernameEditWarning: "O nome de usuario pode cambiarse, pero asegúrate de que siga sendo único.",
     selectRolePlaceholder: "Selecciona un rol",
     newPasswordOptionalLabel: "Novo Contrasinal (Opcional)",
     passwordLabel: "Contrasinal",
@@ -853,6 +902,11 @@ export const translations: Record<SupportedLanguage, Translations> = {
     createUserButton: "Crear Usuario",
     passwordRequiredForNewUser: "O contrasinal é obrigatorio para novos usuarios.",
     classNameLabel: "Nome da Clase",
+    classNameTableHeader: "Nome de Clase",
+    classDelegateTableHeader: "Delegado",
+    editClassButtonAriaLabel: "Editar Clase",
+    deleteClassButtonAriaLabel: "Eliminar Clase",
+    deleteClassConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente a clase \"{name}\".",
     classNamePlaceholder: "p.ex., 1º ESO A, Club de Informática",
     classDelegateLabel: "Delegado",
     optionalLabel: "Opcional",
@@ -876,15 +930,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "Non hai anuncios, exames ou prazos para amosar neste momento.",
     dashboardMenuItemLabel: "Panel",
     logoutButtonLabel: "Pechar Sesión",
-    classPasswordLabel: "Contrasinal da Clase (Opcional)",
-    classPasswordPlaceholder: "Deixar en branco se non require contrasinal",
-    classPasswordPromptTitle: "Requírese Contrasinal",
-    classPasswordPromptDescription: "Esta clase \"{className}\" está protexida por contrasinal. Por favor, introduce o contrasinal para ver o seu contido.",
-    classPasswordInputLabel: "Contrasinal da Clase",
-    classPasswordUnlockButton: "Desbloquear",
-    classPasswordIncorrectError: "Contrasinal incorrecto. Inténtao de novo.",
-    classPasswordVerificationError: "Erro ao verificar o contrasinal. Inténtao de novo máis tarde.",
-    classIsPasswordProtected: "Esta clase está protexida por contrasinal.",
     dbResetCardTitle: "Mantemento da Base de Datos",
     dbResetWarningDescription: "Esta acción é irreversible e eliminará todos os datos da aplicación. Crearase un único usuario administrador 'pablo' (contrasinal: 'soypablo').",
     dbResetButtonLabel: "Reiniciar Toda a Base de Datos",
@@ -909,6 +954,24 @@ export const translations: Record<SupportedLanguage, Translations> = {
     updateAnnouncementButton: "Actualizar Anuncio",
     postAnnouncementButton: "Publicar Anuncio",
     pastEventIndicatorLabel: "O evento xa pasou",
+
+    classUpdatedToastTitle: "Clase Actualizada!",
+    classCreatedToastTitle: "Clase Creada!",
+    classActionSuccessToastDescription: "A clase \"{name}\" foi {action} correctamente.",
+    classDeletedToastTitle: "Clase Eliminada",
+    classDeletedToastDescription: "A clase eliminouse correctamente.",
+    errorLoadingClassesTitle: "Erro ao Cargar Clases",
+    noClassesCreatedHint: "Aínda non hai clases creadas.",
+    editClassTitle: "Editar Clase",
+    addNewClassTitle: "Engadir Nova Clase",
+    editingClassDescription: "Estás a editar: \"{name}\"",
+    existingClassesTitle: "Clases Existentes",
+
+    classIsHiddenLabel: "Clase Oculta",
+    classIsHiddenDescription: "As clases ocultas non aparecerán en listaxes públicas ou despregables.",
+    statusTableHeader: "Estado",
+    hiddenStatusBadge: "Oculta",
+    visibleStatusBadge: "Visible",
   },
 };
 

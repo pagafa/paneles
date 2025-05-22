@@ -18,13 +18,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const user = await db.findOne({ id: params.id });
     
     if (user) {
-      // Exclude password from the response for security
       const { password, ...userWithoutPassword } = user;
       return NextResponse.json(userWithoutPassword);
     }
     return NextResponse.json({ message: 'User not found' }, { status: 404 });
   } catch (error) {
-    console.error(`Error fetching user ${params.id}:`, error);
+    console.error(`[API GET /api/users/${params.id}] Error:`, error);
     return NextResponse.json({ message: 'Error fetching user', error: (error as Error).message }, { status: 500 });
   }
 }
@@ -45,7 +44,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'User not found for update' }, { status: 404 });
     }
 
-    // If username is being changed, check for uniqueness against other users
     if (requestBody.username && requestBody.username !== existingUser.username) {
       const userWithNewUsername = await db.findOne({ username: requestBody.username });
       if (userWithNewUsername && userWithNewUsername.id !== userId) {
@@ -58,7 +56,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (requestBody.username !== undefined) updatePayload.username = requestBody.username;
     if (requestBody.role !== undefined) updatePayload.role = requestBody.role;
     
-    // Hash and update password only if a new one is provided and it's not empty
     if (requestBody.password && requestBody.password.trim() !== "") {
       updatePayload.password = await bcrypt.hash(requestBody.password.trim(), SALT_ROUNDS);
     }
@@ -71,8 +68,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const numAffected = await db.update({ id: userId }, { $set: updatePayload });
 
     if (numAffected === 0) {
-      // This might happen if the payload is identical to existing data,
-      // but we should still return the user data.
       const currentData = await db.findOne({ id: userId });
       if(currentData) {
         const { password, ...userWithoutPassword } = currentData;
@@ -89,12 +84,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     return NextResponse.json(userWithoutPassword);
 
   } catch (error) {
-    console.error(`Error updating user ${params.id}:`, error);
+    console.error(`[API PUT /api/users/${params.id}] Error:`, error);
     const errorMessage = (error as Error).message;
-    const requestBodyUsername = (await request.clone().json().catch(() => ({}))).username;
     
     if (errorMessage.includes('unique constraint violated for field username')) {
-        const attemptedUsername = requestBodyUsername || 'provided';
+        const attemptedUsername = (await request.clone().json().catch(() => ({}))).username || 'provided';
         return NextResponse.json({ message: `Error updating user: Username "${attemptedUsername}" already exists. Please choose a different username. (DB constraint: ${errorMessage})` }, { status: 409 });
     }
      if (errorMessage.includes('unique constraint violated for field id')) { 
@@ -127,8 +121,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'User deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error(`Error deleting user ${params.id}:`, error);
+    console.error(`[API DELETE /api/users/${params.id}] Error:`, error);
     return NextResponse.json({ message: 'Error deleting user', error: (error as Error).message }, { status: 500 });
   }
 }
-    
