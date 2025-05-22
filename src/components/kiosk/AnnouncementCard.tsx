@@ -5,22 +5,28 @@ import type { SchoolEvent, Announcement, Exam, Deadline } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
+import { enUS, es, fr, gl } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
-import { Megaphone, BookOpenCheck, FileText, Edit3, Trash2 } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext'; // Import useLanguage
+import { Edit3, Trash2, Megaphone, BookOpenCheck, FileText } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface AnnouncementCardProps {
-  item: SchoolEvent;
-  onEdit?: (item: SchoolEvent) => void;
-  onDeleteRequest?: (item: SchoolEvent) => void;
+  item: SchoolEvent | Announcement; 
+  onEdit?: (item: SchoolEvent | Announcement) => void;
+  onDeleteRequest?: (item: SchoolEvent | Announcement) => void;
   showDelegateActions?: boolean;
   showTypeIcon?: boolean;
 }
 
-export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateActions = false, showTypeIcon = false }: AnnouncementCardProps) {
+export function AnnouncementCard({ 
+  item, 
+  onEdit, 
+  onDeleteRequest, 
+  showDelegateActions = false, 
+  showTypeIcon = false 
+}: AnnouncementCardProps) {
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
-  const { language } = useLanguage(); // Get current language
+  const { language, t } = useLanguage();
 
   const getLocaleObject = () => {
     switch (language) {
@@ -39,8 +45,23 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
       console.error("Error formatting date:", item.date, error);
       setFormattedDate("Invalid Date");
     }
-  }, [item.date, language]); // Add language to dependency array
+  }, [item.date, language]);
 
+  let displayContentOrSubject = "";
+  
+  if (item.type === 'announcement') {
+    // Check if 'content' exists, for both Admin Announcement and Delegate SchoolEvent (type announcement)
+    if ('content' in item && typeof item.content === 'string') {
+      displayContentOrSubject = item.content;
+    }
+  } else if (item.type === 'exam') {
+    // Type assertion is safe here because SchoolEvent union defines Exam with subject
+    displayContentOrSubject = `${t('formExamSubjectLabel')}: ${(item as Exam).subject}`;
+  } else if (item.type === 'deadline') {
+    // Type assertion is safe here
+    displayContentOrSubject = `${t('formDeadlineAssignmentNameLabel')}: ${(item as Deadline).assignmentName}`;
+  }
+  
   const TypeSpecificIcon =
     item.type === 'announcement' ? Megaphone :
     item.type === 'exam' ? BookOpenCheck :
@@ -58,10 +79,10 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
           </div>
           {showDelegateActions && onEdit && onDeleteRequest && (
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={() => onEdit(item)} aria-label="Edit Submission">
+              <Button variant="outline" size="icon" onClick={() => onEdit(item)} aria-label={t('editButtonLabel') || "Edit Submission"}>
                 <Edit3 className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="icon" onClick={() => onDeleteRequest(item)} aria-label="Delete Submission">
+              <Button variant="destructive" size="icon" onClick={() => onDeleteRequest(item)} aria-label={t('deleteButtonLabel') || "Delete Submission"}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -69,9 +90,7 @@ export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateAc
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        {item.type === 'announcement' && <p className="text-lg text-foreground/90 mb-2">{(item as Announcement).content}</p>}
-        {item.type === 'exam' && <p className="text-lg text-foreground/90 mb-2">Subject: {(item as Exam).subject}</p>}
-        {item.type === 'deadline' && <p className="text-lg text-foreground/90 mb-2">Assignment: {(item as Deadline).assignmentName}</p>}
+        <p className="text-lg text-foreground/90 mb-2">{displayContentOrSubject}</p>
         
         {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
         

@@ -4,8 +4,9 @@
 import { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
 
-import type { SchoolEvent, Announcement, Exam, Deadline, User, ClassPageDetails } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { SchoolEvent, Announcement, Exam, Deadline, User } from "@/types";
+import type { ClassPageDetails } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { Separator } from '@/components/ui/separator';
@@ -13,7 +14,9 @@ import { Book, Megaphone, BookOpenCheck, FileText, AlertTriangle, KeyRound, Unlo
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input'; // For password input
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+
 
 interface ClassPageDetailsWithPassword extends ClassPageDetails {
   passwordProtected: boolean;
@@ -38,22 +41,39 @@ async function getClassDetails(classId: string): Promise<ClassPageDetailsWithPas
   }
 }
 
-// Only gets announcements specifically targeted to this class
-async function getClassSpecificAnnouncements(classId: string): Promise<Announcement[]> {
+// Gets Admin announcements specifically targeted to this class
+async function getClassAdminAnnouncements(classId: string): Promise<Announcement[]> {
   try {
     const response = await fetch('/api/announcements');
     if (!response.ok) {
-        console.error("Failed to fetch announcements for class page (specific)", response.status, await response.text().catch(() => ""));
+        console.error("Failed to fetch admin announcements for class page", response.status, await response.text().catch(() => ""));
         return [];
     }
-    const allAnnouncements: Announcement[] = await response.json();
-    // Filter for announcements that include this classId in their targetClassIds
-    return allAnnouncements.filter(event => event.targetClassIds && event.targetClassIds.includes(classId));
+    const allAdminAnnouncements: Announcement[] = await response.json();
+    return allAdminAnnouncements.filter(ann => ann.targetClassIds && ann.targetClassIds.includes(classId));
   } catch (error) {
-    console.error(`Error fetching class-specific announcements for ${classId}:`, error);
+    console.error(`Error fetching admin announcements for ${classId}:`, error);
     return [];
   }
 }
+
+// Gets Delegate-submitted announcements for this class
+async function getClassDelegateAnnouncements(classId: string): Promise<SchoolEvent[]> {
+  try {
+    const response = await fetch(`/api/schoolevents?type=announcement&classId=${classId}`);
+    if (!response.ok) {
+      console.error("Failed to fetch delegate announcements for class:", classId, response.status, await response.text().catch(() => ""));
+      return [];
+    }
+    // Ensure the response is indeed SchoolEvent[] and filter if necessary, though API should do this
+    const data = await response.json();
+    return data.filter((event: any) => event.type === 'announcement' && event.classId === classId);
+  } catch (error) {
+    console.error(`Error fetching delegate announcements for ${classId}:`, error);
+    return [];
+  }
+}
+
 
 async function getClassExams(classId: string): Promise<Exam[]> {
   try {
@@ -62,7 +82,8 @@ async function getClassExams(classId: string): Promise<Exam[]> {
       console.error("Failed to fetch exams for class:", classId, response.status, await response.text().catch(() => ""));
       return [];
     }
-    return await response.json();
+    const data = await response.json();
+    return data.filter((event: SchoolEvent) => event.type === 'exam') as Exam[];
   } catch (error) {
     console.error(`Error fetching class exams for ${classId}:`, error);
     return [];
@@ -76,7 +97,8 @@ async function getClassDeadlines(classId: string): Promise<Deadline[]> {
       console.error("Failed to fetch deadlines for class:", classId, response.status, await response.text().catch(() => ""));
       return [];
     }
-    return await response.json();
+    const data = await response.json();
+    return data.filter((event: SchoolEvent) => event.type === 'deadline') as Deadline[];
   } catch (error) {
     console.error(`Error fetching class deadlines for ${classId}:`, error);
     return [];
@@ -106,9 +128,9 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
   const [classDetails, setClassDetails] = useState<ClassPageDetailsWithPassword | null>(null);
   const [users, setUsers] = useState<User[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [exams, setExams] = useState<Exam[]>([]);
-  const [deadlines, setDeadlines] = useState<Deadline[]>([]);
+  const [announcements, setAnnouncements] = useState<(Announcement | SchoolEvent)[]>([]);
+  const [exams, setExams] = useState<SchoolEvent[]>([]); // Will store Exam[] which are SchoolEvent
+  const [deadlines, setDeadlines] = useState<SchoolEvent[]>([]); // Will store Deadline[] which are SchoolEvent
 
   const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(true);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
@@ -136,7 +158,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     try {
       const details = await getClassDetails(classId);
       setClassDetails(details);
-      setIsLoadingClassDetails(false); // Class details loaded
+      setIsLoadingClassDetails(false);
 
       if (!details) {
         setError(t('classNotFoundMessage'));
@@ -144,38 +166,43 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         return;
       }
 
-      // If class is not password protected, or if it is but already unlocked this visit, fetch events
       if (!details.passwordProtected || isClassUnlockedThisVisit) {
         const usersData = await getUsers();
         setUsers(usersData);
 
-        const [classSpecificAnns, classExamsData, classDeadlinesData] = await Promise.all([
-          getClassSpecificAnnouncements(classId),
+        const [
+          adminAnnouncementsForClass,
+          delegateAnnouncementsForClass,
+          classExamsData,
+          classDeadlinesData
+        ] = await Promise.all([
+          getClassAdminAnnouncements(classId),
+          getClassDelegateAnnouncements(classId),
           getClassExams(classId),
           getClassDeadlines(classId)
         ]);
-
-        setAnnouncements(sortEvents(classSpecificAnns));
-        setExams(sortEvents(classExamsData));
-        setDeadlines(sortEvents(classDeadlinesData));
+        
+        const combinedAnnouncements: (Announcement | SchoolEvent)[] = [...adminAnnouncementsForClass, ...delegateAnnouncementsForClass];
+        setAnnouncements(sortEvents(combinedAnnouncements));
+        setExams(sortEvents(classExamsData)); // classExamsData is already Exam[] which is compatible with SchoolEvent[]
+        setDeadlines(sortEvents(classDeadlinesData)); // classDeadlinesData is already Deadline[] which is compatible with SchoolEvent[]
         setIsLoadingEvents(false);
       } else {
-        // Class is password protected and not yet unlocked, don't load events yet
         setIsLoadingEvents(false);
       }
 
     } catch (err) {
       console.error("Error fetching data for class page:", err);
       setError((err as Error).message || "An unexpected error occurred");
-      setClassDetails(null); // Ensure classDetails is null on error
+      setClassDetails(null);
       setIsLoadingClassDetails(false);
       setIsLoadingEvents(false);
     }
-  }, [classId, t, isClassUnlockedThisVisit]); // Add isClassUnlockedThisVisit as dependency
+  }, [classId, t, isClassUnlockedThisVisit]);
 
   useEffect(() => {
     fetchClassPageData();
-  }, [fetchClassPageData]); // fetchData already includes isClassUnlockedThisVisit
+  }, [fetchClassPageData]);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +226,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
       if (result.verified) {
         setIsClassUnlockedThisVisit(true);
-        // Events will be fetched by fetchClassPageData due to isClassUnlockedThisVisit change
       } else {
         setPasswordError(t('classPasswordIncorrectError'));
       }
@@ -207,7 +233,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       setPasswordError((err as Error).message);
     } finally {
       setIsVerifyingPassword(false);
-      setPasswordInput(''); // Clear input after attempt
+      setPasswordInput('');
     }
   };
 
@@ -240,7 +266,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       </div>
     );
   }
-
+  
   if (!classDetails) {
      return (
       <div className="w-full max-w-lg text-center py-10">
@@ -257,7 +283,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-  // Show password prompt if class is protected and not yet unlocked
   if (classDetails.passwordProtected && !isClassUnlockedThisVisit) {
     return (
       <div className="w-full max-w-md mx-auto py-12">
@@ -294,24 +319,21 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-
-  // If class is not password protected, or is unlocked, show content
-  const sectionsConfig: { titleKey: TranslationKey; events: SchoolEvent[]; icon: React.ElementType, emptyImageHint: string, isLoading: boolean }[] = [
-    { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, emptyImageHint: 'megaphone class empty', isLoading: isLoadingEvents },
-    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, emptyImageHint: 'exam calendar class empty', isLoading: isLoadingEvents },
-    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, emptyImageHint: 'deadline list class empty', isLoading: isLoadingEvents },
+  const sectionsConfig: { titleKey: TranslationKey; events: (Announcement | SchoolEvent)[]; icon: React.ElementType; isLoading: boolean }[] = [
+    { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, isLoading: isLoadingEvents },
+    { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, isLoading: isLoadingEvents },
+    { titleKey: 'deadlinesSectionTitle', events: deadlines, icon: FileText, isLoading: isLoadingEvents },
   ];
 
   const visibleClassSections = sectionsConfig.filter(section => section.isLoading || section.events.length > 0);
   const noEventsForAllSections = !isLoadingEvents && announcements.length === 0 && exams.length === 0 && deadlines.length === 0;
 
-
-  let delegateNameDisplay = t('noDelegateOption'); // Default to "N/A" or "None"
+  let delegateNameDisplay = t('noDelegateOption');
   if (classDetails.delegateId) {
     const delegateUser = users.find(u => u.id === classDetails.delegateId && u.role === 'delegate');
     if (delegateUser) {
       delegateNameDisplay = delegateUser.name;
-    } else if (isLoadingEvents) { // If users haven't loaded yet with events
+    } else if (isLoadingEvents && !users.length) { 
         delegateNameDisplay = t('loadingLabel');
     }
   }
@@ -360,20 +382,15 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
                 {t(section.titleKey)}
               </h2>
             </div>
-            <KioskCarousel items={section.events} />
+            {/* KioskCarousel now expects (Announcement | SchoolEvent)[] which is what section.events is */}
+            <KioskCarousel items={section.events} /> 
             {index < visibleClassSections.filter(s => s.events.length > 0).length - 1 && <Separator className="my-12" />}
           </section>
         ))
       )}
 
-      {noEventsForAllSections && !classDetails.passwordProtected && ( // Only show if not password protected and empty
+      {noEventsForAllSections && (
         <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
-          <p className="text-xl font-medium text-muted-foreground">{t('noEventsForClassHint', { className: classDetails.name })}</p>
-          <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
-        </div>
-      )}
-      {noEventsForAllSections && classDetails.passwordProtected && isClassUnlockedThisVisit && ( // Show if password protected, unlocked, but empty
-         <div className="text-center py-10 px-4 bg-card rounded-lg shadow-md">
           <p className="text-xl font-medium text-muted-foreground">{t('noEventsForClassHint', { className: classDetails.name })}</p>
           <p className="text-sm text-muted-foreground">{t('checkBackLaterHint')}</p>
         </div>
