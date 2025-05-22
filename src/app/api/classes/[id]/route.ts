@@ -16,13 +16,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
     
     if (schoolClass) {
       // For the public class page, this returns passwordProtected boolean
-      // For admin management, the full list GET /api/classes returns the password for icon display.
-      // This specific GET /api/classes/[id] is primarily used by the public class page.
-      const { password, ...classDetailsWithoutPassword } = schoolClass;
       const classToReturn = {
-        ...classDetailsWithoutPassword,
-        passwordProtected: !!password && password.trim() !== '',
+        ...schoolClass, // Send all fields including name, delegateId, language
+        passwordProtected: !!schoolClass.password && schoolClass.password.trim() !== '',
       };
+      // Do NOT return the actual password to the client for public class pages
+      delete (classToReturn as any).password; 
       return NextResponse.json(classToReturn);
     }
     return NextResponse.json({ message: 'Class not found' }, { status: 404 });
@@ -41,26 +40,33 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const requestBody: Partial<Omit<SchoolClass, 'id'>> = await request.json();
+    // console.log(`[API PUT /api/classes/${classId}] Request body:`, requestBody);
     
     const updatePayload: Partial<SchoolClass> = {};
     
     if (requestBody.name !== undefined) updatePayload.name = requestBody.name;
-    if (requestBody.delegateId !== undefined) updatePayload.delegateId = requestBody.delegateId === "" ? undefined : requestBody.delegateId;
+    if (requestBody.delegateId !== undefined) {
+        // Allow setting delegateId to undefined (or null) if an empty string is passed
+        updatePayload.delegateId = requestBody.delegateId === "" ? undefined : requestBody.delegateId;
+    }
     if (requestBody.language !== undefined) updatePayload.language = requestBody.language;
     
+    // Handle password: if key 'password' is present in requestBody
     if (Object.prototype.hasOwnProperty.call(requestBody, 'password')) { 
       if (requestBody.password && requestBody.password.trim() !== "") {
         updatePayload.password = requestBody.password.trim();
       } else {
+        // If password is an empty string or explicitly null, set it to undefined in DB to remove it
         updatePayload.password = undefined; 
       }
     }
     
+    // console.log(`[API PUT /api/classes/${classId}] Update payload to NeDB:`, updatePayload);
+
     if (Object.keys(updatePayload).length === 0 && !Object.prototype.hasOwnProperty.call(requestBody, 'password')) {
         const dbCheck = await getClassesDb();
         const existingDoc = await dbCheck.findOne({ id: classId });
         if(existingDoc) {
-             // Return without password, consistent with other class GETs not for public page
             const { password, ...classToReturn } = existingDoc;
             return NextResponse.json(classToReturn);
         }
@@ -72,9 +78,18 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     if (numAffected === 0) {
       const existingClass = await db.findOne({ id: classId });
+      // Check if it was just an attempt to set the same data
       if (existingClass) { 
-        const { password, ...classToReturn } = existingClass;
-        return NextResponse.json(classToReturn);
+        let noMeaningfulChange = true;
+        if (updatePayload.name !== undefined && updatePayload.name !== existingClass.name) noMeaningfulChange = false;
+        if (updatePayload.delegateId !== undefined && updatePayload.delegateId !== existingClass.delegateId) noMeaningfulChange = false;
+        if (updatePayload.language !== undefined && updatePayload.language !== existingClass.language) noMeaningfulChange = false;
+        if (Object.prototype.hasOwnProperty.call(requestBody, 'password') && updatePayload.password !== existingClass.password) noMeaningfulChange = false;
+
+        if (noMeaningfulChange) {
+            const { password, ...classToReturn } = existingClass;
+            return NextResponse.json(classToReturn);
+        }
       }
       return NextResponse.json({ message: 'Class not found or no changes made' }, { status: 404 });
     }
@@ -83,7 +98,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!updatedClass) {
         return NextResponse.json({ message: 'Class updated but failed to retrieve' }, { status: 500 });
     }
-    // Return without password for consistency, except for the specific GET /api/classes list.
     const { password, ...classToReturn } = updatedClass; 
     return NextResponse.json(classToReturn);
 

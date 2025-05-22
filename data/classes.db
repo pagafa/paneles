@@ -1,1 +1,8 @@
+{"id":"class-1747935493960-yzta6","name":"1º BACH","_id":"7Wq09raW2oauR5Od","createdAt":{"$$date":1747935493875},"updatedAt":{"$$date":1747935493875}}
+{"id":"class-1747935471466-kpsnk","name":"1º ESO","_id":"KGIGPP3JOIRlcoWY","createdAt":{"$$date":1747935471408},"updatedAt":{"$$date":1747935471408}}
+{"id":"class-1747935483964-qfpp1","name":"3º ESO","_id":"Rrbze2ZTJjEn7IJk","createdAt":{"$$date":1747935483878},"updatedAt":{"$$date":1747935483878}}
+{"id":"class-1747935488824-2xpwq","name":"4º ESO","_id":"T3vHvxtrwxQkCXU9","createdAt":{"$$date":1747935488736},"updatedAt":{"$$date":1747935488736}}
+{"id":"class-1747935478410-c6d7b","name":"2º ESO","_id":"TDySRunNCGeoW6dL","createdAt":{"$$date":1747935478320},"updatedAt":{"$$date":1747935478320}}
+{"id":"class-1747935499130-gk0r5","name":"2º BACH","_id":"yu45V25T4E67Ta6l","createdAt":{"$$date":1747935499040},"updatedAt":{"$$date":1747935499040}}
+{"id":"class-1747935517950-gefxg","name":"Sala Profesores","password":"clave","_id":"yxrryCoythNRTRXe","createdAt":{"$$date":1747935517992},"updatedAt":{"$$date":1747935517992}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}

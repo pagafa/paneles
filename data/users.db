@@ -1,0 +1,3 @@
+{"id":"user-admin-pablo-reset-1747935135205","name":"Pablo Admin","username":"pablo","role":"admin","password":"$2b$10$hhP698UckXUtF5sFTrxHsekhWctjSooGZMh7LGNHhTnOa456ecDxO","_id":"3NS5Absb64oaHjJM","createdAt":{"$$date":1747935135402},"updatedAt":{"$$date":1747935135402}}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
