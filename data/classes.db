@@ -1,4 +1,5 @@
-{"id":"eso2b","name":"2º ESO BB","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952608165}}
+{"id":"class-1747952733278-bbe99","name":"Oculta","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"Cx8HVBVrArCJVRHO","createdAt":{"$$date":1747952733299},"updatedAt":{"$$date":1747952733299}}
+{"id":"eso2b","name":"2º ESO BB","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952721475}}
 {"id":"eso1a","name":"1º ESO A","delegateId":"delegate-laura-g","_id":"JxyjYlwGhI3jpTEc","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
 {"id":"fpsdaw","name":"CS DAW","_id":"OV0qWcUlUUqkNi3M","createdAt":{"$$date":1747952524656},"updatedAt":{"$$date":1747952524656}}
 {"id":"fpbasic","name":"FP Básica Informática","isHidden":false,"_id":"X798W0dFckrnAcSL","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
@@ -7,6 +8,4 @@
 {"id":"fpscm","name":"CM SMR","_id":"ftYKmowbfXlE8hlw","createdAt":{"$$date":1747952524656},"updatedAt":{"$$date":1747952524656}}
 {"id":"bach2d","name":"2º Bacharelato D","delegateId":"delegate-laura-g","_id":"vF36RJpO93sl2wiO","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
-{"id":"eso2b","name":"2º ESO BB","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952710131}}
-{"id":"eso2b","name":"2º ESO BB","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952721475}}
-{"id":"class-1747952733278-bbe99","name":"Oculta","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"Cx8HVBVrArCJVRHO","createdAt":{"$$date":1747952733299},"updatedAt":{"$$date":1747952733299}}
+{"id":"class-1747952824330-q579u","name":"oculta","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"LUBbnpsG74V8PwuK","createdAt":{"$$date":1747952824350},"updatedAt":{"$$date":1747952824350}}

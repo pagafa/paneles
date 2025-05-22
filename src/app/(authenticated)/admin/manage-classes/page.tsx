@@ -29,7 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "@/components/ui/skeleton"; 
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/context/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 
@@ -44,7 +44,7 @@ export default function ManageClassesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { t } = useLanguage(); 
+  const { t } = useLanguage();
 
   const fetchAllUsers = useCallback(async () => {
     try {
@@ -57,7 +57,7 @@ export default function ManageClassesPage() {
       setAllUsersFromApi(data);
     } catch (err) {
       console.error('Error fetching users for ManageClassesPage:', err);
-      setAllUsersFromApi([]); 
+      setAllUsersFromApi([]);
     }
   }, []);
 
@@ -66,7 +66,8 @@ export default function ManageClassesPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/classes', { cache: 'no-store' });
+      // Add a cache-busting query parameter
+      const response = await fetch(`/api/classes?_time=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Failed to fetch classes. Status: ${response.status}` }));
         throw new Error(errorData.message || `Failed to fetch classes. Status: ${response.status}`);
@@ -80,7 +81,7 @@ export default function ManageClassesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]); // t is used in error messages, so it's a valid dependency
 
   useEffect(() => {
     fetchClasses();
@@ -103,14 +104,26 @@ export default function ManageClassesPage() {
         const errorData = await response.json().catch(() => ({ message: `Failed to ${isEditing ? 'update' : 'create'} class. Status: ${response.status}` }));
         throw new Error(errorData.message || `Failed to ${isEditing ? 'update' : 'create'} class. Status: ${response.status}`);
       }
-      
+
+      const savedOrUpdatedClassApiResult: SchoolClass = await response.json();
+
+      // Optimistic update
+      if (!isEditing) {
+        setClasses(prevClasses => sortClasses([...prevClasses, savedOrUpdatedClassApiResult]));
+      } else {
+        setClasses(prevClasses => sortClasses(
+            prevClasses.map(cls => cls.id === savedOrUpdatedClassApiResult.id ? savedOrUpdatedClassApiResult : cls)
+        ));
+      }
+
       toast({
         title: isEditing ? t("classUpdatedToastTitle") : t("classCreatedToastTitle"),
-        description: t('classActionSuccessToastDescription', { name: data.name, action: isEditing ? t('updated') : t('created') }),
+        description: t('classActionSuccessToastDescription', { name: savedOrUpdatedClassApiResult.name, action: isEditing ? t('updated') : t('created') }),
       });
 
       setEditingClass(null);
-      await fetchClasses(); 
+      // Still re-fetch to ensure full synchronization, though UI should reflect change already
+      await fetchClasses();
     } catch (err) {
       console.error(err);
       toast({
@@ -125,7 +138,7 @@ export default function ManageClassesPage() {
     setEditingClass(cls);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  
+
   const handleCancelEdit = () => {
     setEditingClass(null);
   };
@@ -144,7 +157,7 @@ export default function ManageClassesPage() {
         description: t("classDeletedToastDescription"),
         variant: "destructive"
       });
-      await fetchClasses(); 
+      await fetchClasses();
     } catch (err) {
        console.error(err);
        toast({
@@ -178,9 +191,9 @@ export default function ManageClassesPage() {
           )}
         </CardHeader>
         <CardContent>
-          <ClassForm 
-            onSubmitSuccess={handleFormSubmit} 
-            initialData={editingClass || undefined} 
+          <ClassForm
+            onSubmitSuccess={handleFormSubmit}
+            initialData={editingClass || undefined}
             key={editingClass ? editingClass.id : 'new'}
             isEditing={!!editingClass}
             onCancelEdit={handleCancelEdit}
@@ -222,7 +235,7 @@ export default function ManageClassesPage() {
                 <TableRow>
                   <TableHead>{t('classNameTableHeader')}</TableHead>
                   <TableHead>{t('classDelegateTableHeader')}</TableHead>
-                  <TableHead>{t('statusTableHeader')}</TableHead> 
+                  <TableHead>{t('statusTableHeader')}</TableHead>
                   <TableHead className="text-right">{t('actionsTableHeader')}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -283,3 +296,4 @@ export default function ManageClassesPage() {
     </div>
   );
 }
+    
