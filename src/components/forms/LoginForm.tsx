@@ -34,29 +34,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
-  const [usersFromApi, setUsersFromApi] = useState<User[]>([]);
-  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setIsLoadingUsers(true);
-      try {
-        const response = await fetch('/api/users');
-        if (!response.ok) {
-          throw new Error('Failed to fetch users for login');
-        }
-        const data: User[] = await response.json();
-        setUsersFromApi(data);
-      } catch (err) {
-        console.error(err);
-        // setError('Could not load user data. Please try again later.'); // Optional: inform user
-        setUsersFromApi([]);
-      } finally {
-        setIsLoadingUsers(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  // No longer fetching all users here; authentication will be done via API
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -69,29 +47,41 @@ export function LoginForm() {
   async function onSubmit(values: LoginFormValues) {
     setIsLoading(true);
     setError(null);
-    
-    if (isLoadingUsers) {
-      setError("User data is still loading. Please wait a moment and try again.");
-      setIsLoading(false);
-      return;
-    }
 
-    const user = usersFromApi.find(u => u.username === values.username);
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: values.username, password: values.password }),
+      });
 
-    if (user && values.password === "password") { // Still using "password" for demo
-      localStorage.setItem("userRole", user.role);
-      localStorage.setItem("userId", user.id);
-      if (user.role === "admin") {
-        router.push("/admin/dashboard");
-      } else if (user.role === "delegate") {
-        router.push("/delegate/dashboard");
-      } else {
-        setError("Unknown user role."); // Should not happen with current roles
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Invalid username or password." }));
+        throw new Error(errorData.message || "Login failed. Please check your credentials.");
       }
-    } else {
-      setError("Invalid username or password.");
+
+      const user: User = await response.json(); // API should return user data without password
+
+      if (user && user.id && user.role) {
+        localStorage.setItem("userRole", user.role);
+        localStorage.setItem("userId", user.id);
+        if (user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else if (user.role === "delegate") {
+          router.push("/delegate/dashboard");
+        } else {
+          setError("Unknown user role."); // Should not happen with current roles
+        }
+      } else {
+        // This case should ideally be caught by !response.ok
+        setError("Login failed. Invalid response from server.");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError((err as Error).message);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   return (
@@ -137,8 +127,8 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full" disabled={isLoading || isLoadingUsers}>
-              {isLoading || isLoadingUsers ? "Logging in..." : <> <LogIn className="mr-2 h-4 w-4" /> {t('loginButtonLabel')} </>}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Logging in..." : <> <LogIn className="mr-2 h-4 w-4" /> {t('loginButtonLabel')} </>}
             </Button>
           </form>
         </Form>
