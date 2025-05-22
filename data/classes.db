@@ -1,4 +1,12 @@
-{"id":"class-1747936336551-jjqr3","name":"Sala de profesores","_id":"2a9Hw4chC8KunsZy","createdAt":{"$$date":1747936336468},"updatedAt":{"$$date":1747952410094}}
-{"id":"class-1747952108656-l3w7k","name":"2º ESO","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"Bs5ndlNy7yov5HVz","createdAt":{"$$date":1747952108646},"updatedAt":{"$$date":1747952108646}}
-{"id":"class-1747936327866-plzlc","name":"1º ESO A","_id":"pNZncyAGHqHlPhl9","createdAt":{"$$date":1747936327785},"updatedAt":{"$$date":1747938103793},"delegateId":"user-1747938087506-k5ruh"}
+{"id":"eso2b","name":"2º ESO B","delegateId":"delegate-carlos-p","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
+{"id":"eso1a","name":"1º ESO A","delegateId":"delegate-laura-g","_id":"JxyjYlwGhI3jpTEc","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
+{"id":"fpsdaw","name":"CS DAW","_id":"OV0qWcUlUUqkNi3M","createdAt":{"$$date":1747952524656},"updatedAt":{"$$date":1747952524656}}
+{"id":"fpbasic","name":"FP Básica Informática","isHidden":false,"_id":"X798W0dFckrnAcSL","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
+{"id":"bach1c","name":"1º Bacharelato C","_id":"aNMrhCHV47g0J6PR","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
+{"id":"fpsasir","name":"CS ASIR","_id":"bLa7ZEvuuVxllbCQ","createdAt":{"$$date":1747952524656},"updatedAt":{"$$date":1747952524656}}
+{"id":"fpscm","name":"CM SMR","_id":"ftYKmowbfXlE8hlw","createdAt":{"$$date":1747952524656},"updatedAt":{"$$date":1747952524656}}
+{"id":"bach2d","name":"2º Bacharelato D","delegateId":"delegate-laura-g","_id":"vF36RJpO93sl2wiO","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952524650}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"id":"eso2b","name":"2º ESO B","delegateId":"delegate-carlos-p","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952583426}}
+{"id":"eso2b","name":"2º ESO B","delegateId":"delegate-carlos-p","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952594776}}
+{"id":"eso2b","name":"2º ESO BB","delegateId":"user-1747938087506-k5ruh","isHidden":true,"_id":"HVnefQC8kEuhMwyo","createdAt":{"$$date":1747952524650},"updatedAt":{"$$date":1747952608165}}

@@ -15,7 +15,13 @@ export async function GET(request: Request, { params }: { params: { classId: str
     const schoolClass = await db.findOne({ id: params.classId });
     
     if (schoolClass) {
-      return NextResponse.json(schoolClass);
+      // For public consumption, indicate if password protected but don't send password
+      const { password, ...classDetailsWithoutPassword } = schoolClass;
+      const responsePayload = {
+        ...classDetailsWithoutPassword,
+        passwordProtected: !!password && password.trim() !== '',
+      };
+      return NextResponse.json(responsePayload);
     }
     return NextResponse.json({ message: 'Class not found' }, { status: 404 });
   } catch (error) {
@@ -46,12 +52,19 @@ export async function PUT(request: Request, { params }: { params: { classId: str
     if (requestBody.isHidden !== undefined) {
       updatePayload.isHidden = requestBody.isHidden;
     }
+    // Password handling was removed when "classes con clave" was removed
 
     if (Object.keys(updatePayload).length === 0) {
         const dbCheck = await getClassesDb();
         const existingDoc = await dbCheck.findOne({ id: classId });
         if(existingDoc) {
-            return NextResponse.json(existingDoc);
+            // Return the public-facing version without the password
+            const { password, ...classDetailsWithoutPassword } = existingDoc;
+            const responsePayload = {
+                ...classDetailsWithoutPassword,
+                passwordProtected: !!password && password.trim() !== '',
+            };
+            return NextResponse.json(responsePayload);
         }
         return NextResponse.json({ message: 'No updatable fields provided or class not found' }, { status: 400 });
     }
@@ -66,10 +79,16 @@ export async function PUT(request: Request, { params }: { params: { classId: str
         if (updatePayload.name !== undefined && updatePayload.name !== existingClass.name) noMeaningfulChange = false;
         if (updatePayload.delegateId !== undefined && updatePayload.delegateId !== existingClass.delegateId) noMeaningfulChange = false;
         if (updatePayload.language !== undefined && updatePayload.language !== existingClass.language) noMeaningfulChange = false;
-        if (updatePayload.isHidden !== undefined && updatePayload.isHidden !== existingClass.isHidden) noMeaningfulChange = false;
+        if (updatePayload.isHidden !== undefined && updatePayload.isHidden !== existingClass.isHidden) noMeaningfulChange = false; // Added this check
 
         if (noMeaningfulChange) {
-            return NextResponse.json(existingClass);
+            // Return the public-facing version
+            const { password, ...classDetailsWithoutPassword } = existingClass;
+            const responsePayload = {
+                ...classDetailsWithoutPassword,
+                passwordProtected: !!password && password.trim() !== '',
+            };
+            return NextResponse.json(responsePayload);
         }
       }
       return NextResponse.json({ message: 'Class not found or no changes made' }, { status: 404 });
@@ -79,7 +98,13 @@ export async function PUT(request: Request, { params }: { params: { classId: str
     if (!updatedClass) {
         return NextResponse.json({ message: 'Class updated but failed to retrieve' }, { status: 500 });
     }
-    return NextResponse.json(updatedClass);
+    // Return the public-facing version
+    const { password, ...classDetailsWithoutPassword } = updatedClass;
+    const responsePayload = {
+        ...classDetailsWithoutPassword,
+        passwordProtected: !!password && password.trim() !== '',
+    };
+    return NextResponse.json(responsePayload);
 
   } catch (error) {
     console.error(`[API PUT /api/classes/${params.classId}] Error:`, error);
@@ -102,8 +127,19 @@ export async function DELETE(request: Request, { params }: { params: { classId: 
     const announcementsToUpdate = await announcementsDb.find({ targetClassIds: classIdToDelete });
     for (const ann of announcementsToUpdate) {
       const newTargetClassIds = ann.targetClassIds.filter(id => id !== classIdToDelete);
-      await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: newTargetClassIds } });
-      console.log(`[API DELETE /api/classes/${classIdToDelete}] Removed class from announcement ${ann.id}. New targets: ${newTargetClassIds.join(', ')}`);
+      // If newTargetClassIds is empty, the announcement is now invalid as per new rules.
+      // Admin will need to re-assign or delete.
+      if (newTargetClassIds.length > 0) {
+        await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: newTargetClassIds } });
+      } else {
+        // Optionally, delete the announcement if it no longer targets any class
+        // await announcementsDb.remove({ id: ann.id }, {});
+        // For now, we'll leave it, and the admin can manage it.
+        // Or, just update it with an empty array, and the edit form will flag it.
+        await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: newTargetClassIds } });
+
+      }
+      console.log(`[API DELETE /api/classes/${classIdToDelete}] Updated announcement ${ann.id}. New targets: ${newTargetClassIds.join(', ')}`);
     }
 
     // Delete school events (exams, deadlines) associated with this class
@@ -112,6 +148,7 @@ export async function DELETE(request: Request, { params }: { params: { classId: 
       console.log(`[API DELETE /api/classes/${classIdToDelete}] Removed ${numEventsRemoved} school events associated with this class.`);
     }
 
+    // Finally, delete the class itself
     const numRemoved = await classesDb.remove({ id: classIdToDelete }, {});
 
     if (numRemoved === 0) {
