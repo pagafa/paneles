@@ -38,21 +38,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'targetClassIds must be a non-empty array' }, { status: 400 });
     }
 
-    // Verify that all target classes still exist
+    // Verify target classes and filter out non-existent ones
     const classesDb = await getClassesDb();
-    const nonExistentClassIds: string[] = [];
+    const validTargetClassIds: string[] = [];
     for (const classId of requestBody.targetClassIds) {
         const schoolClass = await classesDb.findOne({ id: classId });
-        if (!schoolClass) {
-            nonExistentClassIds.push(classId);
+        if (schoolClass) {
+            validTargetClassIds.push(classId);
         }
     }
 
-    if (nonExistentClassIds.length > 0) {
-        const errorMessage = `Cannot update announcement. The following target class IDs do not exist: ${nonExistentClassIds.join(', ')}. Please remove them or ensure they are valid classes.`;
+    if (validTargetClassIds.length === 0) {
+        const errorMessage = `After filtering non-existent classes, no valid target classes remain. An announcement must target at least one existing class. Original targets: ${requestBody.targetClassIds.join(', ')}.`;
         return NextResponse.json({ 
             message: errorMessage,
-            error: 'Invalid target classes' 
+            error: 'Invalid target classes after filtering' 
         }, { status: 400 });
     }
 
@@ -61,7 +61,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (requestBody.content !== undefined) updatePayload.content = requestBody.content;
     if (requestBody.date !== undefined) updatePayload.date = requestBody.date;
     
-    updatePayload.targetClassIds = requestBody.targetClassIds; // Already validated
+    updatePayload.targetClassIds = validTargetClassIds; // Use the filtered list
     updatePayload.type = 'announcement'; // Ensure type is not changed
 
     const db = await getAnnouncementsDb();
