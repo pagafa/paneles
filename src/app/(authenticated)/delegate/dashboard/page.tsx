@@ -5,10 +5,8 @@ import { DelegateInputForm } from "@/components/forms/DelegateInputForm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-// mockSchoolEvents, mockUsers, mockClasses no longer primary source
 import type { SchoolClass, SchoolEvent, User } from "@/types";
-import { format } from "date-fns";
-import { ListChecks, UserCheck, Edit3, Trash2, AlertTriangle } from "lucide-react";
+import { ListChecks, UserCheck, Edit3, Trash2, AlertTriangle, CalendarOff } from "lucide-react";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { AnnouncementCard } from "@/components/kiosk/AnnouncementCard";
 import { useToast } from "@/hooks/use-toast";
@@ -43,23 +41,15 @@ export default function DelegateDashboardPage() {
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const [errorSubmissions, setErrorSubmissions] = useState<string | null>(null);
   const [errorClasses, setErrorClasses] = useState<string | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null); // To store logged-in delegate's ID
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
 
-  // Fetch current delegate's ID (mocked from localStorage)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUserId = localStorage.getItem('userId');
       const userRole = localStorage.getItem('userRole');
       if (userRole === 'delegate' && storedUserId) {
         setCurrentUserId(storedUserId);
-      } else if (!storedUserId && userRole === 'delegate') {
-        // Fallback to a generic delegate for demo if ID not found but role is delegate
-        // This part might need adjustment based on how users are fetched/managed
-        // For now, assume a generic delegate 'user2' or 'user3' from mockUsers if no specific ID
-        // In a real scenario, this would be handled by the auth system.
-        const genericDelegateUser = mockUsers.find(u => u.username === 'john_delegate'); // From placeholder-data
-        if (genericDelegateUser) setCurrentUserId(genericDelegateUser.id);
       }
     }
   }, []);
@@ -91,20 +81,18 @@ export default function DelegateDashboardPage() {
   }, [currentUserId]);
 
   const fetchMySubmissions = useCallback(async () => {
-    if (delegateAssignedClasses.length === 0 && !isLoadingClasses) { // Don't fetch if no classes and not loading classes
+    if (delegateAssignedClasses.length === 0 && !isLoadingClasses) { 
         setIsLoadingSubmissions(false);
         setMySubmissions([]);
         return;
     }
-    if (delegateAssignedClasses.length === 0 && isLoadingClasses) { // Still waiting for classes
+    if (delegateAssignedClasses.length === 0 && isLoadingClasses) { 
         return;
     }
 
     setIsLoadingSubmissions(true);
     setErrorSubmissions(null);
     try {
-      // Fetch all schoolevents and filter client-side by assigned classIds or submittedByDelegateId
-      // Ideally, API would support filtering by multiple classIds or delegateId
       const response = await fetch('/api/schoolevents');
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Failed to fetch submissions. Status: ${response.status}` }));
@@ -114,10 +102,9 @@ export default function DelegateDashboardPage() {
       const assignedClassIds = delegateAssignedClasses.map(c => c.id);
       
       const filteredSubmissions = allEvents.filter(event => {
-        // Check if submitted by current delegate OR if targeted to one of their classes (if classId is present)
         if (event.submittedByDelegateId === currentUserId) return true;
-        if (event.type === 'announcement' && (event as any).classId && assignedClassIds.includes((event as any).classId)) return true; // Delegate announcements might use classId
-        if ((event.type === 'exam' || event.type === 'deadline') && (event as any).classId && assignedClassIds.includes((event as any).classId) ) return true;
+        if (event.type === 'announcement' && event.classId && assignedClassIds.includes(event.classId)) return true;
+        if ((event.type === 'exam' || event.type === 'deadline') && event.classId && assignedClassIds.includes(event.classId) ) return true;
         return false;
       });
       setMySubmissions(sortEvents(filteredSubmissions));
@@ -136,7 +123,6 @@ export default function DelegateDashboardPage() {
   }, [fetchAssignedClasses]);
 
   useEffect(() => {
-    // Fetch submissions only after assigned classes are determined
     if (!isLoadingClasses) {
         fetchMySubmissions();
     }
@@ -167,7 +153,7 @@ export default function DelegateDashboardPage() {
       
       toast({ title: isEditing ? t('submissionUpdatedToastTitle') : t('submissionSubmittedToastTitle'), description: t('submissionUpdatedToastDescription', { title: data.title }) });
       setEditingSubmission(null);
-      await fetchMySubmissions(); // Refresh list
+      await fetchMySubmissions(); 
     } catch (err) {
       console.error(err);
       toast({
@@ -201,7 +187,7 @@ export default function DelegateDashboardPage() {
             description: t('submissionDeletedToastDescription', { title: submissionToDelete.title }),
             variant: "destructive"
         });
-        await fetchMySubmissions(); // Refresh list
+        await fetchMySubmissions(); 
       } catch (err) {
          console.error(err);
          toast({
@@ -301,16 +287,20 @@ export default function DelegateDashboardPage() {
       {!isLoadingSubmissions && !errorSubmissions && mySubmissions.length > 0 && (
         <ScrollArea className="h-[500px] rounded-md border p-1 bg-background">
           <div className="space-y-4 p-3">
-            {mySubmissions.map((item) => (
-              <AnnouncementCard 
-                key={item.id} 
-                item={item} 
-                showDelegateActions={true}
-                showTypeIcon={true}
-                onEdit={() => handleEdit(item)}
-                onDeleteRequest={() => handleDeleteRequest(item)}
-              />
-            ))}
+            {mySubmissions.map((item) => {
+              const isPast = new Date(item.date) < new Date();
+              return (
+                <AnnouncementCard 
+                  key={item.id} 
+                  item={item} 
+                  showDelegateActions={true}
+                  showTypeIcon={true}
+                  isPastEvent={isPast} // Pass the new prop
+                  onEdit={() => handleEdit(item)}
+                  onDeleteRequest={() => handleDeleteRequest(item)}
+                />
+              );
+            })}
           </div>
         </ScrollArea>
       )}

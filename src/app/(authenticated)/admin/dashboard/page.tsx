@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import type { Announcement, SchoolClass, SupportedLanguage } from "@/types";
 import { format } from "date-fns";
 import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
-import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw } from "lucide-react";
+import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw, CalendarOff } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -255,7 +255,6 @@ export default function AdminDashboardPage() {
 
   const getTargetDisplay = (targetClassIds?: string[]): string => {
     if (!targetClassIds || targetClassIds.length === 0) {
-      // This case should not happen with current validation
       return t('noAnnouncementsPostedHint'); 
     }
     const targetedClassNames = targetClassIds.map(id => {
@@ -392,48 +391,54 @@ export default function AdminDashboardPage() {
       {!isLoadingAnnouncements && !errorAnnouncements && announcements.length > 0 && (
         <ScrollArea className="h-[400px] rounded-md border p-4 bg-card">
           <div className="space-y-4">
-            {announcements.map((ann) => (
-              <Card key={ann.id} className="shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3 pt-4">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-xl font-semibold">{ann.title}</CardTitle>
-                      <CardDescription>{format(new Date(ann.date), "PPP HH:mm", { locale: getLocaleObject() })}</CardDescription>
+            {announcements.map((ann) => {
+              const isPast = new Date(ann.date) < new Date();
+              return (
+                <Card key={ann.id} className="shadow-sm hover:shadow-md transition-shadow">
+                  <CardHeader className="pb-3 pt-4">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-xl font-semibold">{ann.title}</CardTitle>
+                        {isPast && (
+                          <CalendarOff className="h-4 w-4 text-muted-foreground" aria-label={t('pastEventIndicatorLabel')} />
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')} disabled={isLoadingReset}>
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')} disabled={isLoadingReset}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>{t('alertDialogTitle')}</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                {t('deleteAnnouncementConfirmation', { title: ann.title})}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(ann.id)}>
+                                {t('deleteButton')}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')} disabled={isLoadingReset}>
-                        <Edit3 className="h-4 w-4" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')} disabled={isLoadingReset}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>{t('alertDialogTitle')}</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {t('deleteAnnouncementConfirmation', { title: ann.title})}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(ann.id)}>
-                              {t('deleteButton')}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <p className="text-lg text-foreground/90 mb-2">{ann.content}</p>
-                  <p className="text-sm text-muted-foreground mt-2">{t('targetLabel')}: {getTargetDisplay(ann.targetClassIds)}</p>
-                </CardContent>
-              </Card>
-            ))}
+                    <CardDescription>{format(new Date(ann.date), "PPP HH:mm", { locale: getLocaleObject() })}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-lg text-foreground/90 mb-2">{ann.content}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{t('targetLabel')}: {getTargetDisplay(ann.targetClassIds)}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </ScrollArea>
       )}

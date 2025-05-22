@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { enUS, es, fr, gl } from 'date-fns/locale';
 import { useState, useEffect } from 'react';
-import { Edit3, Trash2, Megaphone, BookOpenCheck, FileText } from 'lucide-react';
+import { Edit3, Trash2, Megaphone, BookOpenCheck, FileText, CalendarOff } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface AnnouncementCardProps {
@@ -16,6 +16,7 @@ interface AnnouncementCardProps {
   onDeleteRequest?: (item: SchoolEvent | Announcement) => void;
   showDelegateActions?: boolean;
   showTypeIcon?: boolean;
+  isPastEvent?: boolean; // New prop
 }
 
 export function AnnouncementCard({ 
@@ -23,7 +24,8 @@ export function AnnouncementCard({
   onEdit, 
   onDeleteRequest, 
   showDelegateActions = false, 
-  showTypeIcon = false 
+  showTypeIcon = false,
+  isPastEvent = false // Default to false
 }: AnnouncementCardProps) {
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
   const { language, t } = useLanguage();
@@ -50,15 +52,12 @@ export function AnnouncementCard({
   let displayContentOrSubject = "";
   
   if (item.type === 'announcement') {
-    // Check if 'content' exists, for both Admin Announcement and Delegate SchoolEvent (type announcement)
     if ('content' in item && typeof item.content === 'string') {
       displayContentOrSubject = item.content;
     }
   } else if (item.type === 'exam') {
-    // Type assertion is safe here because SchoolEvent union defines Exam with subject
     displayContentOrSubject = `${t('formExamSubjectLabel')}: ${(item as Exam).subject}`;
   } else if (item.type === 'deadline') {
-    // Type assertion is safe here
     displayContentOrSubject = `${t('formDeadlineAssignmentNameLabel')}: ${(item as Deadline).assignmentName}`;
   }
   
@@ -71,11 +70,16 @@ export function AnnouncementCard({
     <Card className="w-full shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
       <CardHeader className="pb-3 pt-4">
         <div className="flex justify-between items-start">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {showTypeIcon && TypeSpecificIcon && (
-              <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-1" aria-label={item.type} />
+              <TypeSpecificIcon className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" aria-label={item.type} />
             )}
-            <CardTitle className="text-xl font-semibold">{item.title}</CardTitle>
+            <CardTitle className="text-xl font-semibold flex items-center">
+              {item.title}
+              {isPastEvent && (
+                <CalendarOff className="h-4 w-4 text-muted-foreground ml-2" aria-label={t('pastEventIndicatorLabel')} />
+              )}
+            </CardTitle>
           </div>
           {showDelegateActions && onEdit && onDeleteRequest && (
             <div className="flex gap-2">
@@ -91,9 +95,7 @@ export function AnnouncementCard({
       </CardHeader>
       <CardContent className="pt-0">
         <p className="text-lg text-foreground/90 mb-2">{displayContentOrSubject}</p>
-        
         {item.description && <p className="text-sm text-muted-foreground mb-2">{item.description}</p>}
-        
         <p className="text-sm text-muted-foreground mt-2">
           {formattedDate}
         </p>

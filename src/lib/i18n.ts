@@ -77,8 +77,7 @@ interface Translations {
   postNewAnnouncementTitle: string;
   editingAnnouncementDescription: string;
   currentAnnouncementsTitle: string;
-  noAnnouncementsPostedHint: string; // Keep for admin dashboard if no specific announcements
-  // schoolWideTarget: string; // Removed
+  noAnnouncementsPostedHint: string; 
   classesTargetLabel: string;
   targetLabel: string;
   editButtonLabel: string;
@@ -179,12 +178,13 @@ interface Translations {
   confirmPasswordRequiredValidation: string;
   enterNewPasswordFirstValidation: string;
 
-  targetClassesLabel: string; // New
-  selectAtLeastOneClassDescription: string; // New
-  selectAllClassesButtonLabel: string; // New
-  deselectAllClassesButtonLabel: string; // New
-  updateAnnouncementButton: string; // New
-  postAnnouncementButton: string; // New
+  targetClassesLabel: string; 
+  selectAtLeastOneClassDescription: string; 
+  selectAllClassesButtonLabel: string; 
+  deselectAllClassesButtonLabel: string; 
+  updateAnnouncementButton: string; 
+  postAnnouncementButton: string;
+  pastEventIndicatorLabel: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -368,6 +368,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deselectAllClassesButtonLabel: "Deselect All Classes",
     updateAnnouncementButton: "Update Announcement",
     postAnnouncementButton: "Post Announcement",
+    pastEventIndicatorLabel: "Event has passed",
   },
   es: {
     appTitle: "IES Monte da Vila",
@@ -547,6 +548,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deselectAllClassesButtonLabel: "Deseleccionar Todas las Clases",
     updateAnnouncementButton: "Actualizar Anuncio",
     postAnnouncementButton: "Publicar Anuncio",
+    pastEventIndicatorLabel: "El evento ha pasado",
   },
   fr: {
     appTitle: "IES Monte da Vila",
@@ -726,6 +728,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deselectAllClassesButtonLabel: "Désélectionner Toutes les Classes",
     updateAnnouncementButton: "Mettre à Jour l'Annonce",
     postAnnouncementButton: "Publier l'Annonce",
+    pastEventIndicatorLabel: "L'événement est passé",
   },
   gl: {
     appTitle: "IES Monte da Vila",
@@ -905,6 +908,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     deselectAllClassesButtonLabel: "Deseleccionar Todas as Clases",
     updateAnnouncementButton: "Actualizar Anuncio",
     postAnnouncementButton: "Publicar Anuncio",
+    pastEventIndicatorLabel: "O evento xa pasou",
   },
 };
 

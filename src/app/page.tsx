@@ -24,7 +24,7 @@ async function getClassesData(): Promise<SchoolClass[]> {
   }
 }
 
-// Fetch all admin announcements (for counts)
+// Fetch all admin announcements (for counts, and later for filtering upcoming)
 async function getAllAdminAnnouncements(): Promise<Announcement[]> {
   try {
     const response = await fetch('/api/announcements');
@@ -39,7 +39,7 @@ async function getAllAdminAnnouncements(): Promise<Announcement[]> {
   }
 }
 
-// Fetch ALL school events (delegate submissions for counts)
+// Fetch ALL school events (delegate submissions for counts, and later for filtering upcoming)
 async function getAllSchoolEventsData(): Promise<SchoolEvent[]> {
   try {
     const response = await fetch('/api/schoolevents'); // No type filter
@@ -82,18 +82,16 @@ export default function KioskPage() {
       setClasses(classesData);
       setIsLoadingClasses(false);
 
+      // Calculate message counts (includes past and future for "Activity by Class")
       const counts: { [classId: string]: number } = {};
       if (classesData.length > 0) {
         classesData.forEach(cls => {
           let count = 0;
-          // Count admin announcements targeted to this class
           allAdminAnnouncementsData.forEach(ann => {
-             // All admin announcements must have targetClassIds now
             if (ann.targetClassIds && ann.targetClassIds.includes(cls.id)) {
               count++;
             }
           });
-          // Count school events (exams, deadlines, delegate announcements) for this class
           allSchoolEventsForCountsData.forEach(event => {
             if (event.classId === cls.id) {
               count++;
@@ -127,7 +125,7 @@ export default function KioskPage() {
   }
 
   return (
-    <section className="w-full max-w-4xl mx-auto py-8"> {/* Added py-8 for vertical spacing */}
+    <section className="w-full max-w-4xl mx-auto py-8">
       <div className="flex items-center mb-6">
         <Activity className="h-8 w-8 text-primary mr-3" />
         <h2 className="text-3xl font-semibold text-primary/90">{t('activityByClassSectionTitle')}</h2>

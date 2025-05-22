@@ -5,7 +5,6 @@ import { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
 
 import type { SchoolEvent, Announcement, Exam, Deadline, User } from "@/types";
-import type { ClassPageDetails } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
@@ -18,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 
-interface ClassPageDetailsWithPassword extends ClassPageDetails {
+interface ClassPageDetailsData extends Omit<SchoolClass, 'password'> {
   passwordProtected: boolean;
 }
 
@@ -26,7 +25,12 @@ const sortEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
   return [...events].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
-async function getClassDetails(classId: string): Promise<ClassPageDetailsWithPassword | undefined> {
+const filterUpcomingEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
+  const now = new Date();
+  return events.filter(event => new Date(event.date) >= now);
+};
+
+async function getClassDetails(classId: string): Promise<ClassPageDetailsData | undefined> {
   try {
     const response = await fetch(`/api/classes/${classId}`);
     if (!response.ok) {
@@ -65,7 +69,6 @@ async function getClassDelegateAnnouncements(classId: string): Promise<SchoolEve
       console.error("Failed to fetch delegate announcements for class:", classId, response.status, await response.text().catch(() => ""));
       return [];
     }
-    // Ensure the response is indeed SchoolEvent[] and filter if necessary, though API should do this
     const data = await response.json();
     return data.filter((event: any) => event.type === 'announcement' && event.classId === classId);
   } catch (error) {
@@ -126,11 +129,11 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
   const { t } = useLanguage();
 
-  const [classDetails, setClassDetails] = useState<ClassPageDetailsWithPassword | null>(null);
+  const [classDetails, setClassDetails] = useState<ClassPageDetailsData | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [announcements, setAnnouncements] = useState<(Announcement | SchoolEvent)[]>([]);
-  const [exams, setExams] = useState<SchoolEvent[]>([]); // Will store Exam[] which are SchoolEvent
-  const [deadlines, setDeadlines] = useState<SchoolEvent[]>([]); // Will store Deadline[] which are SchoolEvent
+  const [exams, setExams] = useState<SchoolEvent[]>([]);
+  const [deadlines, setDeadlines] = useState<SchoolEvent[]>([]);
 
   const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(true);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
@@ -183,12 +186,12 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         ]);
         
         const combinedAnnouncements: (Announcement | SchoolEvent)[] = [...adminAnnouncementsForClass, ...delegateAnnouncementsForClass];
-        setAnnouncements(sortEvents(combinedAnnouncements));
-        setExams(sortEvents(classExamsData)); // classExamsData is already Exam[] which is compatible with SchoolEvent[]
-        setDeadlines(sortEvents(classDeadlinesData)); // classDeadlinesData is already Deadline[] which is compatible with SchoolEvent[]
+        setAnnouncements(filterUpcomingEvents(sortEvents(combinedAnnouncements)));
+        setExams(filterUpcomingEvents(sortEvents(classExamsData)));
+        setDeadlines(filterUpcomingEvents(sortEvents(classDeadlinesData)));
         setIsLoadingEvents(false);
       } else {
-        setIsLoadingEvents(false);
+        setIsLoadingEvents(false); // If password protected and not unlocked, don't load events yet
       }
 
     } catch (err) {
@@ -202,7 +205,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
   useEffect(() => {
     fetchClassPageData();
-  }, [fetchClassPageData]);
+  }, [fetchClassPageData]); // fetchClassPageData will re-run if isClassUnlockedThisVisit changes
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,7 +228,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       }
 
       if (result.verified) {
-        setIsClassUnlockedThisVisit(true);
+        setIsClassUnlockedThisVisit(true); // This will trigger fetchClassPageData to re-run
       } else {
         setPasswordError(t('classPasswordIncorrectError'));
       }
@@ -233,7 +236,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       setPasswordError((err as Error).message);
     } finally {
       setIsVerifyingPassword(false);
-      setPasswordInput('');
+      setPasswordInput(''); // Clear password input after attempt
     }
   };
 
@@ -267,7 +270,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
   
-  if (!classDetails) {
+  if (!classDetails) { // Fallback if error didn't set and details are still null
      return (
       <div className="w-full max-w-lg text-center py-10">
         <Card className="shadow-lg">
@@ -319,6 +322,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
+  // Only show content if class is not password protected OR if it is and has been unlocked
   const sectionsConfig: { titleKey: TranslationKey; events: (Announcement | SchoolEvent)[]; icon: React.ElementType; isLoading: boolean }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, isLoading: isLoadingEvents },
     { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, isLoading: isLoadingEvents },
@@ -382,7 +386,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
                 {t(section.titleKey)}
               </h2>
             </div>
-            {/* KioskCarousel now expects (Announcement | SchoolEvent)[] which is what section.events is */}
             <KioskCarousel items={section.events} /> 
             {index < visibleClassSections.filter(s => s.events.length > 0).length - 1 && <Separator className="my-12" />}
           </section>
