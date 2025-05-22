@@ -11,16 +11,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, LayoutDashboard } from "lucide-react"; // Added LayoutDashboard
-import { useRouter } from "next/navigation";
+import { LogOut, LayoutDashboard } from "lucide-react"; 
+import { useRouter, usePathname } from "next/navigation"; // Added usePathname
 import { useEffect, useState } from "react";
 import type { User } from "@/types";
-import Link from "next/link"; // Added Link
-import { useLanguage } from "@/context/LanguageContext"; // Added useLanguage
+import Link from "next/link"; 
+import { useLanguage } from "@/context/LanguageContext"; 
 
 export function UserNav() {
   const router = useRouter();
-  const { t } = useLanguage(); // Get translation function
+  const pathname = usePathname(); // Get current pathname
+  const { t } = useLanguage(); 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,11 +38,11 @@ export function UserNav() {
               setUser(userData);
             } else {
               console.error("Failed to fetch user data:", response.status);
-              setUser(null);
+              setUser(null); 
             }
           } catch (error) {
             console.error("Error fetching user data:", error);
-            setUser(null);
+            setUser(null); 
           }
         } else {
           setUser(null); 
@@ -51,14 +52,14 @@ export function UserNav() {
     };
 
     fetchCurrentUser();
-  }, []); 
+  }, [pathname]); // Re-run effect when pathname changes
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
     }
-    setUser(null); // Clear user state on logout
+    setUser(null); 
     router.push("/login");
   };
 
