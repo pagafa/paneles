@@ -32,20 +32,31 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'Announcement ID is required' }, { status: 400 });
     }
 
-    const requestBody: Partial<Omit<Announcement, 'id' | 'type'>> = await request.json();
+    const requestBody: Partial<Omit<Announcement, 'id' | 'type'>> & { targetClassIds?: string[] } = await request.json();
 
     // Construct payload for $set, only including fields that are allowed to be updated
     const updatePayload: Partial<Announcement> = {};
     if (requestBody.title !== undefined) updatePayload.title = requestBody.title;
     if (requestBody.content !== undefined) updatePayload.content = requestBody.content;
     if (requestBody.date !== undefined) updatePayload.date = requestBody.date;
-    if (requestBody.targetClassIds !== undefined) updatePayload.targetClassIds = requestBody.targetClassIds;
+    // Ensure targetClassIds are included in the update payload if provided
+    // Since targetClassIds is required by the form (min 1), it should always be in requestBody for updates.
+    if (requestBody.targetClassIds !== undefined) {
+        if (!Array.isArray(requestBody.targetClassIds) || requestBody.targetClassIds.length === 0) {
+            return NextResponse.json({ message: 'targetClassIds must be a non-empty array' }, { status: 400 });
+        }
+        updatePayload.targetClassIds = requestBody.targetClassIds;
+    } else {
+        // This case should ideally not be reached if the form enforces targetClassIds
+        return NextResponse.json({ message: 'targetClassIds is required and was not provided' }, { status: 400 });
+    }
     
     // Ensure type is not changed
     updatePayload.type = 'announcement';
 
 
-    if (Object.keys(updatePayload).length === 1 && updatePayload.type === 'announcement') { // Only type was in payload (effectively no actual change)
+    if (Object.keys(updatePayload).length === 1 && updatePayload.type === 'announcement' && !updatePayload.targetClassIds) { 
+        // Only type was in payload and no targetClassIds (effectively no actual change if other fields didn't change)
         const dbCheck = await getAnnouncementsDb();
         const existingDoc = await dbCheck.findOne({ id: appLevelId });
         if(existingDoc) return NextResponse.json(existingDoc); // Return existing doc if no real fields changed
@@ -59,6 +70,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const numAffected = await db.update({ id: appLevelId }, { $set: updatePayload });
 
     if (numAffected === 0) {
+      // Check if it was an attempt to set identical data
+      const existingDoc = await db.findOne({ id: appLevelId });
+      if (existingDoc) {
+        let noMeaningfulChange = true;
+        if (updatePayload.title !== undefined && updatePayload.title !== existingDoc.title) noMeaningfulChange = false;
+        if (updatePayload.content !== undefined && updatePayload.content !== existingDoc.content) noMeaningfulChange = false;
+        if (updatePayload.date !== undefined && updatePayload.date !== existingDoc.date) noMeaningfulChange = false;
+        if (updatePayload.targetClassIds && 
+            JSON.stringify(updatePayload.targetClassIds.sort()) !== JSON.stringify(existingDoc.targetClassIds.sort())) {
+             noMeaningfulChange = false;
+        }
+        if (noMeaningfulChange) return NextResponse.json(existingDoc);
+      }
       return NextResponse.json({ message: 'Announcement not found or no changes made' }, { status: 404 });
     }
 
