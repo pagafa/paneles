@@ -2,7 +2,7 @@
 'use server';
 
 import { NextResponse } from 'next/server';
-import { getClassesDb } from '@/lib/db';
+import { getClassesDb, getAnnouncementsDb } from '@/lib/db'; // Added getAnnouncementsDb
 import type { SchoolClass } from '@/types';
 
 // GET a single class by ID
@@ -15,12 +15,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const schoolClass = await db.findOne({ id: params.id });
     
     if (schoolClass) {
-      // For the public class page, this returns passwordProtected boolean
       const classToReturn = {
-        ...schoolClass, // Send all fields including name, delegateId, language
+        ...schoolClass,
         passwordProtected: !!schoolClass.password && schoolClass.password.trim() !== '',
       };
-      // Do NOT return the actual password to the client for public class pages
       delete (classToReturn as any).password; 
       return NextResponse.json(classToReturn);
     }
@@ -40,29 +38,23 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const requestBody: Partial<Omit<SchoolClass, 'id'>> = await request.json();
-    // console.log(`[API PUT /api/classes/${classId}] Request body:`, requestBody);
     
     const updatePayload: Partial<SchoolClass> = {};
     
     if (requestBody.name !== undefined) updatePayload.name = requestBody.name;
     if (requestBody.delegateId !== undefined) {
-        // Allow setting delegateId to undefined (or null) if an empty string is passed
         updatePayload.delegateId = requestBody.delegateId === "" ? undefined : requestBody.delegateId;
     }
     if (requestBody.language !== undefined) updatePayload.language = requestBody.language;
     
-    // Handle password: if key 'password' is present in requestBody
     if (Object.prototype.hasOwnProperty.call(requestBody, 'password')) { 
       if (requestBody.password && requestBody.password.trim() !== "") {
         updatePayload.password = requestBody.password.trim();
       } else {
-        // If password is an empty string or explicitly null, set it to undefined in DB to remove it
         updatePayload.password = undefined; 
       }
     }
     
-    // console.log(`[API PUT /api/classes/${classId}] Update payload to NeDB:`, updatePayload);
-
     if (Object.keys(updatePayload).length === 0 && !Object.prototype.hasOwnProperty.call(requestBody, 'password')) {
         const dbCheck = await getClassesDb();
         const existingDoc = await dbCheck.findOne({ id: classId });
@@ -78,7 +70,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     if (numAffected === 0) {
       const existingClass = await db.findOne({ id: classId });
-      // Check if it was just an attempt to set the same data
       if (existingClass) { 
         let noMeaningfulChange = true;
         if (updatePayload.name !== undefined && updatePayload.name !== existingClass.name) noMeaningfulChange = false;
@@ -110,17 +101,31 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 // DELETE a class
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const classId = params.id;
-    if (!classId) {
+    const classIdToDelete = params.id;
+    if (!classIdToDelete) {
         return NextResponse.json({ message: 'Class ID is required' }, { status: 400 });
     }
-    const db = await getClassesDb();
-    const numRemoved = await db.remove({ id: classId }, {});
+    const classesDb = await getClassesDb();
+    const announcementsDb = await getAnnouncementsDb();
+
+    // Find announcements targeting this class
+    const announcementsToUpdate = await announcementsDb.find({ targetClassIds: classIdToDelete });
+
+    for (const ann of announcementsToUpdate) {
+      const newTargetClassIds = ann.targetClassIds.filter(id => id !== classIdToDelete);
+      // If newTargetClassIds is empty, the announcement becomes "orphaned"
+      // but we'll update it anyway. Admin will need to re-assign or delete.
+      await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: newTargetClassIds } });
+      console.log(`[API DELETE /api/classes/${classIdToDelete}] Removed class from announcement ${ann.id}. New targets: ${newTargetClassIds.join(', ')}`);
+    }
+
+    const numRemoved = await classesDb.remove({ id: classIdToDelete }, {});
 
     if (numRemoved === 0) {
       return NextResponse.json({ message: 'Class not found' }, { status: 404 });
     }
-    return NextResponse.json({ message: 'Class deleted successfully' }, { status: 200 });
+    console.log(`[API DELETE /api/classes/${classIdToDelete}] Class deleted successfully and references updated.`);
+    return NextResponse.json({ message: 'Class deleted successfully and announcement references updated.' }, { status: 200 });
   } catch (error) {
     console.error(`Error deleting class ${params.id}:`, error);
     return NextResponse.json({ message: 'Error deleting class', error: (error as Error).message }, { status: 500 });
