@@ -4,6 +4,9 @@
 import { NextResponse } from 'next/server';
 import { getUsersDb } from '@/lib/db';
 import type { User } from '@/types';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 10;
 
 // GET a single user by ID
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -15,10 +18,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const user = await db.findOne({ id: params.id });
     
     if (user) {
-      // Exclude password from the response for security if it were part of User type
-      // const { password, ...userWithoutPassword } = user as User & {password?:string};
-      // return NextResponse.json(userWithoutPassword);
-      return NextResponse.json(user); // User type doesn't have password
+      // Exclude password from the response for security
+      const { password, ...userWithoutPassword } = user;
+      return NextResponse.json(userWithoutPassword);
     }
     return NextResponse.json({ message: 'User not found' }, { status: 404 });
   } catch (error) {
@@ -35,8 +37,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         return NextResponse.json({ message: 'User ID is required' }, { status: 400 });
     }
 
-    // The requestBody might contain a password if sent from the form, but we will ignore it.
-    const requestBody: Partial<Omit<User, 'id'>> & { password?: string } = await request.json();
+    const requestBody: Partial<Omit<User, 'id' | 'password'>> & { password?: string } = await request.json();
     const db = await getUsersDb();
 
     const existingUser = await db.findOne({ id: userId });
@@ -57,19 +58,26 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (requestBody.username !== undefined) updatePayload.username = requestBody.username;
     if (requestBody.role !== undefined) updatePayload.role = requestBody.role;
     
-    // Explicitly DO NOT include password in the updatePayload,
-    // as login logic is hardcoded to "password".
-    // Any password sent from the client during edit will be ignored for storage.
+    // Hash and update password only if a new one is provided and it's not empty
+    if (requestBody.password && requestBody.password.trim() !== "") {
+      updatePayload.password = await bcrypt.hash(requestBody.password.trim(), SALT_ROUNDS);
+    }
 
     if (Object.keys(updatePayload).length === 0) {
-        // No actual fields to update were provided (excluding password which we ignore)
-        const { password, ...userWithoutPassword } = existingUser as User & {password?: string}; // NeDB might have stored it
+        const { password, ...userWithoutPassword } = existingUser; 
         return NextResponse.json(userWithoutPassword);
     }
 
     const numAffected = await db.update({ id: userId }, { $set: updatePayload });
 
     if (numAffected === 0) {
+      // This might happen if the payload is identical to existing data,
+      // but we should still return the user data.
+      const currentData = await db.findOne({ id: userId });
+      if(currentData) {
+        const { password, ...userWithoutPassword } = currentData;
+        return NextResponse.json(userWithoutPassword);
+      }
       return NextResponse.json({ message: 'User not found or no changes made' }, { status: 404 });
     }
 
@@ -77,16 +85,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (!updatedUserFromDb) {
         return NextResponse.json({ message: 'User updated but failed to retrieve' }, { status: 500 });
     }
-    // Even if NeDB stored a password previously, we don't return it as per User type.
-    const { password, ...userWithoutPassword } = updatedUserFromDb as User & {password?: string}; 
+    const { password, ...userWithoutPassword } = updatedUserFromDb; 
     return NextResponse.json(userWithoutPassword);
 
   } catch (error) {
     console.error(`Error updating user ${params.id}:`, error);
     const errorMessage = (error as Error).message;
+    const requestBodyUsername = (await request.clone().json().catch(() => ({}))).username;
     
     if (errorMessage.includes('unique constraint violated for field username')) {
-        const attemptedUsername = requestBody.username || 'provided';
+        const attemptedUsername = requestBodyUsername || 'provided';
         return NextResponse.json({ message: `Error updating user: Username "${attemptedUsername}" already exists. Please choose a different username. (DB constraint: ${errorMessage})` }, { status: 409 });
     }
      if (errorMessage.includes('unique constraint violated for field id')) { 

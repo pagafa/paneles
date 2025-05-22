@@ -4,6 +4,9 @@
 import { NextResponse } from 'next/server';
 import { getUsersDb } from '@/lib/db';
 import type { User } from '@/types';
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 10;
 
 // GET all users
 export async function GET() {
@@ -43,17 +46,18 @@ export async function POST(request: Request) {
     // Check for existing ID (less likely with generated IDs but good practice)
     const existingUserById = await db.findOne({ id: userId });
     if (existingUserById) {
-      return NextResponse.json({ message: `Error creating user: ID "${userId}" already exists. Please try again.` }, { status: 409 });
+      return NextResponse.json({ message: `Error creating user: ID "${userId}" already exists. Please try again. (This should be rare)` }, { status: 409 });
     }
+
+    const hashedPassword = await bcrypt.hash(newUserData.password, SALT_ROUNDS);
 
     const userToAdd: User = {
       id: userId,
       name: newUserData.name,
       username: newUserData.username,
       role: newUserData.role,
-      password: newUserData.password, // Ensure password from the form is included
+      password: hashedPassword, // Store the hashed password
     };
-
 
     const savedUserDoc = await db.insert(userToAdd);
     
@@ -84,4 +88,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: `Error creating user: ${errorMessage}`, error: errorMessage }, { status: 500 });
   }
 }
-

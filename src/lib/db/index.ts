@@ -6,8 +6,10 @@ import path from 'path';
 import fs from 'fs/promises';
 import type { Announcement, SchoolClass, User, SchoolEvent } from '@/types';
 import { mockClasses, mockUsers, mockSchoolEvents, mockAnnouncements } from '@/lib/placeholder-data';
+import bcrypt from 'bcrypt';
 
 const dataDir = path.join(process.cwd(), 'data');
+const SALT_ROUNDS = 10; // Standard for bcrypt
 
 // Promises to ensure initialization runs only once per datastore
 let announcementsDbInitializationPromise: Promise<Datastore<Announcement>> | null = null;
@@ -134,6 +136,7 @@ export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
     .then(db => {
       announcementsDbInstance = db;
       console.log('[DB getAnnouncementsDb] Initialization successful.');
+      announcementsDbInitializationPromise = null; // Clear promise once resolved
       return db;
     })
     .catch(err => {
@@ -173,11 +176,12 @@ export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
     .then(db => {
       classesDbInstance = db;
       console.log('[DB getClassesDb] Initialization successful.');
+      classesDbInitializationPromise = null;
       return db;
     })
     .catch(err => {
       console.error('[DB getClassesDb] Initialization failed:', err);
-      classesDbInitializationPromise = null; // Allow retry
+      classesDbInitializationPromise = null;
       throw err;
     });
   return classesDbInitializationPromise;
@@ -195,8 +199,15 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
   const count = await db.count({});
   if (count === 0 && mockUsers && mockUsers.length > 0) {
     try {
-      await db.insert(mockUsers);
-      console.log('[DB Seed] Users DB seeded with mockUsers.');
+      const usersToSeed = await Promise.all(mockUsers.map(async (user) => {
+        if (user.password) {
+          const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
+          return { ...user, password: hashedPassword };
+        }
+        return user;
+      }));
+      await db.insert(usersToSeed);
+      console.log('[DB Seed] Users DB seeded with mockUsers (passwords hashed).');
     } catch (seedError) {
       console.error('[DB Seed] Error seeding users DB:', seedError);
     }
@@ -215,11 +226,12 @@ export async function getUsersDb(): Promise<Datastore<User>> {
     .then(db => {
       usersDbInstance = db;
       console.log('[DB getUsersDb] Initialization successful.');
+      usersDbInitializationPromise = null;
       return db;
     })
     .catch(err => {
       console.error('[DB getUsersDb] Initialization failed:', err);
-      usersDbInitializationPromise = null; // Allow retry
+      usersDbInitializationPromise = null;
       throw err;
     });
   return usersDbInitializationPromise;
@@ -254,14 +266,13 @@ export async function getSchoolEventsDb(): Promise<Datastore<SchoolEvent>> {
     .then(db => {
       schoolEventsDbInstance = db;
       console.log('[DB getSchoolEventsDb] Initialization successful.');
+      schoolEventsDbInitializationPromise = null;
       return db;
     })
     .catch(err => {
       console.error('[DB getSchoolEventsDb] Initialization failed:', err);
-      schoolEventsDbInitializationPromise = null; // Allow retry
+      schoolEventsDbInitializationPromise = null;
       throw err;
     });
   return schoolEventsDbInitializationPromise;
 }
-
-    

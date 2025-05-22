@@ -1,4 +1,5 @@
 {"id":"user-1747932981144-bltvi","name":"Marcia","username":"marcia","role":"admin","_id":"40u88IuaBFJKttL3","createdAt":{"$$date":1747932981060},"updatedAt":{"$$date":1747932981060}}
+{"id":"user-1747933948325-7vbll","name":"Antonio","username":"antonio","role":"admin","password":"soyantonio","_id":"6tvKYxi2AMh1EA25","createdAt":{"$$date":1747933948237},"updatedAt":{"$$date":1747933948237}}
 {"id":"user-admin-pablo-1747865879347","name":"Pablo Admin","username":"pablo","role":"admin","password":"soypablo","_id":"a44dhQULnSJQjRBh","createdAt":{"$$date":1747865879351},"updatedAt":{"$$date":1747932736050}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}

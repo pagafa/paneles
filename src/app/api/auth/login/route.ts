@@ -4,15 +4,13 @@
 import { NextResponse } from 'next/server';
 import { getUsersDb } from '@/lib/db';
 import type { User } from '@/types';
+import bcrypt from 'bcrypt';
 
 export async function POST(request: Request) {
   try {
     const { username, password: inputPassword } = await request.json();
 
     console.log(`[API Auth Login] Attempting login for username: ${username}`);
-    // Non rexistres inputPassword no servidor por seguridade en produción, pero útil para depuración local temporal.
-    // console.log(`[API Auth Login] Password received from form: ${inputPassword}`);
-
 
     if (!username || !inputPassword) {
       console.log('[API Auth Login] Username or password not provided in request.');
@@ -27,16 +25,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
     }
 
-    // Rexistra o contrasinal almacenado para depuración. NUNCA fagas isto en produción.
-    console.log(`[API Auth Login] User found in DB. Stored password for ${username}: '${user.password}'`);
-    console.log(`[API Auth Login] Comparing stored password ('${user.password}') with input password ('${inputPassword}')`);
+    // User found, now compare the hashed password
+    if (!user.password) {
+      console.log(`[API Auth Login] User ${username} found in DB but has no password stored. Login failed.`);
+      return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
+    }
 
-    if (user.password !== inputPassword) {
+    console.log(`[API Auth Login] User ${username} found. Comparing input password with stored hash.`);
+    const passwordMatch = await bcrypt.compare(inputPassword, user.password);
+
+    if (!passwordMatch) {
       console.log(`[API Auth Login] Password mismatch for user: ${username}. Login failed.`);
       return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
     }
 
-    // Non devolver o contrasinal na resposta
+    // Password matches
+    // Do not return the password (even the hash) in the response
     const { password: _, ...userWithoutPassword } = user;
 
     console.log(`[API Auth Login] User authenticated successfully: ${username}`);
