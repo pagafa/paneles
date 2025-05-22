@@ -22,11 +22,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
 import { useToast } from "@/hooks/use-toast";
 import type { Announcement, SchoolClass } from "@/types";
 import React, { useEffect } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useLanguage } from "@/context/LanguageContext"; // Import useLanguage
+import { useLanguage } from "@/context/LanguageContext";
 
 const announcementFormSchema = z.object({
   title: z.string().min(3, { message: "Title must be at least 3 characters." }),
@@ -43,7 +44,7 @@ interface AdminAnnouncementFormProps {
   availableClasses: SchoolClass[];
 }
 
-const CLASSES_COLUMN_THRESHOLD = 5; // Show columns if more than 5 classes
+const CLASSES_COLUMN_THRESHOLD = 5;
 
 export function AdminAnnouncementForm({
   onSubmitSuccess,
@@ -51,7 +52,17 @@ export function AdminAnnouncementForm({
   availableClasses
 }: AdminAnnouncementFormProps) {
   const { toast } = useToast();
-  const { t } = useLanguage(); // Get translation function
+  const { t, language } = useLanguage(); // Get language
+
+  const getLocaleObject = () => {
+    switch (language) {
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'gl': return gl;
+      case 'en':
+      default: return enUS;
+    }
+  };
 
   const form = useForm<AnnouncementFormValues>({
     resolver: zodResolver(announcementFormSchema),
@@ -81,7 +92,7 @@ export function AdminAnnouncementForm({
       content: values.content,
       date: values.date.toISOString(),
       type: 'announcement',
-      targetClassIds: values.targetClassIds, // Will always have at least one item due to validation
+      targetClassIds: values.targetClassIds,
     };
 
     toast({
@@ -172,7 +183,7 @@ export function AdminAnnouncementForm({
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
-                          format(field.value, "PPP HH:mm")
+                          format(field.value, "PPP HH:mm", { locale: getLocaleObject() })
                         ) : (
                           <span>{t('formPickDateTimeButton')}</span>
                         )}
@@ -185,6 +196,7 @@ export function AdminAnnouncementForm({
                       selected={field.value}
                       onSelect={handleDateSelect}
                       initialFocus
+                      locale={getLocaleObject()} // Add locale to Calendar
                     />
                     <div className="p-2 border-t border-border">
                       <p className="text-sm font-medium mb-2 text-center">{t('formSelectTimeLabel')}</p>

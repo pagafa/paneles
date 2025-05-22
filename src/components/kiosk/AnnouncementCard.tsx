@@ -2,11 +2,13 @@
 "use client";
 
 import type { SchoolEvent, Announcement, Exam, Deadline } from '@/types';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
 import { useState, useEffect } from 'react';
 import { Megaphone, BookOpenCheck, FileText, Edit3, Trash2 } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext'; // Import useLanguage
 
 interface AnnouncementCardProps {
   item: SchoolEvent;
@@ -18,15 +20,26 @@ interface AnnouncementCardProps {
 
 export function AnnouncementCard({ item, onEdit, onDeleteRequest, showDelegateActions = false, showTypeIcon = false }: AnnouncementCardProps) {
   const [formattedDate, setFormattedDate] = useState<string>("Loading date...");
+  const { language } = useLanguage(); // Get current language
+
+  const getLocaleObject = () => {
+    switch (language) {
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'gl': return gl;
+      case 'en':
+      default: return enUS;
+    }
+  };
 
   useEffect(() => {
     try {
-      setFormattedDate(format(new Date(item.date), 'PPP HH:mm'));
+      setFormattedDate(format(new Date(item.date), 'PPP HH:mm', { locale: getLocaleObject() }));
     } catch (error) {
       console.error("Error formatting date:", item.date, error);
       setFormattedDate("Invalid Date");
     }
-  }, [item.date]);
+  }, [item.date, language]); // Add language to dependency array
 
   const TypeSpecificIcon =
     item.type === 'announcement' ? Megaphone :

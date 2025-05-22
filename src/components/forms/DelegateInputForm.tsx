@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon, PlusCircle, Megaphone, BookOpenCheck, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/types";
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -77,10 +78,20 @@ export function DelegateInputForm({
   availableClasses = [], 
   initialData
 }: DelegateInputFormProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // Get language
   const [activeTab, setActiveTab] = useState<"announcement" | "exam" | "deadline">(
     initialData?.type || "announcement"
   );
+
+  const getLocaleObject = () => {
+    switch (language) {
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'gl': return gl;
+      case 'en':
+      default: return enUS;
+    }
+  };
 
   const form = useForm<DelegateInputFormValues>({
     resolver: zodResolver(delegateInputFormSchema),
@@ -284,21 +295,27 @@ export function DelegateInputForm({
                 };
 
                 return (
-                  <FormItem className="flex flex-col">
+                  <FormItem>
                     <FormLabel>{t('formDateTimeLabel')}</FormLabel>
                      <Popover>
-                        <FormControl>
-                          <PopoverTrigger asChild>
+                        <PopoverTrigger asChild>
+                          <FormControl>
                             <Button
                                 variant={"outline"}
                                 className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
-                              {field.value ? format(field.value, "PPP HH:mm") : <span>{t('formPickDateTimeButton')}</span>}
+                              {field.value ? format(field.value, "PPP HH:mm", { locale: getLocaleObject() }) : <span>{t('formPickDateTimeButton')}</span>}
                             </Button>
-                          </PopoverTrigger>
-                        </FormControl>
+                          </FormControl>
+                        </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar mode="single" selected={field.value} onSelect={handleDateSelect} initialFocus />
+                          <Calendar 
+                            mode="single" 
+                            selected={field.value} 
+                            onSelect={handleDateSelect} 
+                            initialFocus 
+                            locale={getLocaleObject()} // Add locale to Calendar
+                          />
                            <div className="p-2 border-t border-border">
                             <p className="text-sm font-medium mb-2 text-center">{t('formSelectTimeLabel')}</p>
                             <div className="flex gap-2 justify-center">
@@ -417,4 +434,3 @@ export function DelegateInputForm({
     </Tabs>
   );
 }
-

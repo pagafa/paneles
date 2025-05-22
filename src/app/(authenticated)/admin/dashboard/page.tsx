@@ -7,7 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import type { Announcement, SchoolClass, SupportedLanguage } from "@/types";
 import { format } from "date-fns";
-import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw } from "lucide-react"; // Added DatabaseZap, RefreshCw
+import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
+import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,7 +30,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useSchoolName } from "@/context/SchoolNameContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supportedLanguages, defaultLanguage } from "@/lib/i18n";
-import { useRouter } from "next/navigation"; // Added useRouter
+import { useRouter } from "next/navigation";
 
 const sortAnnouncements = (announcements: Announcement[]) => {
   return [...announcements].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -45,14 +46,24 @@ export default function AdminDashboardPage() {
   const [isLoadingClasses, setIsLoadingClasses] = useState(true);
   const [errorAnnouncements, setErrorAnnouncements] = useState<string | null>(null);
   const [errorClasses, setErrorClasses] = useState<string | null>(null);
-  const [isLoadingReset, setIsLoadingReset] = useState(false); // Added for reset button
+  const [isLoadingReset, setIsLoadingReset] = useState(false);
   
   const { toast } = useToast();
   const { language: currentSessionLanguage, setLanguage: setSessionLanguage, t } = useLanguage();
   const { schoolName, setSchoolName: setGlobalSchoolName } = useSchoolName();
   const [editableSchoolName, setEditableSchoolName] = useState(schoolName);
   const [selectedGlobalLanguage, setSelectedGlobalLanguage] = useState<SupportedLanguage>(defaultLanguage);
-  const router = useRouter(); // Added router
+  const router = useRouter();
+
+  const getLocaleObject = () => {
+    switch (currentSessionLanguage) {
+      case 'es': return es;
+      case 'fr': return fr;
+      case 'gl': return gl;
+      case 'en':
+      default: return enUS;
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -216,17 +227,16 @@ export default function AdminDashboardPage() {
         const errorData = await response.json().catch(() => ({ message: `Failed to reset database. Status: ${response.status}` }));
         throw new Error(errorData.message || `Failed to reset database. Status: ${response.status}`);
       }
-      const result = await response.json();
+      await response.json(); // Consume response
       toast({
         title: t('dbResetSuccessTitle'),
         description: t('dbResetSuccessDescription'),
       });
-      // Clear user session and redirect to login
       if (typeof window !== 'undefined') {
         localStorage.removeItem('userId');
         localStorage.removeItem('userRole');
-        localStorage.removeItem('appLanguage'); // Clear language too
-        localStorage.removeItem('adminGlobalAppLanguage');
+        localStorage.removeItem('appLanguage');
+        localStorage.removeItem(ADMIN_GLOBAL_LANGUAGE_KEY);
         localStorage.removeItem('appSchoolName');
       }
       router.push('/login');
@@ -245,7 +255,8 @@ export default function AdminDashboardPage() {
 
   const getTargetDisplay = (targetClassIds?: string[]): string => {
     if (!targetClassIds || targetClassIds.length === 0) {
-      return t('schoolWideTarget');
+      // This case should not happen with current validation
+      return t('noAnnouncementsPostedHint'); 
     }
     const targetedClassNames = targetClassIds.map(id => {
       const cls = allClasses.find(c => c.id === id); 
@@ -387,7 +398,7 @@ export default function AdminDashboardPage() {
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-xl font-semibold">{ann.title}</CardTitle>
-                      <CardDescription>{format(new Date(ann.date), "PPP HH:mm")}</CardDescription>
+                      <CardDescription>{format(new Date(ann.date), "PPP HH:mm", { locale: getLocaleObject() })}</CardDescription>
                     </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')} disabled={isLoadingReset}>
