@@ -31,7 +31,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Invalid username or password' }, { status: 401 });
     }
 
-    console.log(`[API Auth Login] User ${username} found. Comparing input password with stored hash.`);
+    // Check if the stored password looks like a bcrypt hash
+    // Bcrypt hashes typically start with $2a$, $2b$, or $2y$, followed by $ and the cost factor.
+    if (!user.password.startsWith('$2')) {
+      console.error(`[API Auth Login] User ${username} found, but the stored password does not appear to be a valid bcrypt hash. Stored value: ${user.password.substring(0, 10)}...`);
+      return NextResponse.json({ message: 'User data configuration error. Please contact support.' }, { status: 500 });
+    }
+
+    console.log(`[API Auth Login] User ${username} found. Stored password hash: ${user.password.substring(0, 10)}... Comparing with input password.`);
     const passwordMatch = await bcrypt.compare(inputPassword, user.password);
 
     if (!passwordMatch) {
