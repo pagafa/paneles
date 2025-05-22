@@ -120,7 +120,8 @@ export default function ManageClassesPage() {
       });
 
       setEditingClass(null);
-      await fetchClasses();
+      // No need to call fetchClasses() here if optimistic update is correct
+      // await fetchClasses(); 
     } catch (err) {
       console.error(err);
       toast({
@@ -128,6 +129,8 @@ export default function ManageClassesPage() {
         description: (err as Error).message,
         variant: "destructive",
       });
+      // If error, fetch all classes again to ensure UI consistency
+      await fetchClasses();
     }
   };
 
@@ -226,7 +229,7 @@ export default function ManageClassesPage() {
       )}
       {!isLoading && !error && classes.length > 0 && (
         <Card className="shadow-md">
-          <ScrollArea className="max-h-[500px]">
+          <ScrollArea className="h-[300px] rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
