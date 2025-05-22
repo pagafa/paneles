@@ -1,3 +1,3 @@
 {"id":"class-1747936336551-jjqr3","name":"Sala de profesores","_id":"2a9Hw4chC8KunsZy","createdAt":{"$$date":1747936336468},"updatedAt":{"$$date":1747936336468}}
-{"id":"class-1747936327866-plzlc","name":"1º ESO A","_id":"pNZncyAGHqHlPhl9","createdAt":{"$$date":1747936327785},"updatedAt":{"$$date":1747936327785}}
+{"id":"class-1747936327866-plzlc","name":"1º ESO A","_id":"pNZncyAGHqHlPhl9","createdAt":{"$$date":1747936327785},"updatedAt":{"$$date":1747938103793},"delegateId":"user-1747938087506-k5ruh"}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}

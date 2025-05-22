@@ -22,7 +22,6 @@ import { CalendarIcon, PlusCircle, Megaphone, BookOpenCheck, FileText } from "lu
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { SchoolEvent, Announcement, Exam, Deadline, SchoolClass } from "@/types";
-// mockClasses removed as availableClasses is now a prop
 import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/context/LanguageContext";
@@ -32,14 +31,13 @@ const commonSchema = {
   date: z.date({ required_error: "Date is required." }),
   classId: z.string().min(1, "Class selection is required.").default(""),
   description: z.string().optional().default(""),
-  submittedByDelegateId: z.string().optional(), // For tracking who submitted
+  submittedByDelegateId: z.string().optional(), 
 };
 
 const announcementSchema = z.object({
   ...commonSchema,
   type: z.literal("announcement"),
-  content: z.string().min(10, "Content is too short.").optional().default(""),
-  // Fields not relevant to announcement, but part of the discriminated union base
+  content: z.string().min(10, "Content is too short.").default(""),
   subject: z.string().optional().default(""), 
   assignmentName: z.string().optional().default(""),
 });
@@ -47,8 +45,7 @@ const announcementSchema = z.object({
 const examSchema = z.object({
   ...commonSchema,
   type: z.literal("exam"),
-  subject: z.string().min(2, "Subject is too short.").default(""), // Made .default("") instead of optional
-  // Fields not relevant to exam
+  subject: z.string().min(2, "Subject is too short.").default(""), 
   content: z.string().optional().default(""),
   assignmentName: z.string().optional().default(""),
 });
@@ -56,8 +53,7 @@ const examSchema = z.object({
 const deadlineSchema = z.object({
   ...commonSchema,
   type: z.literal("deadline"),
-  assignmentName: z.string().min(3, "Assignment name is too short.").default(""), // Made .default("")
-  // Fields not relevant to deadline
+  assignmentName: z.string().min(3, "Assignment name is too short.").default(""), 
   content: z.string().optional().default(""),
   subject: z.string().optional().default(""),
 });
@@ -72,13 +68,13 @@ type DelegateInputFormValues = z.infer<typeof delegateInputFormSchema>;
 
 interface DelegateInputFormProps {
   onSubmitSuccess?: (data: SchoolEvent) => void;
-  availableClasses?: SchoolClass[]; // Now explicitly passed
+  availableClasses?: SchoolClass[]; 
   initialData?: SchoolEvent | null;
 }
 
 export function DelegateInputForm({
   onSubmitSuccess,
-  availableClasses = [], // Default to empty array if not provided
+  availableClasses = [], 
   initialData
 }: DelegateInputFormProps) {
   const { t } = useLanguage();
@@ -110,8 +106,6 @@ export function DelegateInputForm({
       if (initialData.type !== activeTab) {
         setActiveTab(initialData.type);
       }
-      // Determine classId from initialData based on its type, as 'class' (name) might be on old data.
-      // Prioritize classId if present.
       if (initialData.type === 'announcement') {
         classIdToSet = (initialData as Announcement & { classId?: string }).classId || availableClasses.find(c => (initialData as Announcement).targetClassIds?.includes(c.id))?.id || "";
       } else if (initialData.type === 'exam') {
@@ -145,7 +139,7 @@ export function DelegateInputForm({
         content: "",
         subject: "",
         assignmentName: "",
-        submittedByDelegateId: undefined, // Reset for new submissions
+        submittedByDelegateId: undefined, 
       });
     }
   }, [initialData, activeTab, availableClasses, form]);
@@ -154,14 +148,10 @@ export function DelegateInputForm({
   const handleTabChange = (value: string) => {
     const newType = value as "announcement" | "exam" | "deadline";
     setActiveTab(newType);
-    // useEffect above will handle form reset based on newType and !initialData
   };
 
 
   async function onSubmit(values: DelegateInputFormValues) {
-    // await new Promise(resolve => setTimeout(resolve, 500)); // Artificial delay removed
-
-    // const selectedClass = availableClasses.find(c => c.id === values.classId); // Not strictly needed if submitting classId
     let submissionData: SchoolEvent;
     const id = initialData?.id || `evt-${values.type}-${Date.now()}`;
 
@@ -173,10 +163,10 @@ export function DelegateInputForm({
           date: values.date.toISOString(),
           type: 'announcement',
           content: values.content || "",
-          classId: values.classId, // Delegate announcements target a single class via classId
+          classId: values.classId, 
           description: values.description,
           submittedByDelegateId: values.submittedByDelegateId,
-        } as Announcement & {classId?: string}; // Ensure type compatibility
+        } as Announcement & {classId?: string}; 
         break;
       case 'exam':
         submissionData = {
@@ -213,12 +203,10 @@ export function DelegateInputForm({
     }
 
     if (!initialData) {
-      // Reset form for new submission, keeping activeTab and classId if only one available
-      let classIdToSet = values.classId; // Keep user's selection or auto-selection
+      let classIdToSet = values.classId; 
       if (availableClasses && availableClasses.length === 1 && !values.classId) {
-         classIdToSet = availableClasses[0].id; // Re-apply auto-selection if user cleared it
+         classIdToSet = availableClasses[0].id; 
       }
-
       form.reset({
         type: activeTab, 
         title: "",
@@ -228,7 +216,7 @@ export function DelegateInputForm({
         content: "",
         subject: "",
         assignmentName: "",
-        submittedByDelegateId: undefined, // Important to reset this
+        submittedByDelegateId: undefined,
       });
     }
   }
@@ -299,16 +287,16 @@ export function DelegateInputForm({
                   <FormItem className="flex flex-col">
                     <FormLabel>{t('formDateTimeLabel')}</FormLabel>
                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
+                        <FormControl>
+                          <PopoverTrigger asChild>
                             <Button
                                 variant={"outline"}
                                 className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {field.value ? format(field.value, "PPP HH:mm") : <span>{t('formPickDateTimeButton')}</span>}
                             </Button>
-                          </FormControl>
-                        </PopoverTrigger>
+                          </PopoverTrigger>
+                        </FormControl>
                         <PopoverContent className="w-auto p-0" align="start">
                           <Calendar mode="single" selected={field.value} onSelect={handleDateSelect} initialFocus />
                            <div className="p-2 border-t border-border">
@@ -372,7 +360,7 @@ export function DelegateInputForm({
           <TabsContent value="announcement" className="space-y-6 mt-0 border-none p-0">
              <FormField
               control={form.control}
-              name="content" // This should be "content" for announcement type
+              name="content" 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formAnnouncementContentLabel')}</FormLabel>
@@ -385,7 +373,7 @@ export function DelegateInputForm({
           <TabsContent value="exam" className="space-y-6 mt-0 border-none p-0">
             <FormField
               control={form.control}
-              name="subject" // This should be "subject" for exam type
+              name="subject" 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formExamSubjectLabel')}</FormLabel>
@@ -398,7 +386,7 @@ export function DelegateInputForm({
           <TabsContent value="deadline" className="space-y-6 mt-0 border-none p-0">
             <FormField
               control={form.control}
-              name="assignmentName" // This should be "assignmentName" for deadline type
+              name="assignmentName" 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('formDeadlineAssignmentNameLabel')}</FormLabel>
@@ -429,3 +417,4 @@ export function DelegateInputForm({
     </Tabs>
   );
 }
+

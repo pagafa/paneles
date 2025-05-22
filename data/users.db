@@ -1,3 +1,4 @@
+{"id":"user-1747938087506-k5ruh","name":"Pepe","username":"pepe","role":"delegate","password":"$2b$10$.WWvfHNe.WiFXKkkWHBKSe0X.E0lwu6eSIYMRlaXwxepqXyaLAS9S","_id":"6g8ezvkuDjFLF0Il","createdAt":{"$$date":1747938087550},"updatedAt":{"$$date":1747938087550}}
 {"id":"admin-pablo-001","name":"Pablo Admin","username":"pablo","role":"admin","password":"$2b$10$F6VVnbiE2GsIbADHeoB2uOx8..lgKUlhPHXeGIGVvW8QxM6BPZ/P.","_id":"undfaHMZdGxvDmoz","createdAt":{"$$date":1747936062902},"updatedAt":{"$$date":1747936258472}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
