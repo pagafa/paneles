@@ -4,3 +4,6 @@
 {"id":"exam-math-eso1a","title":"Exame de Matemáticas - Tema 3","date":"2025-05-29T17:47:40.443Z","type":"exam","subject":"Matemáticas","classId":"eso1a","submittedByDelegateId":"delegate-laura-g","description":" cubrirá os contidos dos temas 1, 2 e 3.","_id":"fi7UaCZfNiebvuZS","createdAt":{"$$date":1747936062242},"updatedAt":{"$$date":1747936062242}}
 {"id":"dead-fisica-bach2d","title":"Prazo Problemas Física - Tema 2","date":"2025-05-25T17:47:40.443Z","type":"deadline","assignmentName":"Boletín Problemas Termodinámica","classId":"bach2d","submittedByDelegateId":"delegate-laura-g","_id":"nEBJSR7NfrNKDQzO","createdAt":{"$$date":1747936062242},"updatedAt":{"$$date":1747936062242}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"$$deleted":true,"_id":"fi7UaCZfNiebvuZS"}
+{"$$deleted":true,"_id":"Zb4p6EqwU9OuUY9d"}
+{"$$deleted":true,"_id":"nEBJSR7NfrNKDQzO"}

@@ -66,7 +66,6 @@ export default function ManageClassesPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Add a cache-busting query parameter
       const response = await fetch(`/api/classes?_time=${Date.now()}`, { cache: 'no-store' });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: `Failed to fetch classes. Status: ${response.status}` }));
@@ -81,7 +80,7 @@ export default function ManageClassesPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [t]); // t is used in error messages, so it's a valid dependency
+  }, []); 
 
   useEffect(() => {
     fetchClasses();
@@ -107,7 +106,6 @@ export default function ManageClassesPage() {
 
       const savedOrUpdatedClassApiResult: SchoolClass = await response.json();
 
-      // Optimistic update
       if (!isEditing) {
         setClasses(prevClasses => sortClasses([...prevClasses, savedOrUpdatedClassApiResult]));
       } else {
@@ -122,7 +120,6 @@ export default function ManageClassesPage() {
       });
 
       setEditingClass(null);
-      // Still re-fetch to ensure full synchronization, though UI should reflect change already
       await fetchClasses();
     } catch (err) {
       console.error(err);
@@ -296,4 +293,6 @@ export default function ManageClassesPage() {
     </div>
   );
 }
+    
+
     
