@@ -1,4 +1,5 @@
 
+// src/types/index.ts
 import type { SupportedLanguage } from '@/lib/i18n';
 
 export type AnnouncementItemType = 'announcement' | 'exam' | 'deadline';
@@ -12,7 +13,7 @@ export interface BaseSchoolItem {
   submittedByDelegateId?: string;
 }
 
-// For Admin-created, potentially multi-class announcements stored in announcements.db
+// For Admin-created, announcements stored in announcements.db
 export interface Announcement extends BaseSchoolItem {
   type: 'announcement';
   content: string;
@@ -43,12 +44,14 @@ export interface SchoolClass {
   id: string;
   name: string;
   delegateId?: string;
-  language?: SupportedLanguage;
-  isHidden?: boolean; // Novo campo para marcar a clase como oculta
+  // language?: SupportedLanguage; // Removed
+  isHidden?: boolean;
+  // password?: string; // Removed
 }
 
-export interface ClassPasswordVerificationResponse {
-  verified: boolean;
-  message?: string;
-  errorDetails?: string;
-}
+// This type is no longer needed as class passwords were removed.
+// export interface ClassPasswordVerificationResponse {
+//   verified: boolean;
+//   message?: string;
+//   errorDetails?: string;
+// }

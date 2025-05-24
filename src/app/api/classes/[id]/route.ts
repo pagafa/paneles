@@ -51,21 +51,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     if (requestBody.language !== undefined) updatePayload.language = requestBody.language;
     
-    // Handle password update:
-    // - If password is in requestBody and it's a non-empty string, update it.
-    // - If password is in requestBody and it's an empty string, set it to undefined (remove password).
-    // - If password is not in requestBody, do nothing to the password.
-    if (Object.prototype.hasOwnProperty.call(requestBody, 'password')) { 
-      if (requestBody.password && requestBody.password.trim() !== "") {
-        updatePayload.password = requestBody.password.trim();
-      } else {
-        // Setting to undefined in NeDB effectively removes the field or sets it to null
-        // if NeDB is configured to treat undefined as null upon insertion/update.
-        // For $set, it will remove the field if it's undefined.
-        updatePayload.password = undefined; 
-      }
-    }
-    
     // console.log(`[API PUT /api/classes/${classId}] Update payload to NeDB:`, updatePayload);
 
     if (Object.keys(updatePayload).length === 0 && !Object.prototype.hasOwnProperty.call(requestBody, 'password')) {
@@ -96,12 +81,6 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         if (updatePayload.delegateId !== undefined && updatePayload.delegateId !== existingClass.delegateId) noMeaningfulChange = false;
         if (updatePayload.language !== undefined && updatePayload.language !== existingClass.language) noMeaningfulChange = false;
         
-        // Check password change specifically
-        if (Object.prototype.hasOwnProperty.call(requestBody, 'password')) {
-           // If password was in request, and the resulting updatePayload.password is different from existingClass.password
-           if (updatePayload.password !== existingClass.password) noMeaningfulChange = false;
-        }
-
         if (noMeaningfulChange) {
             const { password, ...classToReturn } = existingClass;
             const finalClassToReturn = {

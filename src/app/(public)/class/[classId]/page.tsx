@@ -4,33 +4,18 @@
 import { useEffect, useState, use, useCallback } from 'react';
 import Link from 'next/link';
 
-import type { SchoolEvent, Announcement, Exam, Deadline, User } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import type { SchoolEvent, Announcement, Exam, Deadline, User, SchoolClass } from "@/types";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KioskCarousel } from '@/components/kiosk/KioskCarousel';
 import { Separator } from '@/components/ui/separator';
-import { Book, Megaphone, BookOpenCheck, FileText, AlertTriangle, KeyRound, Unlock } from 'lucide-react';
+import { Book, Megaphone, BookOpenCheck, FileText, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
-
-interface ClassPageDetailsData extends Omit<SchoolClass, 'password'> {
-  passwordProtected: boolean;
-}
-
-const sortEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
-  return [...events].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-};
-
-const filterUpcomingEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
-  const now = new Date();
-  return events.filter(event => new Date(event.date) >= now);
-};
-
-async function getClassDetails(classId: string): Promise<ClassPageDetailsData | undefined> {
+// SchoolClass type is now directly used as class details no longer include passwordProtected
+async function getClassDetails(classId: string): Promise<SchoolClass | undefined> {
   try {
     const response = await fetch(`/api/classes/${classId}`);
     if (!response.ok) {
@@ -54,6 +39,7 @@ async function getClassAdminAnnouncements(classId: string): Promise<Announcement
         return [];
     }
     const allAdminAnnouncements: Announcement[] = await response.json();
+    // Filter for announcements that target this classId and are not hidden
     return allAdminAnnouncements.filter(ann => ann.targetClassIds && ann.targetClassIds.includes(classId));
   } catch (error) {
     console.error(`Error fetching admin announcements for ${classId}:`, error);
@@ -76,7 +62,6 @@ async function getClassDelegateAnnouncements(classId: string): Promise<SchoolEve
     return [];
   }
 }
-
 
 async function getClassExams(classId: string): Promise<Exam[]> {
   try {
@@ -122,14 +107,21 @@ async function getUsers(): Promise<User[]> {
   }
 }
 
+const sortEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
+  return [...events].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+const filterUpcomingEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
+  const now = new Date();
+  return events.filter(event => new Date(event.date) >= now);
+};
 
 export default function PublicClassPage({ params: paramsPromise }: { params: Promise<{ classId: string }> }) {
   const actualParams = use(paramsPromise);
   const { classId } = actualParams;
-
   const { t } = useLanguage();
 
-  const [classDetails, setClassDetails] = useState<ClassPageDetailsData | null>(null);
+  const [classDetails, setClassDetails] = useState<SchoolClass | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [announcements, setAnnouncements] = useState<(Announcement | SchoolEvent)[]>([]);
   const [exams, setExams] = useState<SchoolEvent[]>([]);
@@ -138,12 +130,6 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
   const [isLoadingClassDetails, setIsLoadingClassDetails] = useState(true);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [isClassUnlockedThisVisit, setIsClassUnlockedThisVisit] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
-
 
   const fetchClassPageData = useCallback(async () => {
     if (!classId) {
@@ -156,89 +142,52 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     setIsLoadingClassDetails(true);
     setIsLoadingEvents(true);
     setError(null);
-    setPasswordError(null);
 
     try {
       const details = await getClassDetails(classId);
-      setClassDetails(details);
+      setClassDetails(details || null); // Ensure it's null if undefined
       setIsLoadingClassDetails(false);
 
-      if (!details) {
-        setError(t('classNotFoundMessage'));
+      if (!details || details.isHidden) { // Also check if class is hidden
+        setError(t('classNotFoundMessage')); // Treat hidden class as not found for public page
         setIsLoadingEvents(false);
         return;
       }
 
-      if (!details.passwordProtected || isClassUnlockedThisVisit) {
-        const usersData = await getUsers();
-        setUsers(usersData);
+      // Class exists, is not hidden, and not password protected (feature removed)
+      const usersData = await getUsers();
+      setUsers(usersData);
 
-        const [
-          adminAnnouncementsForClass,
-          delegateAnnouncementsForClass,
-          classExamsData,
-          classDeadlinesData
-        ] = await Promise.all([
-          getClassAdminAnnouncements(classId),
-          getClassDelegateAnnouncements(classId),
-          getClassExams(classId),
-          getClassDeadlines(classId)
-        ]);
-        
-        const combinedAnnouncements: (Announcement | SchoolEvent)[] = [...adminAnnouncementsForClass, ...delegateAnnouncementsForClass];
-        setAnnouncements(filterUpcomingEvents(sortEvents(combinedAnnouncements)));
-        setExams(filterUpcomingEvents(sortEvents(classExamsData)));
-        setDeadlines(filterUpcomingEvents(sortEvents(classDeadlinesData)));
-        setIsLoadingEvents(false);
-      } else {
-        setIsLoadingEvents(false); // If password protected and not unlocked, don't load events yet
-      }
-
+      const [
+        adminAnnouncementsForClass,
+        delegateAnnouncementsForClass,
+        classExamsData,
+        classDeadlinesData
+      ] = await Promise.all([
+        getClassAdminAnnouncements(classId),
+        getClassDelegateAnnouncements(classId),
+        getClassExams(classId),
+        getClassDeadlines(classId)
+      ]);
+      
+      const combinedAnnouncements: (Announcement | SchoolEvent)[] = [...adminAnnouncementsForClass, ...delegateAnnouncementsForClass];
+      setAnnouncements(filterUpcomingEvents(sortEvents(combinedAnnouncements)));
+      setExams(filterUpcomingEvents(sortEvents(classExamsData)));
+      setDeadlines(filterUpcomingEvents(sortEvents(classDeadlinesData)));
+      
     } catch (err) {
       console.error("Error fetching data for class page:", err);
       setError((err as Error).message || "An unexpected error occurred");
       setClassDetails(null);
-      setIsLoadingClassDetails(false);
-      setIsLoadingEvents(false);
+    } finally {
+        setIsLoadingClassDetails(false); // Ensure this is always set
+        setIsLoadingEvents(false);
     }
-  }, [classId, t, isClassUnlockedThisVisit]);
+  }, [classId, t]);
 
   useEffect(() => {
     fetchClassPageData();
-  }, [fetchClassPageData]); // fetchClassPageData will re-run if isClassUnlockedThisVisit changes
-
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!classDetails || !classId) return;
-
-    setIsVerifyingPassword(true);
-    setPasswordError(null);
-
-    try {
-      const response = await fetch(`/api/classes/${classId}/verify-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || t('classPasswordVerificationError'));
-      }
-
-      if (result.verified) {
-        setIsClassUnlockedThisVisit(true); // This will trigger fetchClassPageData to re-run
-      } else {
-        setPasswordError(t('classPasswordIncorrectError'));
-      }
-    } catch (err) {
-      setPasswordError((err as Error).message);
-    } finally {
-      setIsVerifyingPassword(false);
-      setPasswordInput(''); // Clear password input after attempt
-    }
-  };
+  }, [fetchClassPageData]);
 
   if (isLoadingClassDetails) {
     return (
@@ -250,7 +199,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-  if (error && !classDetails) {
+  if (error || !classDetails) { // If error or classDetails is null (not found or hidden)
     return (
       <div className="w-full max-w-lg text-center py-10">
         <Card className="shadow-lg">
@@ -260,7 +209,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-6">{error}</p>
+            <p className="text-muted-foreground mb-6">{error || t('classNotFoundMessage')}</p>
             <Button asChild>
               <Link href="/">{t('backToHomeButton')}</Link>
             </Button>
@@ -270,59 +219,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
   
-  if (!classDetails) { // Fallback if error didn't set and details are still null
-     return (
-      <div className="w-full max-w-lg text-center py-10">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl text-destructive">{t('classNotFoundTitle')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-6">{t('classNotFoundMessage')}</p>
-            <Button asChild><Link href="/">{t('backToHomeButton')}</Link></Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (classDetails.passwordProtected && !isClassUnlockedThisVisit) {
-    return (
-      <div className="w-full max-w-md mx-auto py-12">
-        <Card className="shadow-xl">
-          <CardHeader className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
-                <KeyRound className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-2xl">{t('classPasswordPromptTitle')}</CardTitle>
-            <CardDescription>{t('classPasswordPromptDescription', { className: classDetails.name })}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handlePasswordSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="classPassword">{t('classPasswordInputLabel')}</Label>
-                <Input
-                  id="classPassword"
-                  type="password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  className="mt-1"
-                  required
-                />
-              </div>
-              {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
-              <Button type="submit" className="w-full" disabled={isVerifyingPassword}>
-                {isVerifyingPassword ? t('loadingLabel') : t('classPasswordUnlockButton')}
-                {!isVerifyingPassword && <Unlock className="ml-2 h-4 w-4" />}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Only show content if class is not password protected OR if it is and has been unlocked
+  // Class exists and is publicly accessible
   const sectionsConfig: { titleKey: TranslationKey; events: (Announcement | SchoolEvent)[]; icon: React.ElementType; isLoading: boolean }[] = [
     { titleKey: 'announcementsSectionTitle', events: announcements, icon: Megaphone, isLoading: isLoadingEvents },
     { titleKey: 'examsSectionTitle', events: exams, icon: BookOpenCheck, isLoading: isLoadingEvents },
@@ -362,7 +259,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         )}
       </Card>
 
-      {isLoadingEvents && visibleClassSections.length > 0 && (
+      {isLoadingEvents && ( // Combined loading state for all event types
          <div className="space-y-12">
           {sectionsConfig.map(section => (
             <div key={section.titleKey} className="w-full mb-12">

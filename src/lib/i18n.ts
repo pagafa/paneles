@@ -22,7 +22,7 @@ interface Translations {
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
-  delegateIdLabel: string;
+  delegateIdLabel: string; // Mantense para uso interno se é necesario
   noEventsForClassHint: string;
   loadingLabel: string;
   assignedClassesLabel: string;
@@ -126,11 +126,11 @@ interface Translations {
   createUserButton: string;
   passwordRequiredForNewUser: string;
   classNameLabel: string;
-  classNameTableHeader: string; // Engadida para consistencia
-  classDelegateTableHeader: string; // Engadida para consistencia
-  editClassButtonAriaLabel: string; // Engadida para aria-label
-  deleteClassButtonAriaLabel: string; // Engadida para aria-label
-  deleteClassConfirmation: string; // Engadida para consistencia
+  classNameTableHeader: string;
+  classDelegateTableHeader: string;
+  editClassButtonAriaLabel: string;
+  deleteClassButtonAriaLabel: string;
+  deleteClassConfirmation: string;
   classNamePlaceholder: string;
   classDelegateLabel: string;
   optionalLabel: string;
@@ -192,11 +192,22 @@ interface Translations {
   editingClassDescription: string;
   existingClassesTitle: string;
 
-  classIsHiddenLabel: string; // Nova
-  classIsHiddenDescription: string; // Nova
-  statusTableHeader: string; // Nova
-  hiddenStatusBadge: string; // Nova
-  visibleStatusBadge: string; // Nova
+  classIsHiddenLabel: string; 
+  classIsHiddenDescription: string; 
+  statusTableHeader: string; 
+  hiddenStatusBadge: string; 
+  visibleStatusBadge: string; 
+
+  // Removidas chaves relacionadas co contrasinal da clase
+  // classPasswordLabel: string;
+  // classPasswordPlaceholder: string;
+  // classPasswordHint: string;
+  // classPasswordPromptTitle: string;
+  // classPasswordPromptDescription: string;
+  // classPasswordInputLabel: string;
+  // classPasswordUnlockButton: string;
+  // classPasswordVerificationError: string;
+  // classPasswordIncorrectError: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -210,7 +221,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Delegate Dashboard",
     announcementsSectionTitle: "Announcements",
     examsSectionTitle: "Exams",
-    deadlinesSectionTitle: "Assignments",
+    deadlinesSectionTitle: "Assignments", // Changed from "Deadlines"
     checkBackLaterHint: "Please check back later for updates.",
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
@@ -273,7 +284,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Post New Announcement",
     editingAnnouncementDescription: "You are editing: \"{title}\"",
     currentAnnouncementsTitle: "Current Announcements",
-    noAnnouncementsPostedHint: "No announcements posted yet for any class.", 
+    noAnnouncementsPostedHint: "No announcements posted yet. Select classes to target.",
     classesTargetLabel: "Classes",
     targetLabel: "Target",
     editButtonLabel: "Edit",
@@ -404,7 +415,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Panel de Delegado",
     announcementsSectionTitle: "Anuncios",
     examsSectionTitle: "Exámenes",
-    deadlinesSectionTitle: "Tareas",
+    deadlinesSectionTitle: "Tareas", // Cambiado de "Plazos"
     checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
@@ -467,7 +478,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Publicar Nuevo Anuncio",
     editingAnnouncementDescription: "Estás editando: \"{title}\"",
     currentAnnouncementsTitle: "Anuncios Actuales",
-    noAnnouncementsPostedHint: "No hay anuncios publicados todavía para ninguna clase.",
+    noAnnouncementsPostedHint: "No hay anuncios publicados todavía. Selecciona clases de destino.",
     classesTargetLabel: "Clases",
     targetLabel: "Dirigido a",
     editButtonLabel: "Editar",
@@ -597,7 +608,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Tableau de bord Délégué",
     announcementsSectionTitle: "Annonces",
     examsSectionTitle: "Examens",
-    deadlinesSectionTitle: "Devoirs",
+    deadlinesSectionTitle: "Devoirs", // Changed from "Dates Limites"
     checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.",
     viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
@@ -660,7 +671,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Publier une Nouvelle Annonce",
     editingAnnouncementDescription: "Vous modifiez : \"{title}\"",
     currentAnnouncementsTitle: "Annonces Actuelles",
-    noAnnouncementsPostedHint: "Aucune annonce publiée pour l'instant pour aucune classe.",
+    noAnnouncementsPostedHint: "Aucune annonce publiée pour l'instant. Sélectionnez des classes cibles.",
     classesTargetLabel: "Classes",
     targetLabel: "Cible",
     editButtonLabel: "Modifier",
@@ -790,7 +801,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Panel de Delegado",
     announcementsSectionTitle: "Anuncios",
     examsSectionTitle: "Exames",
-    deadlinesSectionTitle: "Tarefas",
+    deadlinesSectionTitle: "Tarefas", // Cambiado de "Prazos"
     checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
@@ -853,7 +864,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Publicar Novo Anuncio",
     editingAnnouncementDescription: "Estás a editar: \"{title}\"",
     currentAnnouncementsTitle: "Anuncios Actuais",
-    noAnnouncementsPostedHint: "Aínda non hai anuncios publicados para ningunha clase.",
+    noAnnouncementsPostedHint: "Aínda non hai anuncios publicados. Selecciona clases de destino.",
     classesTargetLabel: "Clases",
     targetLabel: "Dirixido a",
     editButtonLabel: "Editar",
@@ -980,3 +991,4 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
+

@@ -9,8 +9,8 @@ import type { SchoolClass } from '@/types';
 export async function GET() {
   try {
     const db = await getClassesDb();
-    const classes = await db.find({}).sort({ name: 1 }); 
-    // Devolver todos os campos, incluíndo isHidden e password (este último só para o panel de admin)
+    const classes = await db.find({}).sort({ name: 1 });
+    // Devolvemos todos os campos, incluíndo isHidden. O contrasinal xa non existe.
     return NextResponse.json(classes);
   } catch (error) {
     console.error('[API GET /api/classes] Error:', error);
@@ -32,18 +32,20 @@ export async function POST(request: Request) {
     const classToAdd: SchoolClass = {
       id: newClassData.id || `class-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: newClassData.name,
-      delegateId: newClassData.delegateId || undefined, 
-      language: newClassData.language,
+      delegateId: newClassData.delegateId || undefined,
+      // language: newClassData.language, // Language field was removed
       isHidden: newClassData.isHidden || false,
+      // password field was removed
     };
 
     const savedClass = await db.insert(classToAdd);
     return NextResponse.json(savedClass, { status: 201 });
   } catch (error) {
     console.error('[API POST /api/classes] Error creating class:', error);
-    if ((error as Error).message.includes('unique constraint violated')) {
-        return NextResponse.json({ message: 'Error creating class: ID already exists.', error: (error as Error).message }, { status: 409 });
+    const errorMessage = (error as Error).message;
+    if (errorMessage.includes('unique constraint violated')) {
+        return NextResponse.json({ message: `Error creating class: ID already exists. Detail: ${errorMessage}` }, { status: 409 });
     }
-    return NextResponse.json({ message: 'Error creating class', error: (error as Error).message }, { status: 500 });
+    return NextResponse.json({ message: `Error creating class: ${errorMessage}` }, { status: 500 });
   }
 }
