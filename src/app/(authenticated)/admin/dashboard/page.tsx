@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import type { Announcement, SchoolClass, SupportedLanguage } from "@/types";
 import { format } from "date-fns";
 import { enUS, es, fr, gl } from 'date-fns/locale'; // Import locales
-import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw, CalendarOff } from "lucide-react";
+import { Megaphone, Edit3, Trash2, Settings, Save, AlertTriangle, Globe, DatabaseZap, RefreshCw, CalendarOff, Layers } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,6 +47,7 @@ export default function AdminDashboardPage() {
   const [errorAnnouncements, setErrorAnnouncements] = useState<string | null>(null);
   const [errorClasses, setErrorClasses] = useState<string | null>(null);
   const [isLoadingReset, setIsLoadingReset] = useState(false);
+  const [isLoadingCompact, setIsLoadingCompact] = useState(false);
   
   const { toast } = useToast();
   const { language: currentSessionLanguage, setLanguage: setSessionLanguage, t } = useLanguage();
@@ -252,9 +253,48 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleCompactDatabase = async () => {
+    setIsLoadingCompact(true);
+    try {
+      const response = await fetch('/api/admin/compact-database', {
+        method: 'POST',
+      });
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        // For 207 Multi-Status, we might still want to show a partial success/error message
+        if (response.status === 207 && responseData.errors && responseData.errors.length > 0) {
+          toast({
+            title: t('dbCompactErrorDescription'),
+            description: responseData.message + " Details: " + responseData.errors.join('; '),
+            variant: "warning",
+            duration: 10000,
+          });
+        } else {
+          throw new Error(responseData.message || `Failed to compact database. Status: ${response.status}`);
+        }
+      } else {
+        toast({
+          title: t('dbCompactSuccessTitle'),
+          description: responseData.message || t('dbCompactSuccessDescription'),
+        });
+      }
+    } catch (err) {
+      console.error('Error compacting database:', err);
+      toast({
+        title: t('errorDialogTitle'),
+        description: (err as Error).message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoadingCompact(false);
+    }
+  };
+
 
   const getTargetDisplay = (targetClassIds?: string[]): string => {
     if (!targetClassIds || targetClassIds.length === 0) {
+      // This case should no longer happen as announcements must target at least one class
       return t('noAnnouncementsPostedHint'); 
     }
     const targetedClassNames = targetClassIds.map(id => {
@@ -288,7 +328,7 @@ export default function AdminDashboardPage() {
                   className="mt-1"
                 />
               </div>
-              <Button onClick={handleSchoolNameSave} disabled={isLoadingReset}>
+              <Button onClick={handleSchoolNameSave} disabled={isLoadingReset || isLoadingCompact}>
                 <Save className="mr-2 h-4 w-4" />
                 {t('saveSchoolNameButton')}
               </Button>
@@ -310,7 +350,7 @@ export default function AdminDashboardPage() {
                 <Select 
                   value={selectedGlobalLanguage} 
                   onValueChange={(value) => setSelectedGlobalLanguage(value as SupportedLanguage)}
-                  disabled={isLoadingReset}
+                  disabled={isLoadingReset || isLoadingCompact}
                 >
                   <SelectTrigger id="globalLanguageSelect" className="mt-1">
                     <SelectValue placeholder={t('selectLanguagePlaceholder')} />
@@ -324,7 +364,7 @@ export default function AdminDashboardPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={handleGlobalLanguageSave} disabled={isLoadingReset}>
+              <Button onClick={handleGlobalLanguageSave} disabled={isLoadingReset || isLoadingCompact}>
                 <Save className="mr-2 h-4 w-4" />
                 {t('saveGlobalLanguageButton')}
               </Button>
@@ -342,7 +382,7 @@ export default function AdminDashboardPage() {
           </CardTitle>
           {editingAnnouncement && (
             <CardDescription>
-              {t('editingAnnouncementDescription', { title: editingAnnouncement.title })} <Button variant="link" size="sm" onClick={() => setEditingAnnouncement(null)} disabled={isLoadingReset}>{t('cancelEditButton')}</Button>
+              {t('editingAnnouncementDescription', { title: editingAnnouncement.title })} <Button variant="link" size="sm" onClick={() => setEditingAnnouncement(null)} disabled={isLoadingReset || isLoadingCompact}>{t('cancelEditButton')}</Button>
             </CardDescription>
           )}
         </CardHeader>
@@ -381,7 +421,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <p className="text-destructive">{errorAnnouncements}</p>
-            <Button onClick={fetchAnnouncements} className="mt-4" disabled={isLoadingReset}>{t('retryButtonLabel')}</Button>
+            <Button onClick={fetchAnnouncements} className="mt-4" disabled={isLoadingReset || isLoadingCompact}>{t('retryButtonLabel')}</Button>
           </CardContent>
         </Card>
       )}
@@ -404,12 +444,12 @@ export default function AdminDashboardPage() {
                         )}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')} disabled={isLoadingReset}>
+                        <Button variant="outline" size="icon" onClick={() => handleEdit(ann)} aria-label={t('editButtonLabel')} disabled={isLoadingReset || isLoadingCompact}>
                           <Edit3 className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')} disabled={isLoadingReset}>
+                            <Button variant="destructive" size="icon" aria-label={t('deleteButtonLabel')} disabled={isLoadingReset || isLoadingCompact}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -445,46 +485,62 @@ export default function AdminDashboardPage() {
 
       <Separator className="my-8" />
 
-      <Card className="border-destructive shadow-lg">
+      <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl text-destructive">
+          <CardTitle className="flex items-center gap-2 text-xl">
             <DatabaseZap className="h-6 w-6" />
-            {t('dbResetCardTitle')}
+            {t('dbMaintenanceCardTitle')}
           </CardTitle>
-          <CardDescription className="text-destructive/90">
-            {t('dbResetWarningDescription')}
-          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" className="w-full sm:w-auto" disabled={isLoadingReset}>
-                {isLoadingReset ? (
-                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                )}
-                {isLoadingReset ? t('dbResettingButton') : t('dbResetButtonLabel')}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('dbResetConfirmTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>
-                  {t('dbResetConfirmDescription')}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleResetDatabaseConfirm}
-                  className="bg-destructive hover:bg-destructive/90"
-                >
-                  {t('dbResetConfirmButton')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+        <CardContent className="space-y-4">
+          <div className="border-l-4 border-destructive pl-4 py-2 bg-destructive/10">
+            <p className="font-semibold text-destructive">{t('dbResetCardTitle')}</p>
+            <p className="text-sm text-destructive/90">{t('dbResetWarningDescription')}</p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full sm:w-auto mt-3" disabled={isLoadingReset || isLoadingCompact}>
+                  {isLoadingReset ? (
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  {isLoadingReset ? t('dbResettingButton') : t('dbResetButtonLabel')}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t('dbResetConfirmTitle')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('dbResetConfirmDescription')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancelButton')}</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleResetDatabaseConfirm}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    {t('dbResetConfirmButton')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+
+          <Separator />
+
+          <div>
+            <p className="font-semibold text-primary">{t('dbCompactCardTitle')}</p>
+            <p className="text-sm text-muted-foreground mb-2">{t('dbCompactDescription')}</p>
+            <Button onClick={handleCompactDatabase} variant="outline" className="w-full sm:w-auto" disabled={isLoadingReset || isLoadingCompact}>
+              {isLoadingCompact ? (
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Layers className="mr-2 h-4 w-4" />
+              )}
+              {isLoadingCompact ? t('dbCompactingButton') : t('dbCompactButtonLabel')}
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

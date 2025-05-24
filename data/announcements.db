@@ -1,0 +1,7 @@
+{"id":"ann-xeral-1","title":"Reunión Informativa Xeral de Principio de Curso","content":"Convócase a todas as familias a unha reunión informativa o vindeiro luns ás 18:00 no salón de actos.","date":"2025-05-26T10:01:53.071Z","type":"announcement","targetClassIds":["eso1a","bach1c"],"_id":"IQfVdq2Wk63oT0pf","createdAt":{"$$date":1748080913590},"updatedAt":{"$$date":1748080913590}}
+{"id":"ann-fp-1","title":"Charla Orientación Profesional FP","content":"O vindeiro venres haberá unha charla sobre saídas profesionais para os ciclos de FP. Asistencia obrigatoria para CS ASIR e CS DAW.","date":"2025-05-29T10:01:53.071Z","type":"announcement","targetClassIds":["fpsasir","fpsdaw"],"_id":"n8QJDaMueTNOmnIw","createdAt":{"$$date":1748080913590},"updatedAt":{"$$date":1748080913590}}
+{"id":"ann-eso1a-1","title":"Material Necesario para Plástica - 1º ESO A","content":"Lémbrase aos alumnos de 1º ESO A que deben traer o material de plástica solicitado para a clase do mércores.","date":"2025-05-25T10:01:53.071Z","type":"announcement","targetClassIds":["eso1a"],"_id":"rxClJ2tNknVvgnVP","createdAt":{"$$date":1748080913590},"updatedAt":{"$$date":1748080913590}}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"$$deleted":true,"_id":"n8QJDaMueTNOmnIw"}
+{"$$deleted":true,"_id":"rxClJ2tNknVvgnVP"}
+{"$$deleted":true,"_id":"IQfVdq2Wk63oT0pf"}

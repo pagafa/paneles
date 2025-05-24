@@ -1,0 +1,9 @@
+{"id":"fpsdaw","name":"CS DAW","_id":"1MYc3HVOz3UxAWJW","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"bach1c","name":"1º Bacharelato C","_id":"CcXqlPUIvfKwfRJT","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"bach2d","name":"2º Bacharelato D","delegateId":"delegate-laura-g","_id":"DqwmMsZwMw6sbXF8","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"fpscm","name":"CM SMR","_id":"TQA3pIUBgjClnpN8","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"fpbasic","name":"FP Básica Informática","isHidden":false,"_id":"dR4Y9sGw0mEXQUDs","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"fpsasir","name":"CS ASIR","_id":"f2kuRkDBg3m1ad3L","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"eso2b","name":"2º ESO B","delegateId":"delegate-carlos-p","isHidden":true,"_id":"fBxzIMRtLn6l5VMu","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"id":"eso1a","name":"1º ESO A","delegateId":"delegate-laura-g","_id":"iQs3x9JJQd1olbaY","createdAt":{"$$date":1748080913621},"updatedAt":{"$$date":1748080913621}}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}

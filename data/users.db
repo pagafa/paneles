@@ -1,0 +1,6 @@
+{"id":"delegate-carlos-p","name":"Carlos Pérez","username":"carlos_p","role":"delegate","password":"$2b$10$Gl8C/PLKf6E4bi8K2Ukq.eCucmefiCxO9my7K0PEsof3Hp/8HvktK","_id":"9COJHo6FxDdmILZy","createdAt":{"$$date":1748080927711},"updatedAt":{"$$date":1748080927711}}
+{"id":"admin-pablo-001","name":"Pablo Admin","username":"pablo","role":"admin","password":"$2b$10$hN0AdvggVC/wPHRFUGpVk.mbSzbbhKYbCk9HcPqHb8AF72JKMMxay","_id":"MJeCQH6OdGktpYjC","createdAt":{"$$date":1748080927711},"updatedAt":{"$$date":1748080927711}}
+{"id":"user-ana-s","name":"Ana Suárez","username":"ana_s","role":"delegate","password":"$2b$10$WJEw0qXpEQy6fJfjH9TU2OFu4nvQ7f.lbfoReQm7BnfwpXWj8HAHO","_id":"dzhbKoJfFVjZLGzL","createdAt":{"$$date":1748080927711},"updatedAt":{"$$date":1748080927711}}
+{"id":"delegate-laura-g","name":"Laura Gómez","username":"laura_g","role":"delegate","password":"$2b$10$s8SPBssn7oDzCFAqA2SeA.WZTTeqI5k1v9AfZknEa6aiv26vFQEZ2","_id":"zB0R2hqu15cy1r8y","createdAt":{"$$date":1748080927711},"updatedAt":{"$$date":1748080927711}}
+{"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}

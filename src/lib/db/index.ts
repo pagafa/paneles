@@ -9,20 +9,23 @@ import { mockClasses, mockUsers, mockSchoolEvents, mockAnnouncements } from '@/l
 import bcrypt from 'bcrypt';
 
 const dataDir = path.join(process.cwd(), 'data');
-const SALT_ROUNDS = 10; // Standard for bcrypt
+const SALT_ROUNDS = 10;
 
-// Promises to ensure initialization runs only once per datastore
+// --- Singleton Promises & Instances ---
+let announcementsDbInstance: Datastore<Announcement> | null = null;
 let announcementsDbInitializationPromise: Promise<Datastore<Announcement>> | null = null;
+
+let classesDbInstance: Datastore<SchoolClass> | null = null;
 let classesDbInitializationPromise: Promise<Datastore<SchoolClass>> | null = null;
+
+let usersDbInstance: Datastore<User> | null = null;
 let usersDbInitializationPromise: Promise<Datastore<User>> | null = null;
+
+let schoolEventsDbInstance: Datastore<SchoolEvent> | null = null;
 let schoolEventsDbInitializationPromise: Promise<Datastore<SchoolEvent>> | null = null;
 
-let announcementsDbInstance: Datastore<Announcement> | null = null;
-let classesDbInstance: Datastore<SchoolClass> | null = null;
-let usersDbInstance: Datastore<User> | null = null;
-let schoolEventsDbInstance: Datastore<SchoolEvent> | null = null;
 
-// Function to ensure the data directory exists
+// --- Helper Functions ---
 async function ensureDataDirectory(): Promise<void> {
   try {
     await fs.mkdir(dataDir, { recursive: true });
@@ -34,7 +37,6 @@ async function ensureDataDirectory(): Promise<void> {
   }
 }
 
-// Helper function to create or recover a NeDB datastore
 async function createOrRecoverDb<T extends { id: string }>(
   dbPath: string,
   dbNameForLog: string,
@@ -53,49 +55,50 @@ async function createOrRecoverDb<T extends { id: string }>(
     }
     console.log(`[DB Setup] Successfully loaded or created ${dbNameForLog} database at ${dbPath}`);
   } catch (initializationError) {
-    const err = initializationError as Error & { code?: string };
-    console.warn(`[DB Recovery Attempt - ${dbNameForLog}] Initial error for ${dbPath}: ${err.message}`);
+    const err = initializationError as Error & { code?: string; message: string };
+    console.warn(`[DB Recovery - ${dbNameForLog}] Initial error for ${dbPath}: ${err.message}`);
 
     const isCorruptError = err.message.includes("More than 10% of the data file is corrupt") ||
                            err.message.includes("unexpected end of file") ||
                            (err.code === 'ENOENT' && err.message.includes("rename") && err.message.includes(".db~"));
 
     if (isCorruptError) {
-      console.warn(`[DB Recovery Attempt - ${dbNameForLog}] Database file (${dbPath}) appears corrupt or inconsistent. Attempting to delete and re-initialize.`);
+      console.warn(`[DB Recovery - ${dbNameForLog}] Database file (${dbPath}) appears corrupt or inconsistent. Attempting to delete and re-initialize.`);
       try {
         try {
-          console.log(`[DB Recovery Attempt - ${dbNameForLog}] Attempting to delete main DB file: ${dbPath}`);
+          console.log(`[DB Recovery - ${dbNameForLog}] Attempting to delete main DB file: ${dbPath}`);
           await fs.unlink(dbPath);
-          console.log(`[DB Recovery Attempt - ${dbNameForLog}] Successfully deleted main DB file: ${dbPath}`);
+          console.log(`[DB Recovery - ${dbNameForLog}] Successfully deleted main DB file: ${dbPath}`);
         } catch (unlinkError: any) {
           if (unlinkError.code !== 'ENOENT') { 
-            console.warn(`[DB Recovery Attempt - ${dbNameForLog}] Failed to delete main DB file ${dbPath} (might be okay if only journal existed or file already gone):`, unlinkError.message);
+            console.error(`[DB Recovery - ${dbNameForLog}] CRITICAL: Failed to delete main DB file ${dbPath} during recovery:`, unlinkError.message);
+            throw err; // Re-throw original error if deletion fails critically
           } else {
-            console.log(`[DB Recovery Attempt - ${dbNameForLog}] Main DB file ${dbPath} did not exist, proceeding.`);
+            console.log(`[DB Recovery - ${dbNameForLog}] Main DB file ${dbPath} did not exist, proceeding.`);
           }
         }
 
         const journalPath = `${dbPath}~`;
         try {
-          console.log(`[DB Recovery Attempt - ${dbNameForLog}] Attempting to delete journal file: ${journalPath}`);
+          console.log(`[DB Recovery - ${dbNameForLog}] Attempting to delete journal file: ${journalPath}`);
           await fs.unlink(journalPath);
-          console.log(`[DB Recovery Attempt - ${dbNameForLog}] Successfully deleted journal file: ${journalPath}`);
+          console.log(`[DB Recovery - ${dbNameForLog}] Successfully deleted journal file: ${journalPath}`);
         } catch (unlinkJournalError: any) {
           if (unlinkJournalError.code !== 'ENOENT') { 
-            console.warn(`[DB Recovery Attempt - ${dbNameForLog}] Failed to delete journal file ${journalPath} (might be okay if it didn't exist):`, unlinkJournalError.message);
+            console.warn(`[DB Recovery - ${dbNameForLog}] Failed to delete journal file ${journalPath} (might be okay if it didn't exist):`, unlinkJournalError.message);
           } else {
-            console.log(`[DB Recovery Attempt - ${dbNameForLog}] Journal file ${journalPath} did not exist.`);
+            console.log(`[DB Recovery - ${dbNameForLog}] Journal file ${journalPath} did not exist.`);
           }
         }
         
-        console.log(`[DB Recovery Attempt - ${dbNameForLog}] Attempting to re-create database: ${dbPath}`);
+        console.log(`[DB Recovery - ${dbNameForLog}] Attempting to re-create database: ${dbPath}`);
         db = Datastore.create({ filename: dbPath, autoload: true, timestampData: true });
         for (const index of uniqueIndexFields) {
           await db.ensureIndex(index);
         }
-        console.log(`[DB Recovery Attempt - ${dbNameForLog}] Successfully re-initialized ${dbNameForLog} database (${dbPath}).`);
+        console.log(`[DB Recovery - ${dbNameForLog}] Successfully re-initialized ${dbNameForLog} database (${dbPath}).`);
       } catch (reinitializationError) {
-        console.error(`[DB Recovery Attempt - ${dbNameForLog}] Failed to re-initialize ${dbNameForLog} database (${dbPath}) after corruption attempt:`, reinitializationError);
+        console.error(`[DB Recovery - ${dbNameForLog}] Failed to re-initialize ${dbNameForLog} database (${dbPath}) after corruption attempt:`, reinitializationError);
         throw reinitializationError; 
       }
     } else {
@@ -105,7 +108,6 @@ async function createOrRecoverDb<T extends { id: string }>(
   }
   return db;
 }
-
 
 // --- Announcements Database ---
 async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement>> {
@@ -127,25 +129,26 @@ async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement
 
 export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
   if (announcementsDbInstance) return announcementsDbInstance;
-  if (announcementsDbInitializationPromise) {
-    console.log('[DB getAnnouncementsDb] Awaiting existing initialization promise...');
-    return announcementsDbInitializationPromise;
-  }
-  console.log('[DB getAnnouncementsDb] Starting new initialization...');
+  if (announcementsDbInitializationPromise) return announcementsDbInitializationPromise;
+
   announcementsDbInitializationPromise = initializeAnnouncementsDatabase()
     .then(db => {
       announcementsDbInstance = db;
-      console.log('[DB getAnnouncementsDb] Initialization successful.');
-      announcementsDbInitializationPromise = null; // Clear promise once resolved
+      announcementsDbInitializationPromise = null; 
       return db;
     })
     .catch(err => {
-      console.error('[DB getAnnouncementsDb] Initialization failed:', err);
-      announcementsDbInitializationPromise = null; // Allow retry
+      announcementsDbInitializationPromise = null; 
       throw err;
     });
   return announcementsDbInitializationPromise;
 }
+export function resetAnnouncementsDbInstance() {
+  console.log('[DB Reset] Resetting announcementsDbInstance and promise.');
+  announcementsDbInstance = null;
+  announcementsDbInitializationPromise = null;
+}
+
 
 // --- Classes Database ---
 async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
@@ -167,24 +170,24 @@ async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
 
 export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
   if (classesDbInstance) return classesDbInstance;
-  if (classesDbInitializationPromise) {
-    console.log('[DB getClassesDb] Awaiting existing initialization promise...');
-    return classesDbInitializationPromise;
-  }
-  console.log('[DB getClassesDb] Starting new initialization...');
+  if (classesDbInitializationPromise) return classesDbInitializationPromise;
+  
   classesDbInitializationPromise = initializeClassesDatabase()
     .then(db => {
       classesDbInstance = db;
-      console.log('[DB getClassesDb] Initialization successful.');
       classesDbInitializationPromise = null;
       return db;
     })
     .catch(err => {
-      console.error('[DB getClassesDb] Initialization failed:', err);
       classesDbInitializationPromise = null;
       throw err;
     });
   return classesDbInitializationPromise;
+}
+export function resetClassesDbInstance() {
+  console.log('[DB Reset] Resetting classesDbInstance and promise.');
+  classesDbInstance = null;
+  classesDbInitializationPromise = null;
 }
 
 // --- Users Database ---
@@ -217,24 +220,24 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
 
 export async function getUsersDb(): Promise<Datastore<User>> {
   if (usersDbInstance) return usersDbInstance;
-  if (usersDbInitializationPromise) {
-    console.log('[DB getUsersDb] Awaiting existing initialization promise...');
-    return usersDbInitializationPromise;
-  }
-  console.log('[DB getUsersDb] Starting new initialization...');
+  if (usersDbInitializationPromise) return usersDbInitializationPromise;
+
   usersDbInitializationPromise = initializeUsersDatabase()
     .then(db => {
       usersDbInstance = db;
-      console.log('[DB getUsersDb] Initialization successful.');
       usersDbInitializationPromise = null;
       return db;
     })
     .catch(err => {
-      console.error('[DB getUsersDb] Initialization failed:', err);
       usersDbInitializationPromise = null;
       throw err;
     });
   return usersDbInitializationPromise;
+}
+export function resetUsersDbInstance() {
+  console.log('[DB Reset] Resetting usersDbInstance and promise.');
+  usersDbInstance = null;
+  usersDbInitializationPromise = null;
 }
 
 // --- SchoolEvents Database (Delegate Submissions) ---
@@ -257,22 +260,22 @@ async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>>
 
 export async function getSchoolEventsDb(): Promise<Datastore<SchoolEvent>> {
   if (schoolEventsDbInstance) return schoolEventsDbInstance;
-  if (schoolEventsDbInitializationPromise) {
-    console.log('[DB getSchoolEventsDb] Awaiting existing initialization promise...');
-    return schoolEventsDbInitializationPromise;
-  }
-  console.log('[DB getSchoolEventsDb] Starting new initialization...');
+  if (schoolEventsDbInitializationPromise) return schoolEventsDbInitializationPromise;
+  
   schoolEventsDbInitializationPromise = initializeSchoolEventsDatabase()
     .then(db => {
       schoolEventsDbInstance = db;
-      console.log('[DB getSchoolEventsDb] Initialization successful.');
       schoolEventsDbInitializationPromise = null;
       return db;
     })
     .catch(err => {
-      console.error('[DB getSchoolEventsDb] Initialization failed:', err);
       schoolEventsDbInitializationPromise = null;
       throw err;
     });
   return schoolEventsDbInitializationPromise;
+}
+export function resetSchoolEventsDbInstance() {
+  console.log('[DB Reset] Resetting schoolEventsDbInstance and promise.');
+  schoolEventsDbInstance = null;
+  schoolEventsDbInitializationPromise = null;
 }

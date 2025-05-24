@@ -14,7 +14,7 @@ interface Translations {
   delegateDashboardTitle: string;
   announcementsSectionTitle: string;
   examsSectionTitle: string;
-  deadlinesSectionTitle: string;
+  deadlinesSectionTitle: string; // Changed from "Deadlines" for English, etc.
   checkBackLaterHint: string;
   viewClassesButtonLabel: string;
   noClassesHint: string;
@@ -154,6 +154,7 @@ interface Translations {
   dashboardMenuItemLabel: string;
   logoutButtonLabel: string;
 
+  dbMaintenanceCardTitle: string; // New
   dbResetCardTitle: string;
   dbResetWarningDescription: string;
   dbResetButtonLabel: string;
@@ -163,6 +164,15 @@ interface Translations {
   dbResetConfirmButton: string;
   dbResetSuccessTitle: string;
   dbResetSuccessDescription: string;
+  
+  dbCompactCardTitle: string; // New
+  dbCompactDescription: string; // New
+  dbCompactButtonLabel: string; // New
+  dbCompactingButton: string; // New
+  dbCompactSuccessTitle: string; // New
+  dbCompactSuccessDescription: string; // New
+  dbCompactErrorDescription: string; // New
+
 
   confirmPasswordLabel: string;
   confirmNewPasswordLabel: string;
@@ -209,7 +219,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Delegate Dashboard",
     announcementsSectionTitle: "Announcements",
     examsSectionTitle: "Exams",
-    deadlinesSectionTitle: "Assignments", // Changed from "Deadlines"
+    deadlinesSectionTitle: "Assignments",
     checkBackLaterHint: "Please check back later for updates.",
     viewClassesButtonLabel: "View Classes",
     noClassesHint: "No classes available",
@@ -271,7 +281,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Post New Announcement",
     editingAnnouncementDescription: "You are editing: \"{title}\"",
     currentAnnouncementsTitle: "Current Announcements",
-    noAnnouncementsPostedHint: "No announcements posted yet. Select classes to target.",
+    noAnnouncementsPostedHint: "Select target classes for the announcement.",
     classesTargetLabel: "Classes",
     targetLabel: "Target",
     editButtonLabel: "Edit",
@@ -349,7 +359,8 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dashboardMenuItemLabel: "Dashboard",
     logoutButtonLabel: "Log out",
 
-    dbResetCardTitle: "Database Maintenance",
+    dbMaintenanceCardTitle: "Database Maintenance",
+    dbResetCardTitle: "Reset Database",
     dbResetWarningDescription: "This action is irreversible and will delete all application data. A single admin user 'pablo' (password: 'soypablo') will be created.",
     dbResetButtonLabel: "Reset Entire Database",
     dbResettingButton: "Resetting...",
@@ -358,6 +369,14 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Yes, Reset Database",
     dbResetSuccessTitle: "Database Reset",
     dbResetSuccessDescription: "The database has been reset. You will be logged out. Please log in with user 'pablo' and password 'soypablo'.",
+    
+    dbCompactCardTitle: "Compact Database",
+    dbCompactDescription: "Compacting database files can improve performance and reduce disk space by removing unused data. The application might be briefly unresponsive during this process.",
+    dbCompactButtonLabel: "Compact Database Files",
+    dbCompactingButton: "Compacting...",
+    dbCompactSuccessTitle: "Database Compaction Successful",
+    dbCompactSuccessDescription: "Database files have been compacted.",
+    dbCompactErrorDescription: "An error occurred during database compaction.",
 
     confirmPasswordLabel: "Confirm Password",
     confirmNewPasswordLabel: "Confirm New Password",
@@ -402,7 +421,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Panel de Delegado",
     announcementsSectionTitle: "Anuncios",
     examsSectionTitle: "Exámenes",
-    deadlinesSectionTitle: "Tareas", // Cambiado de "Plazos"
+    deadlinesSectionTitle: "Tareas",
     checkBackLaterHint: "Por favor, vuelve a consultarlo más tarde para actualizaciones.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "No hay clases disponibles",
@@ -421,7 +440,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateFormDescription: "Introduce anuncios, horarios de exámenes o fechas de entrega para tus clases asignadas.",
     yourRecentSubmissionsTitle: "Tus Envíos Recientes",
     noSubmissionsYetHint: "Aún no has enviado ninguna información.",
-    alertDialogTitle: "¿Estás absolutamente seguro?",
+    alertDialogTitle: "¿Estás absolutely seguro?", // Placeholder for a more natural Spanish phrase
     alertDialogDescription: "Esta acción no se puede deshacer. Esto eliminará permanentemente tu envío titulado \"{title}\".",
     cancelButton: "Cancelar",
     deleteButton: "Eliminar",
@@ -464,7 +483,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Publicar Nuevo Anuncio",
     editingAnnouncementDescription: "Estás editando: \"{title}\"",
     currentAnnouncementsTitle: "Anuncios Actuales",
-    noAnnouncementsPostedHint: "No hay anuncios publicados todavía. Selecciona clases de destino.",
+    noAnnouncementsPostedHint: "Selecciona clases de destino para el anuncio.",
     classesTargetLabel: "Clases",
     targetLabel: "Dirigido a",
     editButtonLabel: "Editar",
@@ -541,7 +560,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "No hay anuncios, exámenes o plazos para mostrar en este momento.",
     dashboardMenuItemLabel: "Panel",
     logoutButtonLabel: "Cerrar Sesión",
-    dbResetCardTitle: "Mantenimiento de Base de Datos",
+    
+    dbMaintenanceCardTitle: "Mantenimiento de Base de Datos",
+    dbResetCardTitle: "Reiniciar Base de Datos",
     dbResetWarningDescription: "Esta acción es irreversible y eliminará todos los datos de la aplicación. Se creará un único usuario administrador 'pablo' (contraseña: 'soypablo').",
     dbResetButtonLabel: "Reiniciar Toda la Base de Datos",
     dbResettingButton: "Reiniciando...",
@@ -550,6 +571,14 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Sí, Reiniciar Base de Datos",
     dbResetSuccessTitle: "Base de Datos Reiniciada",
     dbResetSuccessDescription: "La base de datos ha sido reiniciada. Serás desconectado. Por favor, inicia sesión con el usuario 'pablo' y la contraseña 'soypablo'.",
+    
+    dbCompactCardTitle: "Compactar Base de Datos",
+    dbCompactDescription: "Compactar los archivos de la base de datos puede mejorar el rendimiento y reducir el espacio en disco al eliminar datos no utilizados. La aplicación podría no responder brevemente durante este proceso.",
+    dbCompactButtonLabel: "Compactar Archivos de Base de Datos",
+    dbCompactingButton: "Compactando...",
+    dbCompactSuccessTitle: "Compactación de Base de Datos Exitosa",
+    dbCompactSuccessDescription: "Los archivos de la base de datos han sido compactados.",
+    dbCompactErrorDescription: "Ocurrió un error durante la compactación de la base de datos.",
 
     confirmPasswordLabel: "Confirmar Contraseña",
     confirmNewPasswordLabel: "Confirmar Nueva Contraseña",
@@ -594,7 +623,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Tableau de bord Délégué",
     announcementsSectionTitle: "Annonces",
     examsSectionTitle: "Examens",
-    deadlinesSectionTitle: "Devoirs", // Changed from "Dates Limites"
+    deadlinesSectionTitle: "Devoirs",
     checkBackLaterHint: "Veuillez revenir plus tard pour les mises à jour.",
     viewClassesButtonLabel: "Voir les Classes",
     noClassesHint: "Aucune classe disponible",
@@ -656,7 +685,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Publier une Nouvelle Annonce",
     editingAnnouncementDescription: "Vous modifiez : \"{title}\"",
     currentAnnouncementsTitle: "Annonces Actuelles",
-    noAnnouncementsPostedHint: "Aucune annonce publiée pour l'instant. Sélectionnez des classes cibles.",
+    noAnnouncementsPostedHint: "Sélectionnez des classes cibles pour l'annonce.",
     classesTargetLabel: "Classes",
     targetLabel: "Cible",
     editButtonLabel: "Modifier",
@@ -733,7 +762,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "Aucune annonce, aucun examen ou aucun délai à afficher pour le moment.",
     dashboardMenuItemLabel: "Tableau de bord",
     logoutButtonLabel: "Déconnexion",
-    dbResetCardTitle: "Maintenance de la Base de Données",
+
+    dbMaintenanceCardTitle: "Maintenance de la Base de Données",
+    dbResetCardTitle: "Réinitialiser la Base de Données",
     dbResetWarningDescription: "Cette action est irréversible et supprimera toutes les données de l'application. Un unique utilisateur admin 'pablo' (mot de passe: 'soypablo') sera créé.",
     dbResetButtonLabel: "Réinitialiser Toute la Base de Données",
     dbResettingButton: "Réinitialisation...",
@@ -742,6 +773,14 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Oui, Réinitialiser la Base de Données",
     dbResetSuccessTitle: "Base de Données Réinitialisée",
     dbResetSuccessDescription: "La base de données a été réinitialisée. Vous allez être déconnecté. Veuillez vous connecter avec l'utilisateur 'pablo' et le mot de passe 'soypablo'.",
+    
+    dbCompactCardTitle: "Compacter la Base de Données",
+    dbCompactDescription: "Compacter les fichiers de la base de données peut améliorer les performances et réduire l'espace disque en supprimant les données inutilisées. L'application peut être brièvement indisponible pendant ce processus.",
+    dbCompactButtonLabel: "Compacter les Fichiers de Base de Données",
+    dbCompactingButton: "Compactage...",
+    dbCompactSuccessTitle: "Compactage de la Base de Données Réussi",
+    dbCompactSuccessDescription: "Les fichiers de la base de données ont été compactés.",
+    dbCompactErrorDescription: "Une erreur s'est produite lors du compactage de la base de données.",
 
     confirmPasswordLabel: "Confirmer le mot de passe",
     confirmNewPasswordLabel: "Confirmer le nouveau mot de passe",
@@ -786,7 +825,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateDashboardTitle: "Panel de Delegado",
     announcementsSectionTitle: "Anuncios",
     examsSectionTitle: "Exames",
-    deadlinesSectionTitle: "Tarefas", // Cambiado de "Prazos"
+    deadlinesSectionTitle: "Tarefas", 
     checkBackLaterHint: "Por favor, volve máis tarde para ver actualizacións.",
     viewClassesButtonLabel: "Ver Clases",
     noClassesHint: "Non hai clases dispoñibles",
@@ -848,7 +887,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     postNewAnnouncementTitle: "Publicar Novo Anuncio",
     editingAnnouncementDescription: "Estás a editar: \"{title}\"",
     currentAnnouncementsTitle: "Anuncios Actuais",
-    noAnnouncementsPostedHint: "Aínda non hai anuncios publicados. Selecciona clases de destino.",
+    noAnnouncementsPostedHint: "Selecciona clases de destino para o anuncio.",
     classesTargetLabel: "Clases",
     targetLabel: "Dirixido a",
     editButtonLabel: "Editar",
@@ -901,7 +940,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classDelegateTableHeader: "Delegado",
     editClassButtonAriaLabel: "Editar Clase",
     deleteClassButtonAriaLabel: "Eliminar Clase",
-    deleteClassConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente a clase \"{name}\".",
+    deleteClassConfirmation: "Esta acción non se pode desfacer. Eliminarase permanentemente la clase \"{name}\".",
     classNamePlaceholder: "p.ex., 1º ESO A, Club de Informática",
     classDelegateLabel: "Delegado",
     optionalLabel: "Opcional",
@@ -925,7 +964,9 @@ export const translations: Record<SupportedLanguage, Translations> = {
     noEventsGeneralHint: "Non hai anuncios, exames ou prazos para amosar neste momento.",
     dashboardMenuItemLabel: "Panel",
     logoutButtonLabel: "Pechar Sesión",
-    dbResetCardTitle: "Mantemento da Base de Datos",
+
+    dbMaintenanceCardTitle: "Mantemento da Base de Datos",
+    dbResetCardTitle: "Reiniciar Base de Datos",
     dbResetWarningDescription: "Esta acción é irreversible e eliminará todos os datos da aplicación. Crearase un único usuario administrador 'pablo' (contrasinal: 'soypablo').",
     dbResetButtonLabel: "Reiniciar Toda a Base de Datos",
     dbResettingButton: "Reiniciando...",
@@ -934,6 +975,14 @@ export const translations: Record<SupportedLanguage, Translations> = {
     dbResetConfirmButton: "Si, Reiniciar Base de Datos",
     dbResetSuccessTitle: "Base de Datos Reiniciada",
     dbResetSuccessDescription: "A base de datos foi reiniciada. Serás desconectado. Por favor, inicia sesión co usuario 'pablo' e o contrasinal 'soypablo'.",
+    
+    dbCompactCardTitle: "Compactar Base de Datos",
+    dbCompactDescription: "Compactar os ficheiros da base de datos pode mellorar o rendemento e reducir o espazo en disco eliminando datos non utilizados. A aplicación podería non responder brevemente durante este proceso.",
+    dbCompactButtonLabel: "Compactar Ficheiros da Base de Datos",
+    dbCompactingButton: "Compactando...",
+    dbCompactSuccessTitle: "Compactación da Base de Datos Exitosa",
+    dbCompactSuccessDescription: "Os ficheiros da base de datos foron compactados.",
+    dbCompactErrorDescription: "Ocorreu un erro durante a compactación da base de datos.",
 
     confirmPasswordLabel: "Confirmar Contrasinal",
     confirmNewPasswordLabel: "Confirmar Novo Contrasinal",
@@ -941,7 +990,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     passwordTooShortValidation: "O novo contrasinal debe ter polo menos 6 caracteres.",
     confirmPasswordRequiredValidation: "Por favor, confirma o teu novo contrasinal.",
     enterNewPasswordFirstValidation: "Introduce o novo contrasinal primeiro antes de confirmar.",
-
+    
     targetClassesLabel: "Clases de Destino",
     selectAtLeastOneClassDescription: "Selecciona polo menos unha clase de destino.",
     selectAllClassesButtonLabel: "Seleccionar Todas as Clases",
