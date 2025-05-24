@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { getClassesDb, getAnnouncementsDb, getSchoolEventsDb } from '@/lib/db';
 import type { SchoolClass } from '@/types';
 
-// GET a single class by ID
+// GET a single class by ID (using classId from params)
 export async function GET(request: Request, { params }: { params: { classId: string } }) {
   try {
     if (!params.classId) {
@@ -15,7 +15,6 @@ export async function GET(request: Request, { params }: { params: { classId: str
     const schoolClass = await db.findOne({ id: params.classId });
     
     if (schoolClass) {
-      // Password and passwordProtected logic removed. Just return the class object.
       return NextResponse.json(schoolClass);
     }
     return NextResponse.json({ message: 'Class not found' }, { status: 404 });
@@ -25,11 +24,11 @@ export async function GET(request: Request, { params }: { params: { classId: str
   }
 }
 
-// PUT (update) a class
+// PUT (update) a class (using classId from params)
 export async function PUT(request: Request, { params }: { params: { classId: string } }) {
   try {
-    const classId = params.classId;
-    if (!classId) {
+    const classIdFromParams = params.classId; // Use params.classId
+    if (!classIdFromParams) {
         return NextResponse.json({ message: 'Class ID is required' }, { status: 400 });
     }
 
@@ -47,20 +46,21 @@ export async function PUT(request: Request, { params }: { params: { classId: str
     
     if (Object.keys(updatePayload).length === 0) {
         const dbCheck = await getClassesDb();
-        const existingDoc = await dbCheck.findOne({ id: classId });
+        const existingDoc = await dbCheck.findOne({ id: classIdFromParams });
         if(existingDoc) {
             return NextResponse.json(existingDoc);
         }
+        // If no fields to update AND class not found, it's more like a 404.
         return NextResponse.json({ message: 'No updatable fields provided or class not found' }, { status: 400 });
     }
 
     const db = await getClassesDb();
-    const numAffected = await db.update({ id: classId }, { $set: updatePayload });
+    const numAffected = await db.update({ id: classIdFromParams }, { $set: updatePayload });
 
     if (numAffected === 0) {
-      const existingClass = await db.findOne({ id: classId });
+      const existingClass = await db.findOne({ id: classIdFromParams });
       if (!existingClass) {
-        console.error(`[API PUT /api/classes/${classId}] Update failed: Class not found after attempting update.`);
+        console.error(`[API PUT /api/classes/${classIdFromParams}] Update failed: Class not found after attempting update.`);
         return NextResponse.json({ message: 'Class not found, cannot update' }, { status: 404 });
       }
 
@@ -78,9 +78,9 @@ export async function PUT(request: Request, { params }: { params: { classId: str
       }
     }
 
-    const updatedClass = await db.findOne({ id: classId });
+    const updatedClass = await db.findOne({ id: classIdFromParams });
     if (!updatedClass) {
-        console.error(`[API PUT /api/classes/${classId}] Class updated in DB but failed to retrieve for response.`);
+        console.error(`[API PUT /api/classes/${classIdFromParams}] Class updated in DB but failed to retrieve for response.`);
         return NextResponse.json({ message: 'Class updated but failed to retrieve' }, { status: 500 });
     }
     return NextResponse.json(updatedClass);
@@ -91,10 +91,10 @@ export async function PUT(request: Request, { params }: { params: { classId: str
   }
 }
 
-// DELETE a class
+// DELETE a class (using classId from params)
 export async function DELETE(request: Request, { params }: { params: { classId: string } }) {
   try {
-    const classIdToDelete = params.classId;
+    const classIdToDelete = params.classId; // Use params.classId
     if (!classIdToDelete) {
         return NextResponse.json({ message: 'Class ID is required' }, { status: 400 });
     }
@@ -106,23 +106,21 @@ export async function DELETE(request: Request, { params }: { params: { classId: 
     const announcementsToUpdate = await announcementsDb.find({ targetClassIds: classIdToDelete });
     for (const ann of announcementsToUpdate) {
       const newTargetClassIds = ann.targetClassIds.filter(id => id !== classIdToDelete);
-      if (newTargetClassIds.length > 0) {
-        await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: newTargetClassIds } });
-      } else {
-        // If an announcement becomes orphaned, it's now invalid by new rules.
-        // Admin will need to re-assign or delete. We update it to an empty array.
-        // Or, per new rules, an announcement MUST have target classes.
-        // Consider deleting such orphaned announcements or handling them based on strict app policy.
-        // For now, we'll set to empty array, admin needs to fix or delete them.
-        await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: [] } });
-      }
+      // If an announcement becomes orphaned (no target classes left), 
+      // it will be handled by the admin or future logic.
+      // For now, just update its targetClassIds.
+      // Per new rules, an announcement *must* have target classes.
+      // If newTargetClassIds is empty, the announcement is now invalid.
+      // Admin will need to re-assign or delete. We update it to an empty array.
+      await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: newTargetClassIds } });
     }
-
+    
     // Delete school events (exams, deadlines) associated with this class
     const numEventsRemoved = await schoolEventsDb.remove({ classId: classIdToDelete }, { multi: true });
     if (numEventsRemoved > 0) {
       // console.log(`[API DELETE /api/classes/${classIdToDelete}] Removed ${numEventsRemoved} school events associated with this class.`);
     }
+
 
     // Finally, delete the class itself
     const numRemoved = await classesDb.remove({ id: classIdToDelete }, {});
