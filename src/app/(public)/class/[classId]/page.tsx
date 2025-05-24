@@ -14,7 +14,6 @@ import { useLanguage } from '@/context/LanguageContext';
 import type { TranslationKey } from '@/lib/i18n';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// SchoolClass type is now directly used as class details no longer include passwordProtected
 async function getClassDetails(classId: string): Promise<SchoolClass | undefined> {
   try {
     const response = await fetch(`/api/classes/${classId}`);
@@ -31,7 +30,7 @@ async function getClassDetails(classId: string): Promise<SchoolClass | undefined
 }
 
 // Gets Admin announcements specifically targeted to this class
-async function getClassAdminAnnouncements(classId: string): Promise<Announcement[]> {
+async function getClassSpecificAdminAnnouncements(classId: string): Promise<Announcement[]> {
   try {
     const response = await fetch('/api/announcements');
     if (!response.ok) {
@@ -39,7 +38,7 @@ async function getClassAdminAnnouncements(classId: string): Promise<Announcement
         return [];
     }
     const allAdminAnnouncements: Announcement[] = await response.json();
-    // Filter for announcements that target this classId and are not hidden
+    // Filter for announcements that target this classId
     return allAdminAnnouncements.filter(ann => ann.targetClassIds && ann.targetClassIds.includes(classId));
   } catch (error) {
     console.error(`Error fetching admin announcements for ${classId}:`, error);
@@ -56,7 +55,7 @@ async function getClassDelegateAnnouncements(classId: string): Promise<SchoolEve
       return [];
     }
     const data = await response.json();
-    return data.filter((event: any) => event.type === 'announcement' && event.classId === classId);
+    return data.filter((event: SchoolEvent) => event.type === 'announcement' && event.classId === classId);
   } catch (error) {
     console.error(`Error fetching delegate announcements for ${classId}:`, error);
     return [];
@@ -71,7 +70,7 @@ async function getClassExams(classId: string): Promise<Exam[]> {
       return [];
     }
     const data = await response.json();
-    return data.filter((event: SchoolEvent) => event.type === 'exam') as Exam[];
+    return data.filter((event: SchoolEvent): event is Exam => event.type === 'exam' && event.classId === classId);
   } catch (error) {
     console.error(`Error fetching class exams for ${classId}:`, error);
     return [];
@@ -86,7 +85,7 @@ async function getClassDeadlines(classId: string): Promise<Deadline[]> {
       return [];
     }
     const data = await response.json();
-    return data.filter((event: SchoolEvent) => event.type === 'deadline') as Deadline[];
+    return data.filter((event: SchoolEvent): event is Deadline => event.type === 'deadline' && event.classId === classId);
   } catch (error) {
     console.error(`Error fetching class deadlines for ${classId}:`, error);
     return [];
@@ -148,13 +147,13 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       setClassDetails(details || null); // Ensure it's null if undefined
       setIsLoadingClassDetails(false);
 
-      if (!details || details.isHidden) { // Also check if class is hidden
-        setError(t('classNotFoundMessage')); // Treat hidden class as not found for public page
+      if (!details || details.isHidden) {
+        setError(t('classNotFoundMessage'));
         setIsLoadingEvents(false);
         return;
       }
 
-      // Class exists, is not hidden, and not password protected (feature removed)
+      // Class exists and is not hidden
       const usersData = await getUsers();
       setUsers(usersData);
 
@@ -164,7 +163,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         classExamsData,
         classDeadlinesData
       ] = await Promise.all([
-        getClassAdminAnnouncements(classId),
+        getClassSpecificAdminAnnouncements(classId),
         getClassDelegateAnnouncements(classId),
         getClassExams(classId),
         getClassDeadlines(classId)
@@ -177,7 +176,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       
     } catch (err) {
       console.error("Error fetching data for class page:", err);
-      setError((err as Error).message || "An unexpected error occurred");
+      setError((err as Error).message || t('errorDialogTitle'));
       setClassDetails(null);
     } finally {
         setIsLoadingClassDetails(false); // Ensure this is always set
@@ -199,7 +198,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     );
   }
 
-  if (error || !classDetails) { // If error or classDetails is null (not found or hidden)
+  if (error || !classDetails) {
     return (
       <div className="w-full max-w-lg text-center py-10">
         <Card className="shadow-lg">
@@ -259,7 +258,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
         )}
       </Card>
 
-      {isLoadingEvents && ( // Combined loading state for all event types
+      {isLoadingEvents && ( 
          <div className="space-y-12">
           {sectionsConfig.map(section => (
             <div key={section.titleKey} className="w-full mb-12">

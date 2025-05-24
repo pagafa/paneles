@@ -21,10 +21,11 @@ export interface Announcement extends BaseSchoolItem {
 }
 
 // SchoolEvent represents items typically submitted by delegates and stored in schoolevents.db
+// It's a discriminated union based on 'type'.
 export type SchoolEvent =
-  | (BaseSchoolItem & { type: 'announcement'; content: string; classId: string; }) // Delegate Announcement
-  | (BaseSchoolItem & { type: 'exam'; subject: string; classId: string; })       // Delegate Exam
-  | (BaseSchoolItem & { type: 'deadline'; assignmentName: string; classId: string; }); // Delegate Deadline
+  | (BaseSchoolItem & { type: 'announcement'; content: string; classId: string; }) // Delegate Announcement specific to a class
+  | (BaseSchoolItem & { type: 'exam'; subject: string; classId: string; })       // Delegate Exam for a class
+  | (BaseSchoolItem & { type: 'deadline'; assignmentName: string; classId: string; }); // Delegate Deadline for a class
 
 export type Exam = Extract<SchoolEvent, { type: 'exam' }>;
 export type Deadline = Extract<SchoolEvent, { type: 'deadline' }>;
@@ -36,7 +37,7 @@ export interface User {
   id: string;
   name: string;
   username: string;
-  password?: string; // Hashed password
+  password?: string; // Hashed password, optional as it's not always needed/exposed
   role: UserRole;
 }
 
@@ -44,14 +45,5 @@ export interface SchoolClass {
   id: string;
   name: string;
   delegateId?: string;
-  // language?: SupportedLanguage; // Removed
   isHidden?: boolean;
-  // password?: string; // Removed
 }
-
-// This type is no longer needed as class passwords were removed.
-// export interface ClassPasswordVerificationResponse {
-//   verified: boolean;
-//   message?: string;
-//   errorDetails?: string;
-// }

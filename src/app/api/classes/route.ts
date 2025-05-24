@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const db = await getClassesDb();
     const classes = await db.find({}).sort({ name: 1 });
-    // Devolvemos todos os campos, incluíndo isHidden. O contrasinal xa non existe.
+    // Return all fields, including isHidden. Password field no longer exists.
     return NextResponse.json(classes);
   } catch (error) {
     console.error('[API GET /api/classes] Error:', error);
@@ -33,9 +33,7 @@ export async function POST(request: Request) {
       id: newClassData.id || `class-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       name: newClassData.name,
       delegateId: newClassData.delegateId || undefined,
-      // language: newClassData.language, // Language field was removed
       isHidden: newClassData.isHidden || false,
-      // password field was removed
     };
 
     const savedClass = await db.insert(classToAdd);

@@ -22,7 +22,6 @@ interface Translations {
   classNotFoundTitle: string;
   classNotFoundMessage: string;
   backToHomeButton: string;
-  delegateIdLabel: string; // Mantense para uso interno se é necesario
   noEventsForClassHint: string;
   loadingLabel: string;
   assignedClassesLabel: string;
@@ -197,17 +196,6 @@ interface Translations {
   statusTableHeader: string; 
   hiddenStatusBadge: string; 
   visibleStatusBadge: string; 
-
-  // Removidas chaves relacionadas co contrasinal da clase
-  // classPasswordLabel: string;
-  // classPasswordPlaceholder: string;
-  // classPasswordHint: string;
-  // classPasswordPromptTitle: string;
-  // classPasswordPromptDescription: string;
-  // classPasswordInputLabel: string;
-  // classPasswordUnlockButton: string;
-  // classPasswordVerificationError: string;
-  // classPasswordIncorrectError: string;
 }
 
 export const translations: Record<SupportedLanguage, Translations> = {
@@ -229,7 +217,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Class Not Found",
     classNotFoundMessage: "The class you are looking for does not exist or is not available.",
     backToHomeButton: "Back to Home",
-    delegateIdLabel: "Delegate",
     noEventsForClassHint: "Looks like this class is on a secret mission! Nothing to show right now.",
     loadingLabel: "Loading...",
     assignedClassesLabel: "Assigned classes",
@@ -423,7 +410,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Clase no encontrada",
     classNotFoundMessage: "La clase que estás buscando no existe o no está disponible.",
     backToHomeButton: "Volver al Inicio",
-    delegateIdLabel: "Delegado/a",
     noEventsForClassHint: "¡Parece que esta clase está en una misión secreta! No hay nada que mostrar por ahora.",
     loadingLabel: "Cargando...",
     assignedClassesLabel: "Clases asignadas",
@@ -616,7 +602,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Classe non trouvée",
     classNotFoundMessage: "La classe que vous recherchez n'existe pas ou n'est pas disponible.",
     backToHomeButton: "Retour à l'accueil",
-    delegateIdLabel: "Délégué(e)",
     noEventsForClassHint: "On dirait que cette classe est en mission secrète ! Rien à afficher pour le moment.",
     loadingLabel: "Chargement...",
     assignedClassesLabel: "Classes assignées",
@@ -809,7 +794,6 @@ export const translations: Record<SupportedLanguage, Translations> = {
     classNotFoundTitle: "Clase Non Atopada",
     classNotFoundMessage: "A clase que buscas non existe ou non está dispoñible.",
     backToHomeButton: "Volver ao Inicio",
-    delegateIdLabel: "Delegado/a",
     noEventsForClassHint: "Parece que esta clase está nunha misión secreta! Non hai nada que amosar polo de agora.",
     loadingLabel: "Cargando...",
     assignedClassesLabel: "Clases asignadas",
@@ -821,7 +805,7 @@ export const translations: Record<SupportedLanguage, Translations> = {
     delegateFormDescription: "Introduce anuncios, horarios de exames ou datas de entrega para as túas clases asignadas.",
     yourRecentSubmissionsTitle: "Os Teus Envíos Recentes",
     noSubmissionsYetHint: "Aínda non enviaches ningunha información.",
-    alertDialogTitle: "Estás absolutamente seguro/a?",
+    alertDialogTitle: "¿Estás absolutamente seguro/a?",
     alertDialogDescription: "Esta acción non se pode desfacer. Isto eliminará permanentemente o teu envío titulado \"{title}\".",
     cancelButton: "Cancelar",
     deleteButton: "Eliminar",
@@ -991,4 +975,3 @@ export type TranslationVariables = { [key: string]: string | number | undefined 
 
 // Helper function type for the 't' function to allow for variables
 export type TFunction = (key: TranslationKey, variables?: TranslationVariables) => string;
-

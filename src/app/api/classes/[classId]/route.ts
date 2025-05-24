@@ -34,7 +34,6 @@ export async function PUT(request: Request, { params }: { params: { classId: str
     }
 
     const requestBody: Partial<Omit<SchoolClass, 'id'>> = await request.json();
-    // console.log(`[API PUT /api/classes/${classId}] Request body:`, requestBody);
     
     const updatePayload: Partial<SchoolClass> = {};
     
@@ -42,14 +41,10 @@ export async function PUT(request: Request, { params }: { params: { classId: str
     if (requestBody.delegateId !== undefined) {
         updatePayload.delegateId = requestBody.delegateId === "" ? undefined : requestBody.delegateId;
     }
-    // Language field was removed
-    // Password field was removed
     if (requestBody.isHidden !== undefined) {
       updatePayload.isHidden = requestBody.isHidden;
     }
     
-    // console.log(`[API PUT /api/classes/${classId}] Update payload to NeDB:`, updatePayload);
-
     if (Object.keys(updatePayload).length === 0) {
         const dbCheck = await getClassesDb();
         const existingDoc = await dbCheck.findOne({ id: classId });
@@ -61,8 +56,6 @@ export async function PUT(request: Request, { params }: { params: { classId: str
 
     const db = await getClassesDb();
     const numAffected = await db.update({ id: classId }, { $set: updatePayload });
-    // console.log(`[API PUT /api/classes/${classId}] NeDB numAffected:`, numAffected);
-
 
     if (numAffected === 0) {
       const existingClass = await db.findOne({ id: classId });
@@ -77,11 +70,9 @@ export async function PUT(request: Request, { params }: { params: { classId: str
       if (updatePayload.isHidden !== undefined && updatePayload.isHidden !== existingClass.isHidden) noMeaningfulChange = false; 
 
       if (noMeaningfulChange) {
-        // console.log(`[API PUT /api/classes/${classId}] No meaningful changes detected. Returning existing class.`);
         return NextResponse.json(existingClass);
       } else {
-        // console.warn(`[API PUT /api/classes/${classId}] NeDB reported 0 affected, but changes were intended. Merging and returning.`);
-        // This case means we attempted to set a value to its current value.
+        // This case means we attempted to set a value to its current value, or a mix.
         // The data is effectively "updated" to the intended state.
         return NextResponse.json({ ...existingClass, ...updatePayload });
       }
@@ -92,7 +83,6 @@ export async function PUT(request: Request, { params }: { params: { classId: str
         console.error(`[API PUT /api/classes/${classId}] Class updated in DB but failed to retrieve for response.`);
         return NextResponse.json({ message: 'Class updated but failed to retrieve' }, { status: 500 });
     }
-    // console.log(`[API PUT /api/classes/${classId}] Successfully updated and returning:`, updatedClass);
     return NextResponse.json(updatedClass);
 
   } catch (error) {
@@ -121,9 +111,11 @@ export async function DELETE(request: Request, { params }: { params: { classId: 
       } else {
         // If an announcement becomes orphaned, it's now invalid by new rules.
         // Admin will need to re-assign or delete. We update it to an empty array.
+        // Or, per new rules, an announcement MUST have target classes.
+        // Consider deleting such orphaned announcements or handling them based on strict app policy.
+        // For now, we'll set to empty array, admin needs to fix or delete them.
         await announcementsDb.update({ id: ann.id }, { $set: { targetClassIds: [] } });
       }
-      // console.log(`[API DELETE /api/classes/${classIdToDelete}] Updated announcement ${ann.id}. New targets: ${newTargetClassIds.join(', ')}`);
     }
 
     // Delete school events (exams, deadlines) associated with this class
@@ -138,7 +130,6 @@ export async function DELETE(request: Request, { params }: { params: { classId: 
     if (numRemoved === 0) {
       return NextResponse.json({ message: 'Class not found' }, { status: 404 });
     }
-    // console.log(`[API DELETE /api/classes/${classIdToDelete}] Class deleted successfully and references updated.`);
     return NextResponse.json({ message: 'Class deleted successfully and related data (announcements, school events) updated/removed.' }, { status: 200 });
   } catch (error) {
     console.error(`[API DELETE /api/classes/${params.classId}] Error:`, error);
