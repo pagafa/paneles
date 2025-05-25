@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, LayoutDashboard } from "lucide-react"; 
-import { useRouter, usePathname } from "next/navigation"; // Added usePathname
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { User } from "@/types";
 import Link from "next/link"; 
@@ -20,7 +20,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export function UserNav() {
   const router = useRouter();
-  const pathname = usePathname(); // Get current pathname
+  const pathname = usePathname();
   const { t } = useLanguage(); 
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,17 +37,22 @@ export function UserNav() {
               const userData: User = await response.json();
               setUser(userData);
             } else {
-              let errorMessage = `Failed to fetch user data. Status: ${response.status}`;
+              let errorMessage = `API error: ${response.status}`;
               try {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorMessage;
               } catch (e) { /* Ignore if response is not JSON */ }
               console.error("Failed to fetch user data:", errorMessage);
               setUser(null); 
+              // If user not found or other error, clear stored invalid userId and role
+              localStorage.removeItem("userId");
+              localStorage.removeItem("userRole");
             }
           } catch (error) {
             console.error("Error fetching user data:", error);
             setUser(null); 
+            localStorage.removeItem("userId");
+            localStorage.removeItem("userRole");
           }
         } else {
           setUser(null); 
@@ -57,15 +62,12 @@ export function UserNav() {
     };
 
     fetchCurrentUser();
-  }, [pathname]); // Re-run effect when pathname changes
+  }, [pathname]);
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
-      // Also clear admin global language and school name if desired upon any logout
-      // localStorage.removeItem('adminGlobalAppLanguage');
-      // localStorage.removeItem('appSchoolName'); 
     }
     setUser(null); 
     router.push("/login");
