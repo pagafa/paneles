@@ -37,7 +37,12 @@ export function UserNav() {
               const userData: User = await response.json();
               setUser(userData);
             } else {
-              console.error("Failed to fetch user data:", response.status);
+              let errorMessage = `Failed to fetch user data. Status: ${response.status}`;
+              try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+              } catch (e) { /* Ignore if response is not JSON */ }
+              console.error("Failed to fetch user data:", errorMessage);
               setUser(null); 
             }
           } catch (error) {
@@ -58,6 +63,9 @@ export function UserNav() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("userRole");
       localStorage.removeItem("userId");
+      // Also clear admin global language and school name if desired upon any logout
+      // localStorage.removeItem('adminGlobalAppLanguage');
+      // localStorage.removeItem('appSchoolName'); 
     }
     setUser(null); 
     router.push("/login");
