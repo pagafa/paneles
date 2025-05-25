@@ -1,3 +1,4 @@
 {"id":"ann-1748210359500","title":"Avisnado 2","content":"Avisnado 2","date":"2025-05-25T20:58:58.831Z","type":"announcement","targetClassIds":["class-1748209643896-7rwud"],"_id":"Iu46QXdCLft0hJ6x","createdAt":{"$$date":1748210360196},"updatedAt":{"$$date":1748210360196}}
 {"id":"ann-1748210338830","title":"Avisnado 1","content":"Avisnado 1","date":"2025-05-26T21:58:00.000Z","type":"announcement","targetClassIds":["class-1748209643896-7rwud"],"_id":"jDrNkAInfiqTpX2Q","createdAt":{"$$date":1748210339543},"updatedAt":{"$$date":1748210339543}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
+{"id":"ann-1748210518466","title":"Avisnado 3","content":"Avisnado 3","date":"2025-05-26T22:01:00.000Z","type":"announcement","targetClassIds":["class-1748209643896-7rwud"],"_id":"NxZJoFf1MRpfyJlR","createdAt":{"$$date":1748210519165},"updatedAt":{"$$date":1748210519165}}

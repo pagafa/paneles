@@ -107,7 +107,8 @@ async function getUsers(): Promise<User[]> {
 }
 
 const sortEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
-  return [...events].sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Sorts by date ascending (closest to furthest in the future)
+  return [...events].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
 const filterUpcomingEvents = <T extends SchoolEvent | Announcement>(events: T[]): T[] => {
@@ -144,7 +145,7 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
 
     try {
       const details = await getClassDetails(classId);
-      setClassDetails(details || null); // Ensure it's null if undefined
+      setClassDetails(details || null); 
       setIsLoadingClassDetails(false);
 
       if (!details || details.isHidden) {
@@ -170,16 +171,16 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
       ]);
       
       const combinedAnnouncements: (Announcement | SchoolEvent)[] = [...adminAnnouncementsForClass, ...delegateAnnouncementsForClass];
-      setAnnouncements(filterUpcomingEvents(sortEvents(combinedAnnouncements)));
-      setExams(filterUpcomingEvents(sortEvents(classExamsData)));
-      setDeadlines(filterUpcomingEvents(sortEvents(classDeadlinesData)));
+      setAnnouncements(sortEvents(filterUpcomingEvents(combinedAnnouncements)));
+      setExams(sortEvents(filterUpcomingEvents(classExamsData)));
+      setDeadlines(sortEvents(filterUpcomingEvents(classDeadlinesData)));
       
     } catch (err) {
       console.error("Error fetching data for class page:", err);
       setError((err as Error).message || t('errorDialogTitle'));
       setClassDetails(null);
     } finally {
-        setIsLoadingClassDetails(false); // Ensure this is always set
+        setIsLoadingClassDetails(false); 
         setIsLoadingEvents(false);
     }
   }, [classId, t]);
@@ -297,3 +298,4 @@ export default function PublicClassPage({ params: paramsPromise }: { params: Pro
     </div>
   );
 }
+
