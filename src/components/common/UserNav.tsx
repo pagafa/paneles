@@ -42,17 +42,22 @@ export function UserNav() {
                 const errorData = await response.json();
                 errorMessage = errorData.message || errorMessage;
               } catch (e) { /* Ignore if response is not JSON */ }
-              console.error("Failed to fetch user data:", errorMessage);
+              console.error("Failed to fetch user data:", errorMessage); // This error log is intentional when stale data is found
               setUser(null); 
-              // If user not found or other error, clear stored invalid userId and role
               localStorage.removeItem("userId");
               localStorage.removeItem("userRole");
+              if (pathname !== "/login") { // Prevent redirect loop if already on login page
+                router.push("/login"); 
+              }
             }
           } catch (error) {
             console.error("Error fetching user data:", error);
             setUser(null); 
             localStorage.removeItem("userId");
             localStorage.removeItem("userRole");
+            if (pathname !== "/login") { // Prevent redirect loop
+               router.push("/login");
+            }
           }
         } else {
           setUser(null); 
@@ -62,7 +67,7 @@ export function UserNav() {
     };
 
     fetchCurrentUser();
-  }, [pathname]);
+  }, [pathname, router]); // router added to dependency array
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {

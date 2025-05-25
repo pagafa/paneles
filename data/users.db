@@ -1,5 +1,3 @@
-{"id":"user-admin-pablo-1748208864723","name":"Pablo Admin","username":"pablo","role":"admin","password":"$2b$10$4.210LjGsUpmCsC5vGM2rOOWMiFR8wZXGnBO.l6S1.SSwvDWRW2rK","_id":"z5OBnsC3z9QF5Uci","createdAt":{"$$date":1748208864725},"updatedAt":{"$$date":1748208864725}}
+{"id":"user-1748209017911-saioi","name":"MdV Admin","username":"admin","role":"admin","password":"$2b$10$3KEq1e6aNxSvA8GN0GWnfea1MFRI.vNqnW2480vxJfdKWwyO3S5i2","_id":"dx6BNsPukXqLsqPy","createdAt":{"$$date":1748209018712},"updatedAt":{"$$date":1748209018712}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}
 {"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
-{"id":"user-1748209017911-saioi","name":"MdV Admin","username":"admin","role":"admin","password":"$2b$10$3KEq1e6aNxSvA8GN0GWnfea1MFRI.vNqnW2480vxJfdKWwyO3S5i2","_id":"dx6BNsPukXqLsqPy","createdAt":{"$$date":1748209018712},"updatedAt":{"$$date":1748209018712}}
-{"$$deleted":true,"_id":"z5OBnsC3z9QF5Uci"}
