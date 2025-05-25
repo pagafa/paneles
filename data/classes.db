@@ -1,1 +1,3 @@
+{"id":"class-1748209633944-fmft6","name":"Sala de profesores","isHidden":true,"_id":"NXr5bAdmXYArTrz5","createdAt":{"$$date":1748209634660},"updatedAt":{"$$date":1748209634660}}
+{"id":"class-1748209643896-7rwud","name":"1º ESO A","isHidden":false,"_id":"qGoTRCJJn4ilx8FU","createdAt":{"$$date":1748209644603},"updatedAt":{"$$date":1748209644603}}
 {"$$indexCreated":{"fieldName":"id","unique":true,"sparse":false}}

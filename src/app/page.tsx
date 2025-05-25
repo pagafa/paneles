@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { SchoolClass, Announcement, SchoolEvent, Exam, Deadline } from '@/types';
+import type { SchoolClass, Announcement, SchoolEvent } from '@/types';
 import { Activity } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -70,6 +70,9 @@ export default function KioskPage() {
     setIsLoadingClasses(true);
     setIsLoadingClassCounts(true);
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to the beginning of today for comparison
+
     try {
       const [
         classesData, // Xa filtradas para excluír as ocultas
@@ -85,17 +88,23 @@ export default function KioskPage() {
       setIsLoadingClasses(false);
 
       const counts: { [classId: string]: number } = {};
-      if (classesData.length > 0) { // Usar classesData (xa filtradas)
+      if (classesData.length > 0) { 
         classesData.forEach(cls => {
           let count = 0;
+          // Count admin announcements for this class that are not past
           allAdminAnnouncementsData.forEach(ann => {
             if (ann.targetClassIds && ann.targetClassIds.includes(cls.id)) {
-              count++;
+              if (new Date(ann.date) >= today) {
+                count++;
+              }
             }
           });
+          // Count school events for this class that are not past
           allSchoolEventsForCountsData.forEach(event => {
             if (event.classId === cls.id) {
-              count++;
+              if (new Date(event.date) >= today) {
+                count++;
+              }
             }
           });
           counts[cls.id] = count;
@@ -108,7 +117,6 @@ export default function KioskPage() {
       console.error("Error fetching data for KioskPage", e);
       setIsLoadingClasses(false);
       setIsLoadingClassCounts(false);
-      // Considerar mostrar un erro na UI
     }
   }, []);
 
@@ -138,12 +146,12 @@ export default function KioskPage() {
           <Skeleton className="h-8 w-2/3 rounded-md" />
           <Skeleton className="h-8 w-1/2 rounded-md" />
         </div></CardContent></Card>
-      ) : visibleClasses.length > 0 ? ( // Usar visibleClasses
+      ) : visibleClasses.length > 0 ? ( 
         <Card className="shadow-md">
           <CardContent className="pt-6">
             {Object.keys(classMessageCounts).length > 0 ? (
               <ul className="space-y-3">
-                {visibleClasses.map((cls) => ( // Usar visibleClasses
+                {visibleClasses.map((cls) => ( 
                   <li key={cls.id} className="flex justify-between items-center p-3 rounded-md hover:bg-muted/50 transition-colors border border-border">
                     <span className="font-medium text-foreground/90 text-lg">{cls.name}</span>
                     <Badge variant={(classMessageCounts[cls.id] || 0) > 0 ? "default" : "secondary"} className="text-sm px-3 py-1">
