@@ -1,6 +1,4 @@
 
-'use server';
-
 import Datastore from 'nedb-promises';
 import path from 'path';
 import fs from 'fs/promises';
@@ -72,7 +70,9 @@ async function createOrRecoverDb<T extends { id: string }>(
         } catch (unlinkError: any) {
           if (unlinkError.code !== 'ENOENT') { 
             console.error(`[DB Recovery - ${dbNameForLog}] CRITICAL: Failed to delete main DB file ${dbPath} during recovery:`, unlinkError.message);
-            throw err; // Re-throw original error if deletion fails critically
+            // If we can't delete the main corrupted file, re-throw the original error.
+            // Further attempts to create will likely fail or operate on the bad file.
+            throw err; 
           } else {
             console.log(`[DB Recovery - ${dbNameForLog}] Main DB file ${dbPath} did not exist, proceeding.`);
           }
@@ -129,24 +129,23 @@ async function initializeAnnouncementsDatabase(): Promise<Datastore<Announcement
 
 export async function getAnnouncementsDb(): Promise<Datastore<Announcement>> {
   if (announcementsDbInstance) return announcementsDbInstance;
-  if (announcementsDbInitializationPromise) return announcementsDbInitializationPromise;
+  if (announcementsDbInitializationPromise) {
+    await announcementsDbInitializationPromise;
+    return announcementsDbInstance!;
+  }
 
-  announcementsDbInitializationPromise = initializeAnnouncementsDatabase()
-    .then(db => {
-      announcementsDbInstance = db;
-      announcementsDbInitializationPromise = null; 
-      return db;
-    })
-    .catch(err => {
-      announcementsDbInitializationPromise = null; 
-      throw err;
-    });
-  return announcementsDbInitializationPromise;
+  announcementsDbInitializationPromise = initializeAnnouncementsDatabase();
+  try {
+    announcementsDbInstance = await announcementsDbInitializationPromise;
+  } finally {
+    announcementsDbInitializationPromise = null; 
+  }
+  return announcementsDbInstance;
 }
 export function resetAnnouncementsDbInstance() {
-  console.log('[DB Reset] Resetting announcementsDbInstance and promise.');
-  announcementsDbInstance = null;
-  announcementsDbInitializationPromise = null;
+    console.log('[DB Reset] Resetting announcementsDbInstance and promise.');
+    announcementsDbInstance = null;
+    announcementsDbInitializationPromise = null;
 }
 
 
@@ -161,7 +160,8 @@ async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
     try {
       await db.insert(mockClasses);
       console.log('[DB Seed] Classes DB seeded with mockClasses.');
-    } catch (seedError) {
+    } catch (seedError)
+       {
       console.error('[DB Seed] Error seeding classes DB:', seedError);
     }
   }
@@ -170,19 +170,18 @@ async function initializeClassesDatabase(): Promise<Datastore<SchoolClass>> {
 
 export async function getClassesDb(): Promise<Datastore<SchoolClass>> {
   if (classesDbInstance) return classesDbInstance;
-  if (classesDbInitializationPromise) return classesDbInitializationPromise;
+  if (classesDbInitializationPromise) {
+    await classesDbInitializationPromise;
+    return classesDbInstance!;
+  }
   
-  classesDbInitializationPromise = initializeClassesDatabase()
-    .then(db => {
-      classesDbInstance = db;
-      classesDbInitializationPromise = null;
-      return db;
-    })
-    .catch(err => {
-      classesDbInitializationPromise = null;
-      throw err;
-    });
-  return classesDbInitializationPromise;
+  classesDbInitializationPromise = initializeClassesDatabase();
+  try {
+    classesDbInstance = await classesDbInitializationPromise;
+  } finally {
+    classesDbInitializationPromise = null;
+  }
+  return classesDbInstance;
 }
 export function resetClassesDbInstance() {
   console.log('[DB Reset] Resetting classesDbInstance and promise.');
@@ -202,13 +201,14 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
   const count = await db.count({});
   if (count === 0 && mockUsers && mockUsers.length > 0) {
     try {
-      const usersToSeed = await Promise.all(mockUsers.map(async (user) => {
+      const usersToSeedPromises = mockUsers.map(async (user) => {
         if (user.password) {
           const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
           return { ...user, password: hashedPassword };
         }
         return user;
-      }));
+      });
+      const usersToSeed = await Promise.all(usersToSeedPromises);
       await db.insert(usersToSeed);
       console.log('[DB Seed] Users DB seeded with mockUsers (passwords hashed).');
     } catch (seedError) {
@@ -220,19 +220,18 @@ async function initializeUsersDatabase(): Promise<Datastore<User>> {
 
 export async function getUsersDb(): Promise<Datastore<User>> {
   if (usersDbInstance) return usersDbInstance;
-  if (usersDbInitializationPromise) return usersDbInitializationPromise;
+  if (usersDbInitializationPromise) {
+    await usersDbInitializationPromise;
+    return usersDbInstance!;
+  }
 
-  usersDbInitializationPromise = initializeUsersDatabase()
-    .then(db => {
-      usersDbInstance = db;
-      usersDbInitializationPromise = null;
-      return db;
-    })
-    .catch(err => {
-      usersDbInitializationPromise = null;
-      throw err;
-    });
-  return usersDbInitializationPromise;
+  usersDbInitializationPromise = initializeUsersDatabase();
+  try {
+    usersDbInstance = await usersDbInitializationPromise;
+  } finally {
+    usersDbInitializationPromise = null;
+  }
+  return usersDbInstance;
 }
 export function resetUsersDbInstance() {
   console.log('[DB Reset] Resetting usersDbInstance and promise.');
@@ -260,19 +259,18 @@ async function initializeSchoolEventsDatabase(): Promise<Datastore<SchoolEvent>>
 
 export async function getSchoolEventsDb(): Promise<Datastore<SchoolEvent>> {
   if (schoolEventsDbInstance) return schoolEventsDbInstance;
-  if (schoolEventsDbInitializationPromise) return schoolEventsDbInitializationPromise;
+  if (schoolEventsDbInitializationPromise) {
+    await schoolEventsDbInitializationPromise;
+    return schoolEventsDbInstance!;
+  }
   
-  schoolEventsDbInitializationPromise = initializeSchoolEventsDatabase()
-    .then(db => {
-      schoolEventsDbInstance = db;
-      schoolEventsDbInitializationPromise = null;
-      return db;
-    })
-    .catch(err => {
-      schoolEventsDbInitializationPromise = null;
-      throw err;
-    });
-  return schoolEventsDbInitializationPromise;
+  schoolEventsDbInitializationPromise = initializeSchoolEventsDatabase();
+  try {
+    schoolEventsDbInstance = await schoolEventsDbInitializationPromise;
+  } finally {
+    schoolEventsDbInitializationPromise = null;
+  }
+  return schoolEventsDbInstance;
 }
 export function resetSchoolEventsDbInstance() {
   console.log('[DB Reset] Resetting schoolEventsDbInstance and promise.');
